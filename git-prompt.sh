@@ -11,6 +11,7 @@
         unset rawhex_len
 
         conf=git-prompt.conf;                   [[ -r $conf ]]  && . $conf
+        conf=~/.dotfiles/git-prompt.conf;       [[ -r $conf ]]  && . $conf
         conf=/etc/git-prompt.conf;              [[ -r $conf ]]  && . $conf
         conf=~/.git-prompt.conf;                [[ -r $conf ]]  && . $conf
         conf=~/.config/git-prompt.conf;         [[ -r $conf ]]  && . $conf
