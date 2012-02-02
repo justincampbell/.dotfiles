@@ -1,3 +1,4 @@
+export BROWSER=open
 export EDITOR=vim
 export HISTCONTROL=ignoreboth
 export HISTSIZE=10000
