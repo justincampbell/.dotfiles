@@ -1,4 +1,5 @@
 set gfn=Monaco:h18
 set guioptions-=T
+set guioptions-=r
 colorscheme railscasts
 
