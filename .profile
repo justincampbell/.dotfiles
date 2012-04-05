@@ -2,6 +2,9 @@ export BROWSER=open
 export EDITOR=vim
 export HISTCONTROL=ignoreboth
 export HISTSIZE=10000
+export PATH=/usr/local/bin:$PATH
+
+eval "$(hub alias -s)" # Git ♥ 's GitHub
 
 [[ $- == *i* ]]   &&   . ~/.dotfiles/git-prompt.sh
 source ~/.dotfiles/git-completion.bash
