@@ -1,0 +1,3 @@
+[submodule ".janus/vim-smartinput"]
+	path = .janus/vim-smartinput
+	url = git://github.com/kana/vim-smartinput.git
