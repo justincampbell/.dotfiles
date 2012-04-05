@@ -1,7 +1,27 @@
+" Automatically reload files
 set autoread
-set gfn=Monaco:h18
-set guioptions-=T
-set guioptions-=r
+
+" MacVim
+if has('gui_macvim')
+  set guioptions-=T " Hide toolbar
+  set guioptions-=r " Hide scrollbars
+endif
+
+" Font and colors
 colorscheme railscasts
+set gfn=Monaco:h18
+
+" Filetype syntax highlighting
 au BufNewFile,BufRead *.jbuilder set filetype=ruby
+
+" 80-column line
+set colorcolumn=81
+hi ColorColumn guibg=grey15
+
+" Clear search highlighting with enter
+noremap <CR> :nohlsearch<CR>/<BS>
+
+" Use Command-left/right to change buffer
+noremap <D-left>  :bp<CR>
+noremap <D-right> :bn<CR>
 
