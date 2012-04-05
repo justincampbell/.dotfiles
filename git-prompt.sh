@@ -628,7 +628,7 @@ parse_vcs_status() {
         head_local="$vcs_color(${vcs_info}$vcs_color${file_list}$vcs_color)"
 
         ### fringes
-        head_local="${head_local+$vcs_color$head_local }"
+        head_local="${head_local+$vcs_color$head_local\n}"
         #above_local="${head_local+$vcs_color$head_local\n}"
         #tail_local="${tail_local+$vcs_color $tail_local}${dir_color}"
  }
@@ -677,7 +677,7 @@ prompt_command_function() {
         if [[ "$rc" == "0" ]]; then
                 rc=""
         else
-                rc="$rc_color$rc$colors_reset$bell "
+                rc="$rc_color$rc$colors_reset$belltest "
         fi
 
         cwd=${PWD/$HOME/\~}                     # substitute  "~"
@@ -694,7 +694,7 @@ prompt_command_function() {
         # else eval cwd_cmd,  cwd should have path after exection
         eval "${cwd_cmd/\\/cwd=\\\\}"
 
-        PS1="$colors_reset$rc$head_local$color_who_where$dir_color$cwd$tail_local$colors_reset$prompt_char "
+        PS1="$colors_reset$rc$head_local$color_who_where$new_line$dir_color$cwd$tail_local$colors_reset$prompt_char "
 
         unset head_local tail_local pwd
  }
