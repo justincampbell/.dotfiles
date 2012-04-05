@@ -1,6 +1,6 @@
 printf "irb"
 
-def status(text)
+def irb_load_status(text)
   printf " #{text}"
 end
 
@@ -11,7 +11,7 @@ end
   pp
   wirble
 ].each do |r|
-  status r
+  irb_load_status r
   begin
     require r
   rescue LoadError
