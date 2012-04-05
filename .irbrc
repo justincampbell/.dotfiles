@@ -45,18 +45,56 @@ IRB.conf[:LOAD_MODULES] = []  unless IRB.conf.key?(:LOAD_MODULES)
 end
 
 class Object
+  def benchmark(count = 1)
+    require 'benchmark'
+
+    result = nil
+
+    Benchmark.bm do |b|
+      b.report {
+        count.times {
+          result = yield
+        }
+      }
+    end
+
+    result
+  end
+  alias_method :bench, :benchmark
+
+  def profile(count = 1)
+    begin
+      require 'ruby-prof'
+    rescue LoadError
+      raise "RubyProf not installed. Install it with: gem install ruby-prof"
+    end
+
+    result = nil
+
+    RubyProf::FlatPrinter.new(
+      RubyProf.profile {
+        count.times {
+          result = yield
+        }
+      }
+    ).print STDOUT, :min_percent => 1
+
+    result
+  end
+  alias_method :prof, :profile
+
+  def copy(thing)
+    string = (thing.is_a? String) ? thing : thing.inspect.gsub("\"","\\\"")
+    `echo "#{string}" | pbcopy`
+    thing
+  end
+
   def local_methods
     (methods - Object.instance_methods).sort
   end
-
   alias_method :methods!, :local_methods
 end
 
-def pbcopy(thing)
-  string = (thing.is_a? String) ? thing : thing.inspect.gsub("\"","\\\"")
-  `echo "#{string}" | pbcopy`
-  thing
-end
 
 if defined? Wirble
   Wirble.init
