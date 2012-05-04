@@ -2,7 +2,7 @@ export BROWSER=open
 export EDITOR=vim
 export HISTCONTROL=ignoreboth
 export HISTSIZE=10000
-export PATH=/usr/local/bin:$PATH
+export PATH=bin:/usr/local/bin:$PATH
 
 eval "$(hub alias -s)" # Git ♥ 's GitHub
 
