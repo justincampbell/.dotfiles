@@ -46,6 +46,11 @@ end
 
 class Object
   def benchmark(count = 1)
+    if defined? ActiveRecord
+      old_logger = ActiveRecord::Base.logger
+      ActiveRecord::Base.logger = nil
+    end
+
     require 'benchmark'
 
     result = nil
@@ -58,6 +63,8 @@ class Object
       }
     end
 
+    ActiveRecord::Base.logger = old_logger if old_logger
+
     result
   end
   alias_method :bench, :benchmark
@@ -69,6 +76,11 @@ class Object
       raise "RubyProf not installed. Install it with: gem install ruby-prof"
     end
 
+    if defined? ActiveRecord
+      old_logger = ActiveRecord::Base.logger
+      ActiveRecord::Base.logger = nil
+    end
+
     result = nil
 
     RubyProf::FlatPrinter.new(
@@ -78,6 +90,8 @@ class Object
         }
       }
     ).print STDOUT, :min_percent => 1
+
+    ActiveRecord::Base.logger = old_logger if old_logger
 
     result
   end
