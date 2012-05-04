@@ -99,7 +99,7 @@ class Object
 
   def copy(thing)
     string = (thing.is_a? String) ? thing : thing.inspect.gsub("\"","\\\"")
-    `echo "#{string}" | pbcopy`
+    `echo -n "#{string}" | pbcopy`
     thing
   end
 
