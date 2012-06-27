@@ -26,3 +26,5 @@ noremap <CR> :nohlsearch<CR>/<BS>
 noremap <D-left>  :bp<CR>
 noremap <D-right> :bn<CR>
 
+" Enable vim-indent-guides plugin
+au VimEnter * :IndentGuidesEnable
