@@ -13,6 +13,7 @@ set gfn=Monaco:h18
 
 " Filetype syntax highlighting
 au BufNewFile,BufRead *.jbuilder set filetype=ruby
+au BufNewFile,BufRead *.slim     set filetype=ruby
 
 " 80-column line
 set colorcolumn=81
