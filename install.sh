@@ -1,6 +1,6 @@
 cd ~
 ln -s .dotfiles/.gemrc        ~/.gemrc
-ln -s .dotfiles/.gvimrc.after ~/.gvimrc.after
+ln -s .dotfiles/.vimrc.after  ~/.vimrc.after
 ln -s .dotfiles/.irbrc        ~/.irbrc
 ln -s .dotfiles/.janus/       ~/.janus
 ln -s .dotfiles/.profile      ~/.profile
