@@ -18,6 +18,7 @@ def create_ssh_user(username)
   `dscl . -create /Users/#{username} PrimaryGroupID #{GROUP}` #console users
   `mkdir -p /Users/#{username}/.ssh`
   `dscl . -passwd /Users/#{username} #{ridiculous_password}`
+  `defaults write /Library/Preferences/com.apple.loginwindow HiddenUsersList -array-add #{username}`
 end
 
 def setup_pub_key_for(username, args = {})
