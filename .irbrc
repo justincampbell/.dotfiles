@@ -39,65 +39,63 @@ IRB.conf[:LOAD_MODULES] ||= []
   IRB.conf[:LOAD_MODULES] << m unless IRB.conf[:LOAD_MODULES].include?(m)
 end
 
+def self.benchmark(count = 1)
+  if defined? ActiveRecord
+    old_logger = ActiveRecord::Base.logger
+    ActiveRecord::Base.logger = nil
+  end
+
+  require 'benchmark'
+
+  result = nil
+
+  Benchmark.bm do |b|
+    b.report {
+      count.times {
+        result = yield
+      }
+    }
+  end
+
+  ActiveRecord::Base.logger = old_logger if old_logger
+
+  result
+end
+
+def self.profile(count = 1)
+  begin
+    require 'ruby-prof'
+  rescue LoadError
+    raise "RubyProf not installed. Install it with: gem install ruby-prof"
+  end
+
+  if defined? ActiveRecord
+    old_logger = ActiveRecord::Base.logger
+    ActiveRecord::Base.logger = nil
+  end
+
+  result = nil
+
+  RubyProf::FlatPrinter.new(
+    RubyProf.profile {
+      count.times {
+        result = yield
+      }
+    }
+  ).print STDOUT, :min_percent => 1
+
+  ActiveRecord::Base.logger = old_logger if old_logger
+
+  result
+end
+
+def self.copy(thing)
+  string = (thing.is_a? String) ? thing : thing.inspect.gsub("\"","\\\"")
+  `echo -n "#{string}" | pbcopy`
+  thing
+end
+
 class Object
-  def benchmark(count = 1)
-    if defined? ActiveRecord
-      old_logger = ActiveRecord::Base.logger
-      ActiveRecord::Base.logger = nil
-    end
-
-    require 'benchmark'
-
-    result = nil
-
-    Benchmark.bm do |b|
-      b.report {
-        count.times {
-          result = yield
-        }
-      }
-    end
-
-    ActiveRecord::Base.logger = old_logger if old_logger
-
-    result
-  end
-  alias_method :bench, :benchmark
-
-  def profile(count = 1)
-    begin
-      require 'ruby-prof'
-    rescue LoadError
-      raise "RubyProf not installed. Install it with: gem install ruby-prof"
-    end
-
-    if defined? ActiveRecord
-      old_logger = ActiveRecord::Base.logger
-      ActiveRecord::Base.logger = nil
-    end
-
-    result = nil
-
-    RubyProf::FlatPrinter.new(
-      RubyProf.profile {
-        count.times {
-          result = yield
-        }
-      }
-    ).print STDOUT, :min_percent => 1
-
-    ActiveRecord::Base.logger = old_logger if old_logger
-
-    result
-  end
-  alias_method :prof, :profile
-
-  def copy(thing)
-    string = (thing.is_a? String) ? thing : thing.inspect.gsub("\"","\\\"")
-    `echo -n "#{string}" | pbcopy`
-    thing
-  end
-
   def local_methods
     (methods - Object.instance_methods).sort
   end
