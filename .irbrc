@@ -24,11 +24,11 @@ IRB.conf[:PROMPT][:CUSTOM] = {
   :RETURN   => "= %s\n"
 }
 
-IRB.conf[:USE_READLINE] = true
-IRB.conf[:PROMPT_MODE]  = :CUSTOM
 IRB.conf[:AUTO_INDENT]  = true
-IRB.conf[:SAVE_HISTORY] = 10000
 IRB.conf[:HISTORY_FILE] = "#{ENV['HOME']}/.irb_history"
+IRB.conf[:PROMPT_MODE]  = :CUSTOM
+IRB.conf[:SAVE_HISTORY] = 10000
+IRB.conf[:USE_READLINE] = true
 
 IRB.conf[:LOAD_MODULES] = []  unless IRB.conf.key?(:LOAD_MODULES)
 
