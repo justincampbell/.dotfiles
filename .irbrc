@@ -30,15 +30,13 @@ IRB.conf[:PROMPT_MODE]  = :CUSTOM
 IRB.conf[:SAVE_HISTORY] = 10000
 IRB.conf[:USE_READLINE] = true
 
-IRB.conf[:LOAD_MODULES] = []  unless IRB.conf.key?(:LOAD_MODULES)
+IRB.conf[:LOAD_MODULES] ||= []
 
 [
   'irb/completion',
   'irb/ext/save-history'
 ].each do |m|
-  unless IRB.conf[:LOAD_MODULES].include?(m)
-    IRB.conf[:LOAD_MODULES] << m
-  end
+  IRB.conf[:LOAD_MODULES] << m unless IRB.conf[:LOAD_MODULES].include?(m)
 end
 
 class Object
