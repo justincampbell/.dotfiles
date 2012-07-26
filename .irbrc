@@ -39,25 +39,33 @@ IRB.conf[:LOAD_MODULES] ||= []
   IRB.conf[:LOAD_MODULES] << m unless IRB.conf[:LOAD_MODULES].include?(m)
 end
 
-def self.benchmark(count = 1)
+def self.silence_active_record
   if defined? ActiveRecord
     old_logger = ActiveRecord::Base.logger
     ActiveRecord::Base.logger = nil
   end
 
+  result = yield
+
+  ActiveRecord::Base.logger = old_logger if old_logger
+
+  result
+end
+
+def self.benchmark(count = 1)
   require 'benchmark'
 
   result = nil
 
-  Benchmark.bm do |b|
-    b.report {
-      count.times {
-        result = yield
+  silence_active_record do
+    Benchmark.bm do |b|
+      b.report {
+        count.times {
+          result = yield
+        }
       }
-    }
+    end
   end
-
-  ActiveRecord::Base.logger = old_logger if old_logger
 
   result
 end
@@ -69,22 +77,17 @@ def self.profile(count = 1)
     raise "RubyProf not installed. Install it with: gem install ruby-prof"
   end
 
-  if defined? ActiveRecord
-    old_logger = ActiveRecord::Base.logger
-    ActiveRecord::Base.logger = nil
-  end
-
   result = nil
 
-  RubyProf::FlatPrinter.new(
-    RubyProf.profile {
-      count.times {
-        result = yield
+  silence_active_record do
+    RubyProf::FlatPrinter.new(
+      RubyProf.profile {
+        count.times {
+          result = yield
+        }
       }
-    }
-  ).print STDOUT, :min_percent => 1
-
-  ActiveRecord::Base.logger = old_logger if old_logger
+    ).print STDOUT, :min_percent => 1
+  end
 
   result
 end
