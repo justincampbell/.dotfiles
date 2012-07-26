@@ -1,19 +1,16 @@
 printf "irb"
 
-def irb_load_status(text)
-  printf " #{text}"
-end
-
 %w[
   rubygems
   irb/completion
   irb/ext/save-history
   pp
   wirble
-].each do |r|
-  irb_load_status r
+].each do |path|
+  printf " #{path}"
+
   begin
-    require r
+    require path
   rescue LoadError
     printf "\e[1;31m!\e[0m"
   end
