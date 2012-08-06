@@ -37,3 +37,6 @@ let g:indent_guides_auto_colors = 0
 hi IndentGuidesEven ctermbg=233 guibg=#333333
 hi IndentGuidesOdd ctermbg=black guibg=#2b2b2b
 
+" Scroll before the cursor reaches the edge
+set scrolloff=5
+
