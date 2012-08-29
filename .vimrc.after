@@ -40,3 +40,6 @@ hi IndentGuidesOdd ctermbg=black guibg=#2b2b2b
 " Scroll before the cursor reaches the edge
 set scrolloff=5
 
+" Show leader keystrokes in the bottom right
+set showcmd
+
