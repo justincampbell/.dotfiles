@@ -51,8 +51,8 @@ def self.benchmark(count = 1)
   result = nil
 
   silence_active_record do
-    Benchmark.bm do |b|
-      b.report {
+    Benchmark.bm do |benchmark|
+      benchmark.report {
         count.times {
           result = yield
         }
@@ -97,7 +97,6 @@ class Object
   end
   alias_method :methods!, :local_methods
 end
-
 
 if defined? Wirble
   Wirble.init
