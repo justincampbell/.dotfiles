@@ -37,6 +37,7 @@ username = ARGV.shift
 pub_key_filepath = ARGV.shift
 user_path = "/Users/#{username}"
 
+raise "Do not run this on the current user account" if username == `whoami`.strip
 create_ssh_user username
 setup_pub_key_for username, :key_path => pub_key_filepath, :user_path => user_path
 change_ownership_to username, :for => user_path
