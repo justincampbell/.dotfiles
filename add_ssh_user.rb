@@ -33,6 +33,15 @@ def change_ownership_to(username, args = {})
   `chgrp -R #{GROUP} #{user_path}`
 end
 
+def create_profile_for(username, args = {})
+  user_path = args[:in]
+  profile = "#{user_path}/.profile"
+  profile_text = "wemux\nexit"
+  `echo "#{profile_text}" > #{profile}`
+  `chown -R #{username} #{profile}`
+  `chgrp -R #{GROUP} #{profile}`
+end
+
 username = ARGV.shift
 pub_key_filepath = ARGV.shift
 user_path = "/Users/#{username}"
@@ -41,5 +50,6 @@ raise "Do not run this on the current user account" if username == `whoami`.stri
 create_ssh_user username
 setup_pub_key_for username, :key_path => pub_key_filepath, :user_path => user_path
 change_ownership_to username, :for => user_path
+create_profile_for username, :in => user_path
 `dseditgroup -o edit -a #{username} -t user com.apple.access_ssh`
 
