@@ -34,6 +34,12 @@ syntax on
 " Backspace over anything
 set backspace=eol,indent,start
 
+" Soft tabs
+set expandtab
+set shiftwidth=2
+set softtabstop=2
+set tabstop=2
+
 " Filetype syntax highlighting
 au BufNewFile,BufRead *.jbuilder set filetype=ruby
 au BufNewFile,BufRead *.slim set filetype=ruby
