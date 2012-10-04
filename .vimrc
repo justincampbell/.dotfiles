@@ -1,23 +1,23 @@
-" Automatically reload files
-set autoread
-
 if has('gui_macvim')
   " MacVim
   set guioptions-=T " Hide toolbar
   set guioptions-=r " Hide scrollbars
-  colorscheme railscasts
+  set gfn=Monaco:h18
 else
   " Terminal
-  colorscheme railscasts256
   set mouse=a
 endif
 
+" Automatically reload files
+set autoread
+
 " Font and colors
-set gfn=Monaco:h18
+colorscheme slate
+syntax on
 
 " Filetype syntax highlighting
 au BufNewFile,BufRead *.jbuilder set filetype=ruby
-au BufNewFile,BufRead *.slim     set filetype=ruby
+au BufNewFile,BufRead *.slim set filetype=ruby
 
 " 80-column line
 set colorcolumn=81
