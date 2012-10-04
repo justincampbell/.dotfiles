@@ -66,7 +66,7 @@ set ignorecase
 set smartcase
 
 " Clear search highlighting with enter
-noremap <CR> :nohlsearch<CR>/<BS>
+" noremap <CR> :nohlsearch<CR>/<BS>
 
 " Smarter tab-completion
 set wildmode=list
@@ -75,15 +75,27 @@ set wildmode=list
 noremap <D-left>  :bp<CR>
 noremap <D-right> :bn<CR>
 
-" Enable vim-indent-guides plugin
-au VimEnter * :IndentGuidesEnable
-let g:indent_guides_auto_colors = 0
-hi IndentGuidesEven ctermbg=233 guibg=#333333
-hi IndentGuidesOdd ctermbg=black guibg=#2b2b2b
-
 " Scroll before the cursor reaches the edge
 set scrolloff=5
 
 " Show leader keystrokes in the bottom right
 set showcmd
+
+" Indent-Guides
+au VimEnter * :IndentGuidesEnable
+let g:indent_guides_auto_colors = 0
+hi IndentGuidesEven ctermbg=233 guibg=#333333
+hi IndentGuidesOdd ctermbg=black guibg=#2b2b2b
+
+" NERDCommenter
+let NERDRemoveExtraSpaces=1
+let NERDSpaceDelims=1
+
+map <leader>/ <plug>NERDCommenterToggle<CR>
+imap <leader>/ <Esc><plug>NERDCommenterToggle<CR>i
+
+if has("gui_macvim")
+  map <D-/> <plug>NERDCommenterToggle<CR>
+  imap <D-/> <Esc><plug>NERDCommenterToggle<CR>i
+end
 
