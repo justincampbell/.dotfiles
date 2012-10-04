@@ -57,6 +57,9 @@ set smartcase
 " Clear search highlighting with enter
 noremap <CR> :nohlsearch<CR>/<BS>
 
+" Smarter tab-completion
+set wildmode=list
+
 " Use Command-left/right to change buffer
 noremap <D-left>  :bp<CR>
 noremap <D-right> :bn<CR>
