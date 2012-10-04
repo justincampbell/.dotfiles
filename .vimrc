@@ -1,3 +1,11 @@
+" Vundle
+set nocompatible
+filetype off
+set rtp+=~/.vim/bundle/vundle/
+call vundle#rc()
+Bundle 'gmarik/vundle'
+filetype plugin indent on
+
 if has('gui_macvim')
   " MacVim
   set guioptions-=T " Hide toolbar
