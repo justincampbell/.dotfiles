@@ -27,9 +27,16 @@ endif
 " Automatically reload files
 set autoread
 
-" Font and colors
+" Colors
 colorscheme railscasts
 syntax on
+
+" Line numbers
+set number
+set numberwidth=1
+
+" Don't wrap text
+set nowrap
 
 " Backspace over anything
 set backspace=eol,indent,start
@@ -39,6 +46,10 @@ set expandtab
 set shiftwidth=2
 set softtabstop=2
 set tabstop=2
+
+" Fancy characters
+set listchars=tab:‣\	,trail:ₓ,extends:⇢,precedes:⇠
+set list
 
 " Filetype syntax highlighting
 au BufNewFile,BufRead *.jbuilder set filetype=ruby
