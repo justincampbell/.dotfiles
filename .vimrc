@@ -31,6 +31,9 @@ set autoread
 colorscheme railscasts
 syntax on
 
+" Backspace over anything
+set backspace=eol,indent,start
+
 " Filetype syntax highlighting
 au BufNewFile,BufRead *.jbuilder set filetype=ruby
 au BufNewFile,BufRead *.slim set filetype=ruby
