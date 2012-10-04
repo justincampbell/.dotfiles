@@ -4,6 +4,14 @@ filetype off
 set rtp+=~/.vim/bundle/vundle/
 call vundle#rc()
 Bundle 'gmarik/vundle'
+Bundle 'ack.vim'
+Bundle 'fugitive.vim'
+Bundle 'Indent-Guides'
+Bundle 'Railscasts-Theme-GUIand256color'
+Bundle 'SuperTab'
+Bundle 'Syntastic'
+Bundle 'The-NERD-Commenter'
+Bundle 'The-NERD-tree'
 filetype plugin indent on
 
 if has('gui_macvim')
@@ -20,7 +28,7 @@ endif
 set autoread
 
 " Font and colors
-colorscheme slate
+colorscheme railscasts
 syntax on
 
 " Filetype syntax highlighting
