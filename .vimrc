@@ -49,6 +49,11 @@ set colorcolumn=81
 hi ColorColumn ctermbg=234
 hi ColorColumn guibg=grey15
 
+" Smart search
+set incsearch
+set ignorecase
+set smartcase
+
 " Clear search highlighting with enter
 noremap <CR> :nohlsearch<CR>/<BS>
 
