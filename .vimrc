@@ -28,6 +28,9 @@ endif
 " Automatically reload files
 set autoread
 
+" Set swap location
+set directory=/tmp
+
 " Colors
 colorscheme railscasts
 syntax on
