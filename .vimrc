@@ -5,6 +5,7 @@ set rtp+=~/.vim/bundle/vundle/
 call vundle#rc()
 Bundle 'gmarik/vundle'
 Bundle 'ack.vim'
+Bundle 'ctrlp.vim'
 Bundle 'fugitive.vim'
 Bundle 'Indent-Guides'
 Bundle 'Railscasts-Theme-GUIand256color'
