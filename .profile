@@ -2,7 +2,7 @@ export BROWSER=open
 export EDITOR=vim
 export HISTCONTROL=ignoreboth
 export HISTSIZE=10000
-export PATH=bin:$HOME/.rbenv/bin:/usr/local/bin:/usr/local/sbin:$PATH
+export PATH=bin:$HOME/.rbenv/bin:/usr/local/bin:/usr/local/sbin:$HOME/.dotfiles/bin:$PATH
 
 # git
 eval "$(hub alias -s)" # Git ♥ 's GitHub
