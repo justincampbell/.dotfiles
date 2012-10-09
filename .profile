@@ -1,6 +1,7 @@
 export BROWSER=open
 export EC2_HOME="/usr/local/Library/LinkedKegs/ec2-api-tools/jars"
 export EDITOR=vim
+export JAVA_HOME="$(/usr/libexec/java_home)"
 export HISTCONTROL=ignoreboth
 export HISTSIZE=10000
 export PATH=bin:$HOME/.rbenv/bin:/usr/local/bin:/usr/local/sbin:/usr/local/share/npm/bin/:$HOME/.dotfiles/bin:$PATH
