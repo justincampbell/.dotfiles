@@ -1,4 +1,5 @@
 export BROWSER=open
+export EC2_HOME="/usr/local/Library/LinkedKegs/ec2-api-tools/jars"
 export EDITOR=vim
 export HISTCONTROL=ignoreboth
 export HISTSIZE=10000
