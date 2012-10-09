@@ -1,0 +1,6 @@
+#!/bin/bash
+
+export AWS_ACCESS_KEY=`cat ~/.ec2/${1}/credentials.txt | grep "AWSAccessKeyId" | cut -f 2 -d "=" 2>/dev/null`
+export AWS_SECRET_KEY=`cat ~/.ec2/${1}/credentials.txt | grep "AWSSecretKeyId" | cut -f 2 -d "=" 2>/dev/null`
+# export EC2_CERT=`ls ~/.ec2/${1}/cert-*.pem 2>/dev/null`
+# export EC2_PRIVATE_KEY=`ls ~/.ec2/${1}/pk-*.pem 2>/dev/null`

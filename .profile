@@ -14,3 +14,6 @@ eval "$(hub alias -s)" # Git ♥ 's GitHub
 
 # rbenv
 eval "$(rbenv init -)"
+
+# use
+alias use="source _use"
