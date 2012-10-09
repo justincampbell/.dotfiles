@@ -4,22 +4,25 @@ filetype off
 set rtp+=~/.vim/bundle/vundle/
 call vundle#rc()
 Bundle 'gmarik/vundle'
-Bundle 'ack.vim'
-Bundle 'ctrlp.vim'
-Bundle 'fugitive.vim'
 Bundle 'Indent-Guides'
-Bundle 'Railscasts-Theme-GUIand256color'
 Bundle 'SuperTab'
 Bundle 'Syntastic'
 Bundle 'The-NERD-Commenter'
 Bundle 'The-NERD-tree'
+Bundle 'ack.vim'
+Bundle 'ctrlp.vim'
+Bundle 'fortes/vim-railscasts'
+Bundle 'tpope/vim-endwise'
+Bundle 'tpope/vim-fugitive'
+Bundle 'tpope/vim-rails'
+Bundle 'vim-ruby/vim-ruby'
 filetype plugin indent on
 
 if has('gui_macvim')
   " MacVim
   set guioptions-=T " Hide toolbar
   set guioptions-=r " Hide scrollbars
-  set gfn=Monaco:h18
+  set gfn=Monaco:h16
 else
   " Terminal
   set mouse=a
@@ -52,7 +55,7 @@ set softtabstop=2
 set tabstop=2
 
 " Fancy characters
-set listchars=tab:‣\	,trail:ₓ,extends:⇢,precedes:⇠
+set listchars=tab:‣\	,trail:.,extends:⇢,precedes:⇠
 set list
 
 " Filetype syntax highlighting
@@ -73,7 +76,7 @@ set smartcase
 " noremap <CR> :nohlsearch<CR>/<BS>
 
 " Smarter tab-completion
-set wildmode=list
+set wildmode=list:list,full
 
 " Use Command-left/right to change buffer
 noremap <D-left>  :bp<CR>
