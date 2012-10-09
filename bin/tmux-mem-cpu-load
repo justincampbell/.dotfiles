@@ -19,5 +19,6 @@ FREE_MEM=$(( $TOTAL-$FREE ))
 USED_MEM=`awk 'BEGIN{printf("%0.1f", '$FREE_MEM' / 100000)}'`
 TOTAL_MEM=`awk 'BEGIN{printf("%0.1f", '$TOTAL' / 100000)}'`
 MEM_SUFFIX="G"
-echo "$USED_MEM/$TOTAL_MEM$MEM_SUFFIX |${LINES}|"
-
+CORE_COUNT=`sysctl -n hw.ncpu`
+LOAD_AVERAGE=`uptime | awk '{print $8}'`
+echo "$USED_MEM/$TOTAL_MEM$MEM_SUFFIX $LOAD_AVERAGE/$CORE_COUNT |${LINES}|"
