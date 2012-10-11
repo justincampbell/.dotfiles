@@ -4,7 +4,7 @@ export EDITOR=vim
 export JAVA_HOME="$(/usr/libexec/java_home)"
 export HISTCONTROL=ignoreboth
 export HISTSIZE=10000
-export PATH=bin:$HOME/.rbenv/bin:/usr/local/bin:/usr/local/sbin:/usr/local/share/npm/bin/:$HOME/.dotfiles/bin:$PATH
+export PATH=bin:$HOME/.rbenv/bin:/usr/local/bin:/usr/local/sbin:/usr/local/share/npm/bin:$HOME/.dotfiles/bin:$PATH
 
 # git
 eval "$(hub alias -s)" # Git ♥ 's GitHub
