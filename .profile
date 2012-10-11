@@ -18,3 +18,6 @@ eval "$(rbenv init -)"
 
 # use
 alias use="source _use"
+
+# remove Dropbox when opening new terminal tabs
+cd ${PWD/Dropbox\//}
