@@ -13,12 +13,6 @@ for (( i = 0; i < $NUM_LINES; i++ )); do
     LINES="$LINES "
   fi
 done
-FREE=`vm_stat | grep free | awk '{ print $3 }' | sed 's/\\.//'`
-TOTAL=`vm_stat | grep " active" | awk '{ print $3 }' | sed 's/\\.//'`
-FREE_MEM=$(( $TOTAL-$FREE ))
-USED_MEM=`awk 'BEGIN{printf("%0.1f", '$FREE_MEM' / 100000)}'`
-TOTAL_MEM=`awk 'BEGIN{printf("%0.1f", '$TOTAL' / 100000)}'`
-MEM_SUFFIX="G"
 CORE_COUNT=`sysctl -n hw.ncpu`
 LOAD_AVERAGE=`uptime | awk '{print $8}'`
-echo "$USED_MEM/$TOTAL_MEM$MEM_SUFFIX $LOAD_AVERAGE/$CORE_COUNT |${LINES}|"
+echo "$LOAD_AVERAGE/$CORE_COUNT |${LINES}|"
