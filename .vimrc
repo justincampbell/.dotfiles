@@ -12,6 +12,8 @@ Bundle 'The-NERD-tree'
 Bundle 'ack.vim'
 Bundle 'ctrlp.vim'
 Bundle 'fortes/vim-railscasts'
+Bundle 'mattn/gist-vim'
+Bundle 'mattn/webapi-vim'
 Bundle 'tpope/vim-endwise'
 Bundle 'tpope/vim-fugitive'
 Bundle 'tpope/vim-rails'
@@ -106,3 +108,8 @@ if has("gui_macvim")
   imap <D-/> <Esc><plug>NERDCommenterToggle<CR>i
 end
 
+" Gist
+let g:gist_clip_command = 'pbcopy'
+let g:gist_detect_filetype = 1
+let g:gist_open_browser_after_post = 1
+let g:gist_post_private = 1
