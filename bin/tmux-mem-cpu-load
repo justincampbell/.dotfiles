@@ -14,5 +14,5 @@ for (( i = 0; i < $NUM_LINES; i++ )); do
   fi
 done
 CORE_COUNT=`sysctl -n hw.ncpu`
-LOAD_AVERAGE=`uptime | awk '{print $8}'`
+LOAD_AVERAGE=`uptime | awk '{ print $(NF-2) }'`
 echo "$LOAD_AVERAGE/$CORE_COUNT |${LINES}|"
