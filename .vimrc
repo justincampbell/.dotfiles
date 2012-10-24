@@ -10,6 +10,7 @@ Bundle 'Syntastic'
 Bundle 'The-NERD-Commenter'
 Bundle 'The-NERD-tree'
 Bundle 'ack.vim'
+Bundle 'bbommarito/vim-slim'
 Bundle 'ctrlp.vim'
 Bundle 'fortes/vim-railscasts'
 Bundle 'mattn/gist-vim'
@@ -62,7 +63,6 @@ set list
 
 " Filetype syntax highlighting
 au BufNewFile,BufRead *.jbuilder set filetype=ruby
-au BufNewFile,BufRead *.slim set filetype=ruby
 
 " 80-column line
 set colorcolumn=81
