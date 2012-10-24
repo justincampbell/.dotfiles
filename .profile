@@ -20,4 +20,7 @@ eval "$(rbenv init -)"
 alias use="source _use"
 
 # remove Dropbox when opening new terminal tabs
-cd ${PWD/Dropbox\//}
+[[ -d ${PWD/Dropbox\//} ]] && cd ${PWD/Dropbox\//}
+
+# reset return code to 0
+true
