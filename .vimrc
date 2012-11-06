@@ -19,6 +19,7 @@ Bundle 'tpope/vim-endwise'
 Bundle 'tpope/vim-fugitive'
 Bundle 'tpope/vim-rails'
 Bundle 'vim-ruby/vim-ruby'
+Bundle 'vim-scripts/AutoComplPop'
 filetype plugin indent on
 
 if has('gui_macvim')
