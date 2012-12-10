@@ -5,6 +5,7 @@ set rtp+=~/.vim/bundle/vundle/
 call vundle#rc()
 Bundle 'gmarik/vundle'
 Bundle 'bbommarito/vim-slim'
+Bundle 'ecomba/vim-ruby-refactoring'
 Bundle 'ervandew/supertab'
 Bundle 'fortes/vim-railscasts'
 Bundle 'kien/ctrlp.vim'
@@ -18,8 +19,10 @@ Bundle 'scrooloose/syntastic'
 Bundle 'tpope/vim-endwise'
 Bundle 'tpope/vim-fugitive'
 Bundle 'tpope/vim-rails'
+Bundle 'tpope/vim-rake'
 Bundle 'vim-ruby/vim-ruby'
 Bundle 'vim-scripts/AutoComplPop'
+Bundle 'vim-scripts/matchit.zip'
 filetype plugin indent on
 
 if has('gui_macvim')
