@@ -24,3 +24,6 @@ alias use="source _use"
 
 # reset return code to 0
 true
+
+# vim-brained
+alias :q=exit
