@@ -1,5 +1,6 @@
 cd ~
 
+ln -s .dotfiles/.ackrc ~/.ackrc
 ln -s .dotfiles/.gemrc ~/.gemrc
 ln -s .dotfiles/.git_commit_template ~/.git_commit_template
 ln -s .dotfiles/.irbrc ~/.irbrc
