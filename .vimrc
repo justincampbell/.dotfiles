@@ -45,6 +45,9 @@ set directory=/tmp
 colorscheme railscasts
 syntax on
 
+" Sign column
+hi SignColumn ctermbg=0
+
 " Line numbers
 set number
 set numberwidth=1
