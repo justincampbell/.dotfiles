@@ -22,6 +22,7 @@ Bundle 'tpope/vim-rails'
 Bundle 'tpope/vim-rake'
 Bundle 'vim-ruby/vim-ruby'
 Bundle 'vim-scripts/AutoComplPop'
+Bundle 'vim-scripts/VimClojure'
 Bundle 'vim-scripts/matchit.zip'
 filetype plugin indent on
 
@@ -120,3 +121,10 @@ let g:gist_clip_command = 'pbcopy'
 let g:gist_detect_filetype = 1
 let g:gist_open_browser_after_post = 1
 let g:gist_post_private = 1
+
+" VimClojure
+let vimclojure#DynamicHighlighting = 1
+let vimclojure#FuzzyIndent = 1
+let vimclojure#HighlightBuiltins = 1
+let vimclojure#HighlightContrib = 1
+let vimclojure#ParenRainbow = 1
