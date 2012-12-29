@@ -4,17 +4,23 @@ export EDITOR=vim
 export JAVA_HOME="$(/usr/libexec/java_home)"
 export HISTCONTROL=ignoreboth
 export HISTSIZE=10000
-export PATH=bin:$HOME/.rbenv/bin:/usr/local/bin:/usr/local/sbin:/usr/local/share/npm/bin:$HOME/.dotfiles/bin:$PATH
+export PATH=/usr/local/bin:/usr/local/sbin:/usr/local/share/npm/bin:$HOME/.dotfiles/bin:$PATH
 
 # git
 eval "$(hub alias -s)" # Git ♥ 's GitHub
 [[ $- == *i* ]]  &&  . ~/.dotfiles/git-prompt.sh && source ~/.dotfiles/git-completion.bash
 
+# chruby
+source /usr/local/opt/chruby/share/chruby/chruby.sh
+source /usr/local/opt/chruby/share/chruby/auto.sh
+RUBIES=(~/.rubies/*)
+
 # rvm
-[[ -s ".rvm/scripts/rvm" ]] && source ".rvm/scripts/rvm" && chmod +x $rvm_path/hooks/after_cd_bundler
+# [[ -s ".rvm/scripts/rvm" ]] && source ".rvm/scripts/rvm" && chmod +x $rvm_path/hooks/after_cd_bundler
 
 # rbenv
-eval "$(rbenv init -)"
+# export PATH=$HOME/.rbenv/bin:$PATH
+# eval "$(rbenv init -)"
 
 # use
 alias use="source _use"
@@ -24,6 +30,9 @@ alias use="source _use"
 
 # vim-brained
 alias :q=exit
+
+# prefer local bin/
+export PATH=bin:$PATH
 
 # reset return code to 0
 true
