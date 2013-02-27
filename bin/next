@@ -1,0 +1,10 @@
+#!/bin/bash
+
+CURRENT_TAG=`git describe --tags`
+NEXT_TAG_NUMBER=$(expr `echo $CURRENT_TAG | cut -f 1 -d "-"` + 1)
+NEXT_TAG=`git tag | grep "^$NEXT_TAG_NUMBER"`
+
+clear
+git diff -U1 $CURRENT_TAG..$NEXT_TAG
+git checkout $NEXT_TAG
+
