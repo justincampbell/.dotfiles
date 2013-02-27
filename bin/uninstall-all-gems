@@ -1,0 +1,3 @@
+#!/bin/bash
+
+gem list --no-version | xargs gem uninstall -ax
