@@ -1,3 +1,5 @@
 #! /bin/bash
 
-git ls-files | xargs -t sed -i '' -E "s/[[:space:]]*$//"
+git ls-files | \
+  xargs file | grep ".*: .* text" | sed "s;\(.*\): .* text.*;\1;" | \
+  xargs -t sed -i '' -E "s/[[:space:]]*$//"
