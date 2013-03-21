@@ -4,6 +4,7 @@ filetype off
 set rtp+=~/.vim/bundle/vundle/
 call vundle#rc()
 Bundle 'gmarik/vundle'
+Bundle 'airblade/vim-gitgutter'
 Bundle 'bbommarito/vim-slim'
 Bundle 'ecomba/vim-ruby-refactoring'
 Bundle 'ervandew/supertab'
