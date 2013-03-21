@@ -35,5 +35,9 @@ alias :q=exit
 # prefer local bin/
 export PATH=bin:$PATH
 
+# Heroku
+production() { heroku $@ --remote production ;}
+staging() { heroku $@ --remote staging ;}
+
 # reset return code to 0
 true
