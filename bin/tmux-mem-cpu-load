@@ -15,4 +15,12 @@ for (( i = 0; i < $NUM_LINES; i++ )); do
 done
 CORE_COUNT=`sysctl -n hw.ncpu`
 LOAD_AVERAGE=`uptime | awk '{ print $(NF-2) }'`
-echo "$LOAD_AVERAGE/$CORE_COUNT |${LINES}|"
+
+BATTERY=`pmset -g batt | grep "discharging" | cut -f 4 -d " "`
+if [[ $BATTERY == "" ]]; then
+  BATTERY=" 🔌"
+else
+  BATTERY=" ~$BATTERY 🔋"
+fi
+
+echo "$LOAD_AVERAGE/$CORE_COUNT |${LINES}|$BATTERY"
