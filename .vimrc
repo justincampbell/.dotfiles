@@ -14,6 +14,7 @@ Bundle 'kien/ctrlp.vim'
 Bundle 'kien/rainbow_parentheses.vim'
 Bundle 'mattn/gist-vim'
 Bundle 'mattn/webapi-vim'
+Bundle 'michaeljsmith/vim-indent-object'
 Bundle 'mileszs/ack.vim'
 Bundle 'nathanaelkane/vim-indent-guides'
 Bundle 'scrooloose/nerdcommenter'
@@ -29,6 +30,7 @@ Bundle 'tpope/vim-rake'
 Bundle 'vim-ruby/vim-ruby'
 Bundle 'vim-scripts/AutoComplPop'
 Bundle 'vim-scripts/matchit.zip'
+Bundle 'wikitopian/hardmode'
 filetype plugin indent on
 
 if has('gui_macvim')
@@ -48,6 +50,7 @@ set autoread
 set directory=/tmp
 
 " Colors
+autocmd ColorScheme * highlight ExtraWhitespace ctermbg=red guibg=red
 colorscheme railscasts
 syntax on
 
@@ -128,7 +131,7 @@ let g:gist_open_browser_after_post = 1
 let g:gist_post_private = 1
 
 " rainbow_parentheses.vim
-au VimEnter * RainbowParenthesesToggle
+au VimEnter *.clj RainbowParenthesesToggle
 au Syntax * RainbowParenthesesLoadRound
 au Syntax * RainbowParenthesesLoadSquare
 au Syntax * RainbowParenthesesLoadBraces
