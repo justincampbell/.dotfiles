@@ -9,7 +9,9 @@ Bundle 'bbommarito/vim-slim'
 Bundle 'ecomba/vim-ruby-refactoring'
 Bundle 'ervandew/supertab'
 Bundle 'fortes/vim-railscasts'
+Bundle 'guns/vim-clojure-static'
 Bundle 'kien/ctrlp.vim'
+Bundle 'kien/rainbow_parentheses.vim'
 Bundle 'mattn/gist-vim'
 Bundle 'mattn/webapi-vim'
 Bundle 'mileszs/ack.vim'
@@ -17,14 +19,15 @@ Bundle 'nathanaelkane/vim-indent-guides'
 Bundle 'scrooloose/nerdcommenter'
 Bundle 'scrooloose/nerdtree'
 Bundle 'scrooloose/syntastic'
+Bundle 'tpope/vim-classpath'
 Bundle 'tpope/vim-endwise'
+Bundle 'tpope/vim-fireplace'
 Bundle 'tpope/vim-fugitive'
 Bundle 'tpope/vim-markdown'
 Bundle 'tpope/vim-rails'
 Bundle 'tpope/vim-rake'
 Bundle 'vim-ruby/vim-ruby'
 Bundle 'vim-scripts/AutoComplPop'
-Bundle 'vim-scripts/VimClojure'
 Bundle 'vim-scripts/matchit.zip'
 filetype plugin indent on
 
@@ -124,9 +127,8 @@ let g:gist_detect_filetype = 1
 let g:gist_open_browser_after_post = 1
 let g:gist_post_private = 1
 
-" VimClojure
-let vimclojure#DynamicHighlighting = 1
-let vimclojure#FuzzyIndent = 1
-let vimclojure#HighlightBuiltins = 1
-let vimclojure#HighlightContrib = 1
-let vimclojure#ParenRainbow = 1
+" rainbow_parentheses.vim
+au VimEnter * RainbowParenthesesToggle
+au Syntax * RainbowParenthesesLoadRound
+au Syntax * RainbowParenthesesLoadSquare
+au Syntax * RainbowParenthesesLoadBraces
