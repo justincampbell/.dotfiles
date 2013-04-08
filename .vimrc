@@ -30,19 +30,14 @@ Bundle 'tpope/vim-rails'
 Bundle 'tpope/vim-rake'
 Bundle 'vim-ruby/vim-ruby'
 Bundle 'vim-scripts/AutoComplPop'
+Bundle 'vim-scripts/EvalSelection.vim'
 Bundle 'vim-scripts/matchit.zip'
+Bundle 'vim-scripts/multvals.vim'
 Bundle 'wikitopian/hardmode'
 filetype plugin indent on
 
-if has('gui_macvim')
-  " MacVim
-  set guioptions-=T " Hide toolbar
-  set guioptions-=r " Hide scrollbars
-  set gfn=Monaco:h16
-else
-  " Terminal
-  set mouse=a
-endif
+" Mouse
+set mouse=a
 
 " Automatically reload files
 set autoread
@@ -51,7 +46,7 @@ set autoread
 set directory=/tmp
 
 " Colors
-autocmd ColorScheme * highlight ExtraWhitespace ctermbg=red guibg=red
+autocmd ColorScheme * highlight ExtraWhitespace ctermbg=red
 colorscheme railscasts
 syntax on
 
@@ -84,7 +79,6 @@ au BufNewFile,BufRead *.jbuilder set filetype=ruby
 " 80-column line
 set colorcolumn=81
 hi ColorColumn ctermbg=234
-hi ColorColumn guibg=grey15
 
 " Smart search
 set incsearch
@@ -110,8 +104,8 @@ set showcmd
 " Indent-Guides
 au VimEnter * :IndentGuidesEnable
 let g:indent_guides_auto_colors = 0
-hi IndentGuidesEven ctermbg=233 guibg=#333333
-hi IndentGuidesOdd ctermbg=black guibg=#2b2b2b
+hi IndentGuidesEven ctermbg=233
+hi IndentGuidesOdd ctermbg=black
 
 " NERDCommenter
 let NERDRemoveExtraSpaces=1
@@ -119,11 +113,6 @@ let NERDSpaceDelims=1
 
 map <leader>/ <plug>NERDCommenterToggle<CR>
 imap <leader>/ <Esc><plug>NERDCommenterToggle<CR>i
-
-if has("gui_macvim")
-  map <D-/> <plug>NERDCommenterToggle<CR>
-  imap <D-/> <Esc><plug>NERDCommenterToggle<CR>i
-end
 
 " Gist
 let g:gist_clip_command = 'pbcopy'
