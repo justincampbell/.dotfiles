@@ -127,7 +127,7 @@ let g:gist_open_browser_after_post = 1
 let g:gist_post_private = 1
 
 " rainbow_parentheses.vim
-au VimEnter *.clj RainbowParenthesesToggle
+au VimEnter * RainbowParenthesesToggle
 au Syntax * RainbowParenthesesLoadRound
 au Syntax * RainbowParenthesesLoadSquare
 au Syntax * RainbowParenthesesLoadBraces
