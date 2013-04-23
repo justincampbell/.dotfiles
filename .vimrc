@@ -47,7 +47,6 @@ set autoread
 set directory=/tmp
 
 " Colors
-autocmd ColorScheme * highlight ExtraWhitespace ctermbg=red
 autocmd ColorScheme * highlight Visual ctermbg=236
 colorscheme railscasts
 syntax on
