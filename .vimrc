@@ -53,7 +53,7 @@ colorscheme railscasts
 syntax on
 
 " Sign column
-hi SignColumn ctermbg=0
+highlight SignColumn ctermbg=0
 
 " Line numbers
 set number
@@ -76,11 +76,11 @@ set listchars=tab:‣\	,trail:.,extends:⇢,precedes:⇠
 set list
 
 " Filetype syntax highlighting
-au BufNewFile,BufRead *.jbuilder set filetype=ruby
+autocmd BufNewFile,BufRead *.jbuilder set filetype=ruby
 
 " 80-column line
 set colorcolumn=81
-hi ColorColumn ctermbg=234
+highlight ColorColumn ctermbg=234
 
 " Smart search
 set incsearch
@@ -108,10 +108,10 @@ set scrolloff=5
 set showcmd
 
 " Indent-Guides
-au VimEnter * :IndentGuidesEnable
+autocmd VimEnter * :IndentGuidesEnable
 let g:indent_guides_auto_colors = 0
-hi IndentGuidesEven ctermbg=233
-hi IndentGuidesOdd ctermbg=black
+highlight IndentGuidesEven ctermbg=233
+highlight IndentGuidesOdd ctermbg=black
 
 " NERDCommenter
 let NERDRemoveExtraSpaces=1
@@ -127,7 +127,7 @@ let g:gist_open_browser_after_post = 1
 let g:gist_post_private = 1
 
 " rainbow_parentheses.vim
-au VimEnter * RainbowParenthesesToggle
-au Syntax * RainbowParenthesesLoadRound
-au Syntax * RainbowParenthesesLoadSquare
-au Syntax * RainbowParenthesesLoadBraces
+autocmd VimEnter * RainbowParenthesesToggle
+autocmd Syntax * RainbowParenthesesLoadRound
+autocmd Syntax * RainbowParenthesesLoadSquare
+autocmd Syntax * RainbowParenthesesLoadBraces
