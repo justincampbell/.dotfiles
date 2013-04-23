@@ -97,6 +97,10 @@ set wildmode=list:list,full
 noremap <D-left>  :bp<CR>
 noremap <D-right> :bn<CR>
 
+" Smarter split opening
+set splitbelow
+set splitright
+
 " Scroll before the cursor reaches the edge
 set scrolloff=5
 
