@@ -103,6 +103,9 @@ set scrolloff=5
 " Show leader keystrokes in the bottom right
 set showcmd
 
+" Always show filename
+set laststatus=2
+
 " Indent-Guides
 autocmd VimEnter * :IndentGuidesEnable
 let g:indent_guides_auto_colors = 0
