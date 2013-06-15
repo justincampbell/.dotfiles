@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/sh -e
 
 if [[ $(git branch --no-color | sed -e '/^[^*]/d' -e 's/* \(.*\)/\1/') != 'master' ]]; then
   echo "Need to be on master"
