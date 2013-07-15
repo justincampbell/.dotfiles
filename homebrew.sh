@@ -7,6 +7,7 @@ brew install \
   git \
   hub \
   ruby-install \
+  tree \
   vim \
   watch \
   wemux
