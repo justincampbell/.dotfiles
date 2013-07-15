@@ -10,4 +10,5 @@ brew install \
   tree \
   vim \
   watch \
-  wemux
+  wemux \
+  wget
