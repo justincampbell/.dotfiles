@@ -8,10 +8,10 @@ ln -s .dotfiles/.profile ~/.profile
 ln -s .dotfiles/.tmux.conf ~/.tmux.conf
 ln -s .dotfiles/.vimrc ~/.vimrc
 
-git config --global --add color.ui true
-git config --global --add commit.template ~/.git_commit_template
-git config --global --add push.default simple
-git config --global --add user.email "justin@justincampbell.me"
-git config --global --add user.name "Justin Campbell"
-git config --global --add web.browser open
+git config --global color.ui true
+git config --global commit.template ~/.git_commit_template
+git config --global push.default simple
+git config --global user.email "justin@justincampbell.me"
+git config --global user.name "Justin Campbell"
+git config --global web.browser open
 
