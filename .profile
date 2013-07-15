@@ -6,15 +6,15 @@ export HISTCONTROL=ignoreboth
 export HISTSIZE=10000
 export PATH=/usr/local/bin:/usr/local/sbin:$HOME/.dotfiles/bin:$PATH
 
-# git
-eval "$(hub alias -s)" # Git ♥ 's GitHub
-[[ $- == *i* ]]  &&  . ~/.dotfiles/git-prompt.sh && source ~/.dotfiles/git-completion.bash
-
 # chruby
 source /usr/local/opt/chruby/share/chruby/chruby.sh
 source /usr/local/opt/chruby/share/chruby/auto.sh
 RUBIES=(~/.rubies/*)
 chruby 1.9.3
+
+# git
+eval "$(hub alias -s)" # Git ♥ 's GitHub
+[[ $- == *i* ]]  &&  . ~/.dotfiles/git-prompt.sh && source ~/.dotfiles/git-completion.bash
 
 # use
 alias use="source _use"
