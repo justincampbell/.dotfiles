@@ -16,13 +16,6 @@ source /usr/local/opt/chruby/share/chruby/auto.sh
 RUBIES=(~/.rubies/*)
 chruby 1.9.3
 
-# rvm
-# [[ -s ".rvm/scripts/rvm" ]] && source ".rvm/scripts/rvm" && chmod +x $rvm_path/hooks/after_cd_bundler
-
-# rbenv
-# export PATH=$HOME/.rbenv/bin:$PATH
-# eval "$(rbenv init -)"
-
 # use
 alias use="source _use"
 
