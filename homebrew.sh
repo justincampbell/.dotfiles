@@ -5,6 +5,7 @@ packages=(
   ack
   chruby
   git
+  heroku-toolbelt
   hub
   ruby-install
   tree
