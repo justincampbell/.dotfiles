@@ -1,4 +1,3 @@
---all-types
 --ignore-dir=coverage/
 --ignore-dir=doc/
 --ignore-dir=log/
