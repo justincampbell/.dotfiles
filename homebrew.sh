@@ -1,3 +1,5 @@
+#!/bin/bash -e
+
 which -s brew && brew update
 which -s brew || ruby -e "$(curl -fsSL https://raw.github.com/mxcl/homebrew/go)"
 
