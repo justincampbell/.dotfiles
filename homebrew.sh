@@ -6,6 +6,7 @@ which -s brew || ruby -e "$(curl -fsSL https://raw.github.com/mxcl/homebrew/go)"
 packages=(
   ack
   chruby
+  cloc
   git
   heroku-toolbelt
   hub
