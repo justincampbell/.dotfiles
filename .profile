@@ -4,6 +4,8 @@ export EDITOR=vim
 export JAVA_HOME="$(/usr/libexec/java_home)"
 export HISTCONTROL=ignoreboth
 export HISTSIZE=10000
+export PATH=/usr/local/share/npm/bin:$PATH # Node/NPM
+export PATH=$HOME/.cabal/bin:$PATH # Haskell/Cabal
 export PATH=/usr/local/bin:/usr/local/sbin:$HOME/.dotfiles/bin:$PATH
 
 # chruby
