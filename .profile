@@ -1,6 +1,7 @@
 export BROWSER=open
 export EC2_HOME="/usr/local/Library/LinkedKegs/ec2-api-tools/jars"
 export EDITOR=vim
+export GOPATH=".gopath"
 export JAVA_HOME="$(/usr/libexec/java_home)"
 export HISTCONTROL=ignoreboth
 export HISTSIZE=10000
