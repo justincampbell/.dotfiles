@@ -75,6 +75,12 @@ set tabstop=4
 set listchars=tab:‣\ ,trail:.,extends:⇢,precedes:⇠
 set list
 
+" Highlight trailing whitespace
+highlight ExtraWhitespace ctermfg=red
+autocmd BufWinEnter,InsertLeave * match ExtraWhitespace /\s\+$/
+autocmd InsertEnter * match ExtraWhitespace /\s\+\%#\@<!$/
+autocmd BufWinLeave * call clearmatches()
+
 " Filetype syntax highlighting
 autocmd BufNewFile,BufRead *.jbuilder set filetype=ruby
 
