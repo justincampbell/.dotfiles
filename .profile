@@ -34,5 +34,8 @@ export PATH=bin:$PATH
 production() { heroku $@ --remote production ;}
 staging() { heroku $@ --remote staging ;}
 
+# Start wemux if it's not already running elsewhere
+[[ -x /tmp/wemux-wemux ]] || wemux
+
 # reset return code to 0
 true
