@@ -12,7 +12,6 @@ export PATH=/usr/local/bin:/usr/local/sbin:$HOME/.dotfiles/bin:$PATH
 # chruby
 source /usr/local/opt/chruby/share/chruby/chruby.sh
 source /usr/local/opt/chruby/share/chruby/auto.sh
-RUBIES=(~/.rubies/*)
 
 # git
 eval "$(hub alias -s)" # Git ♥ 's GitHub
