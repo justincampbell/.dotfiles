@@ -63,23 +63,46 @@ def self.benchmark(count = 1)
   result
 end
 
-def self.profile(count = 1)
+def self.profile(count = 1, printer = :flat)
   begin
     require 'ruby-prof'
   rescue LoadError
     raise "RubyProf not installed. Install it with: gem install ruby-prof"
   end
 
+  require 'tmpdir'
+  temp = Dir.mktmpdir
+
   result = nil
+  profile_data = nil
+
+  printer_class = case printer
+                  when :flat then RubyProf::FlatPrinterWithLineNumbers
+                  when :graph then RubyProf::GraphPrinter
+                  when :html then RubyProf::GraphHtmlPrinter
+                  when :dot then RubyProf::DotPrinter
+                  end
 
   silence_active_record do
-    RubyProf::FlatPrinter.new(
-      RubyProf.profile {
-        count.times {
-          result = yield
-        }
+    profile_data = RubyProf.profile {
+      count.times {
+       result = yield
       }
-    ).print STDOUT, :min_percent => 1
+    }
+  end
+
+  output = printer_class.new profile_data
+
+  case printer
+  when :flat, :graph
+    output.print STDOUT, :min_percent => 1
+  when :html
+    output.print File.open("#{temp}/profile.html", 'w'), :print_file => true
+    `open #{temp}/profile.html`
+  when :dot
+    output.print File.open("profile.dot", 'w')
+    `dot -q2 -Tpng -O profile.dot`
+    `open profile.png`
   end
 
   result
