@@ -2,6 +2,7 @@
 
 formulae=(
   ack
+  bash
   brew-cask
   chruby
   cloc
