@@ -79,7 +79,7 @@ set listchars=tab:‣\ ,trail:.,extends:⇢,precedes:⇠
 set list
 
 " Highlight trailing whitespace
-highlight ExtraWhitespace ctermfg=red
+highlight! link ExtraWhitespace Todo
 autocmd BufWinEnter,InsertLeave * match ExtraWhitespace /\s\+$/
 autocmd InsertEnter * match ExtraWhitespace /\s\+\%#\@<!$/
 autocmd BufWinLeave * call clearmatches()
@@ -89,7 +89,7 @@ autocmd BufNewFile,BufRead *.jbuilder set filetype=ruby
 
 " 80-column line
 set colorcolumn=81
-highlight ColorColumn ctermbg=234
+highlight! link ColorColumn CursorColumn
 
 " Smart search
 set incsearch
