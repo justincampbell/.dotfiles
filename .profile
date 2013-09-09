@@ -8,6 +8,7 @@ export HISTSIZE=10000
 export PATH=/usr/local/share/npm/bin:$PATH # Node/NPM
 export PATH=$HOME/.cabal/bin:$PATH # Haskell/Cabal
 export PATH=/usr/local/bin:/usr/local/sbin:$HOME/.dotfiles/bin:$PATH
+export PATH=bin:$PATH
 
 # chruby
 source /usr/local/opt/chruby/share/chruby/chruby.sh
@@ -25,9 +26,6 @@ alias use="source _use"
 
 # vim-brained
 alias :q=exit
-
-# prefer local bin/
-export PATH=bin:$PATH
 
 # Heroku
 production() { heroku $@ --remote production ;}
