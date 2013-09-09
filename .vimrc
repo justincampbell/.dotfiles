@@ -162,3 +162,6 @@ let g:rbpt_max = 15
 " xmpfilter
 map <F4> <Plug>(xmpfilter-mark)
 map <F5> <Plug>(xmpfilter-run)
+
+" The Silver Searcher
+let g:ackprg="/usr/local/bin/ag -H --nocolor --nogroup --column"
