@@ -1,7 +1,7 @@
 #!/bin/bash -e
 
 formulae=(
-  ack
+  ag
   bash
   brew-cask
   chruby

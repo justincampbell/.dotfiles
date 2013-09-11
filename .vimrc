@@ -20,6 +20,7 @@ Bundle 'mattn/webapi-vim'
 Bundle 'michaeljsmith/vim-indent-object'
 Bundle 'mileszs/ack.vim'
 Bundle 'nathanaelkane/vim-indent-guides'
+Bundle 'rking/ag.vim'
 Bundle 'scrooloose/nerdcommenter'
 Bundle 'scrooloose/nerdtree'
 Bundle 'scrooloose/syntastic'
@@ -162,3 +163,9 @@ let g:rbpt_max = 15
 " xmpfilter
 map <F4> <Plug>(xmpfilter-mark)
 map <F5> <Plug>(xmpfilter-run)
+
+" The Silver Searcher
+let g:ag_binary = system("which ag | xargs echo -n")
+if filereadable(g:ag_binary)
+  let g:ackprg = g:ag_binary . " --nocolor --nogroup --column"
+endif
