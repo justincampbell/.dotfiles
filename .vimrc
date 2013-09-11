@@ -75,7 +75,7 @@ set softtabstop=2
 set tabstop=4
 
 " Fancy characters
-set listchars=tab:‣\ ,trail:.,extends:⇢,precedes:⇠
+set listchars=tab:‣\ ,trail:·,extends:⇢,precedes:⇠
 set list
 
 " Highlight trailing whitespace
