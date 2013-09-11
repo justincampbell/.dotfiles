@@ -28,6 +28,9 @@ alias use="source _use"
 # vim-brained
 alias :q=exit
 
+# The Silver Searcher
+alias ack=ag
+
 # Heroku
 production() { heroku $@ --remote production ;}
 staging() { heroku $@ --remote staging ;}
