@@ -164,4 +164,7 @@ map <F4> <Plug>(xmpfilter-mark)
 map <F5> <Plug>(xmpfilter-run)
 
 " The Silver Searcher
-let g:ackprg="/usr/local/bin/ag -H --nocolor --nogroup --column"
+let g:ag_binary = system("which ag | xargs echo -n")
+if filereadable(g:ag_binary)
+  let g:ackprg = g:ag_binary . " --nocolor --nogroup --column"
+endif
