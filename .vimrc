@@ -164,6 +164,12 @@ let g:rbpt_max = 15
 map <F4> <Plug>(xmpfilter-mark)
 map <F5> <Plug>(xmpfilter-run)
 
+" command aliases
+ca E e
+ca Q q
+ca W w
+ca Wq wq
+
 " The Silver Searcher
 let g:ag_binary = system("which ag | xargs echo -n")
 if filereadable(g:ag_binary)
