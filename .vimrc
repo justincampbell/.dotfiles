@@ -164,11 +164,11 @@ let g:rbpt_max = 15
 map <F4> <Plug>(xmpfilter-mark)
 map <F5> <Plug>(xmpfilter-run)
 
-" command aliases
-ca E e
-ca Q q
-ca W w
-ca Wq wq
+" alias common mistyped commands to correct command
+cabbrev E e
+cabbrev Q q
+cabbrev W w
+cabbrev Wq wq
 
 " The Silver Searcher
 let g:ag_binary = system("which ag | xargs echo -n")
