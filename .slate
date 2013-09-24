@@ -12,6 +12,7 @@ alias left     move screenOriginX;screenOriginY screenSizeX/2;screenSizeY
 alias right    move screenSizeX/2;screenOriginY screenSizeX/2;screenSizeY
 alias center   move ${middle-left};screenOriginY ${middle-width};screenSizeY
 alias middle   move ${middle-left};${middle-top} ${middle-width};${middle-height}
+alias twitter  move screenOriginX;screenOriginY 480;screenSizeY
 
 alias trigger cmd;shift;space
 
@@ -21,6 +22,7 @@ bind left:${trigger}   ${left}
 bind right:${trigger}  ${right}
 bind c:${trigger}      ${center}
 bind m:${trigger}      ${middle}
+bind t:${trigger}      ${twitter}
 bind g:${trigger}      grid
 bind r:${trigger}      relaunch
 bind return:${trigger} undo
