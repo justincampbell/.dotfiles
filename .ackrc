@@ -1,7 +1,0 @@
---ignore-dir=coverage/
---ignore-dir=doc/
---ignore-dir=log/
---ignore-dir=node_modules/
---ignore-dir=pkg/
---ignore-dir=tmp/
---smart-case
