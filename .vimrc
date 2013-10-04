@@ -5,6 +5,7 @@ set rtp+=~/.vim/bundle/vundle/
 call vundle#rc()
 Bundle 'gmarik/vundle'
 Bundle 'airblade/vim-gitgutter'
+Bundle 'beloglazov/vim-online-thesaurus'
 Bundle 'ecomba/vim-ruby-refactoring'
 Bundle 'elixir-lang/vim-elixir'
 Bundle 'ervandew/supertab'
