@@ -15,9 +15,10 @@ source /usr/local/opt/chruby/share/chruby/chruby.sh
 source /usr/local/opt/chruby/share/chruby/auto.sh
 [[ -f .ruby-version ]] || chruby 2.1.0
 
-# git
+# git + prompt
 eval "$(hub alias -s)" # Git ♥ 's GitHub
-[[ $- == *i* ]]  &&  . ~/.dotfiles/git-prompt.sh && source ~/.dotfiles/git-completion.bash
+source /usr/local/etc/bash_completion.d/git-completion.bash
+source ~/.dotfiles/prompt.sh
 
 # use
 alias use="source _use"
