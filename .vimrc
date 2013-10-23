@@ -12,6 +12,7 @@ Bundle 'ervandew/supertab'
 Bundle 'fsouza/go.vim'
 Bundle 'godlygeek/tabular'
 Bundle 'guns/vim-clojure-static'
+Bundle 'hwartig/vim-seeing-is-believing'
 Bundle 'justincampbell/vim-eighties'
 Bundle 'justincampbell/vim-railscasts'
 Bundle 'kien/ctrlp.vim'
@@ -26,7 +27,6 @@ Bundle 'scrooloose/nerdcommenter'
 Bundle 'scrooloose/nerdtree'
 Bundle 'scrooloose/syntastic'
 Bundle 'slim-template/vim-slim'
-Bundle 't9md/vim-ruby-xmpfilter'
 Bundle 'terryma/vim-multiple-cursors'
 Bundle 'tpope/vim-classpath'
 Bundle 'tpope/vim-endwise'
@@ -161,9 +161,9 @@ let g:rbpt_colorpairs = [
       \ ]
 let g:rbpt_max = 15
 
-" xmpfilter
-map <F4> <Plug>(xmpfilter-mark)
-map <F5> <Plug>(xmpfilter-run)
+" seeing-is-beleiving
+map <F4> <Plug>(seeing-is-believing-mark)
+map <F5> <Plug>(seeing-is-believing-run)
 
 " alias common mistyped commands to correct command
 cabbrev E e
