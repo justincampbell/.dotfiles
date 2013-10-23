@@ -23,6 +23,5 @@ set_ps1() {
 }
 
 set_ps1
-PS2='\[${orange}\]> \[${reset}\]'
 
 PROMPT_COMMAND='prompt_command'
