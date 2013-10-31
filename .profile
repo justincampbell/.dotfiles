@@ -36,6 +36,9 @@ alias ack=ag
 production() { heroku $@ --remote production ;}
 staging() { heroku $@ --remote staging ;}
 
+# Jump to project with fuzzy finder
+code() { cd ~/Code/$(ls ~/Code | selecta) && clear ;}
+
 # Start wemux if it's not already running elsewhere
 [[ -x /tmp/wemux-wemux ]] || wemux
 
