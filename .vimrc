@@ -6,6 +6,7 @@ call vundle#rc()
 Bundle 'gmarik/vundle'
 Bundle 'airblade/vim-gitgutter'
 Bundle 'beloglazov/vim-online-thesaurus'
+Bundle 'bling/vim-airline'
 Bundle 'ecomba/vim-ruby-refactoring'
 Bundle 'elixir-lang/vim-elixir'
 Bundle 'ervandew/supertab'
@@ -176,3 +177,11 @@ let g:ag_binary = system("which ag | xargs echo -n")
 if filereadable(g:ag_binary)
   let g:ackprg = g:ag_binary . " --nocolor --nogroup --column"
 endif
+
+" vim-airline
+let g:airline_left_sep=''
+let g:airline_right_sep=''
+let g:airline_section_a='' " mode
+let g:airline_section_b='' " branch
+let g:airline_section_z='' " ruler
+let g:airline_theme='monochrome'
