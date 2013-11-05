@@ -1,5 +1,7 @@
 #!/bin/bash -e
 
+xcode-select --install
+
 formulae=(
   ag
   bash
