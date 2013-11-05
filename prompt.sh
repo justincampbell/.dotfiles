@@ -5,8 +5,32 @@ red=`tput setaf 1`
 dark_gray=`tput setaf 241`
 reset=`tput sgr0`
 
+contains() {
+  local list=$#
+  local value=${!list}
+
+  for ((i=1; i<$#; i++)) {
+    if [ "${!i}" == "${value}" ]; then
+      return 0
+    fi
+  }
+
+  return 1
+}
+
+generate_random_color() {
+  random_color="0"
+  blacklist=("0" "8" "16" "17" "18" "59")
+
+  until $(! contains "${blacklist[@]}" "$random_color"); do
+    random_color=$(jot -r 1 1 230)
+  done
+
+  echo $random_color
+}
+
 random_color() {
-  echo -n `jot -r 1 1 231 | xargs tput setaf`
+  echo -n `tput setaf $(generate_random_color)`
 }
 
 prompt_command() {
