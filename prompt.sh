@@ -2,7 +2,7 @@
 
 cyan=`tput setaf 6`
 red=`tput setaf 1`
-dark_gray=`tput setaf 236`
+dark_gray=`tput setaf 241`
 reset=`tput sgr0`
 
 random_color() {
