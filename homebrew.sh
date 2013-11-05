@@ -1,7 +1,5 @@
 #!/bin/bash -e
 
-xcode-select --install
-
 formulae=(
   ag
   bash
@@ -25,6 +23,8 @@ casks=(
 
 which -s brew && brew update
 which -s brew || ruby -e "$(curl -fsSL https://raw.github.com/mxcl/homebrew/go)"
+
+brew doctor || exit 1
 
 brew tap | grep "cask" > /dev/null || brew tap phinze/homebrew-cask
 
