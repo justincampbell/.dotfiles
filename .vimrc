@@ -185,3 +185,9 @@ let g:airline_section_a='' " mode
 let g:airline_section_b='' " branch
 let g:airline_section_z='' " ruler
 let g:airline_theme='monochrome'
+
+" Macro repeat
+nnoremap <Space> @q
+
+" Frequently used operations
+command! ConvertCamelCaseToUnderScore :%s/\<\u\|\l\u/\=len(submatch(0)) == 1 ? tolower(submatch(0)) : submatch(0)[0].'_'.tolower(submatch(0)[1])/gc
