@@ -58,8 +58,10 @@ autocmd ColorScheme * highlight Visual ctermbg=236
 colorscheme railscasts
 syntax on
 
-" Sign column
+" Sign and number columns
 highlight SignColumn ctermbg=0
+highlight NonText ctermbg=0 ctermfg=0
+highlight Vertsplit ctermbg=233 ctermfg=233
 
 " Line numbers
 set number
