@@ -35,3 +35,10 @@ done
 for cask in "${casks[@]}"; do
   brew cask install $cask --force
 done
+
+grep /usr/local/bin/bash /etc/shells > /dev/null || (echo "
+Homebrew Bash needs some additional setup:
+
+  sudo sh -c 'echo /usr/local/bin/bash >> /etc/shells'
+  chsh -s /usr/local/bin/bash
+" && exit 1)
