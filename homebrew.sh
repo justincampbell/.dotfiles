@@ -41,9 +41,12 @@ for cask in "${casks[@]}"; do
   brew cask install $cask --force
 done
 
-grep /usr/local/bin/bash /etc/shells > /dev/null || (echo "
+if ! grep /usr/local/bin/bash /etc/shells > /dev/null; then
+  echo "
 Homebrew Bash needs some additional setup:
 
   sudo sh -c 'echo /usr/local/bin/bash >> /etc/shells'
   chsh -s /usr/local/bin/bash
-" && exit 1)
+  "
+  exit 1
+fi
