@@ -24,7 +24,12 @@ casks=(
 which -s brew && brew update
 which -s brew || ruby -e "$(curl -fsSL https://raw.github.com/mxcl/homebrew/go)"
 
-brew doctor || exit 1
+if ! brew doctor; then
+  echo "
+\`brew doctor\` failed. Please resolve issues before continuing.
+  "
+  exit 1
+fi
 
 brew tap | grep "cask" > /dev/null || brew tap phinze/homebrew-cask
 
