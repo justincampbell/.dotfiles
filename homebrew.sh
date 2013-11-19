@@ -17,6 +17,7 @@ formulae=(
 )
 
 casks=(
+  iterm2
   slate
 )
 
