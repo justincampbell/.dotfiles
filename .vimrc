@@ -186,6 +186,9 @@ let g:airline_section_b='' " branch
 let g:airline_section_z='' " ruler
 let g:airline_theme='monochrome'
 
+" Sort
+vnoremap <Leader>s :sort<cr>
+
 " Macro repeat
 nnoremap <Space> @q
 
