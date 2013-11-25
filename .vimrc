@@ -191,3 +191,6 @@ nnoremap <Space> @q
 
 " Frequently used operations
 command! ConvertCamelCaseToUnderScore :%s/\<\u\|\l\u/\=len(submatch(0)) == 1 ? tolower(submatch(0)) : submatch(0)[0].'_'.tolower(submatch(0)[1])/gc
+
+" Disable CtrlP caching
+let g:ctrlp_use_caching = 0
