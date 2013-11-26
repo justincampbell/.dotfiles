@@ -103,6 +103,7 @@ set smartcase
 
 " Smarter tab-completion
 set wildmode=list:list,full
+set wildignore+=*/coverage/*,*/tmp/*
 
 " Use Command-left/right to change buffer
 noremap <D-left>  :bp<CR>
