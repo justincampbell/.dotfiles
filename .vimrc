@@ -103,7 +103,6 @@ set smartcase
 
 " Smarter tab-completion
 set wildmode=list:list,full
-set wildignore+=*/coverage/*,*/tmp/*
 
 " Use Command-left/right to change buffer
 noremap <D-left>  :bp<CR>
@@ -176,7 +175,8 @@ cabbrev Wq wq
 " The Silver Searcher
 let g:ag_binary = system("which ag | xargs echo -n")
 if filereadable(g:ag_binary)
-  let g:ackprg = g:ag_binary . " --nocolor --nogroup --column"
+  let g:ackprg = g:ag_binary . ' --nocolor --nogroup --column'
+  let g:ctrlp_user_command = g:ag_binary . ' %s -l --nocolor -g ""'
 endif
 
 " vim-airline
