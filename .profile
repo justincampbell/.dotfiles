@@ -12,8 +12,8 @@ export PATH=bin:$PATH
 
 # chruby
 source /usr/local/opt/chruby/share/chruby/chruby.sh
-source /usr/local/opt/chruby/share/chruby/auto.sh
 [[ -f .ruby-version ]] || chruby 2.1.0
+detect_chruby() { chruby $(cat .ruby-version) && cat .ruby-version ;}
 
 # git + prompt
 eval "$(hub alias -s)" # Git ♥ 's GitHub
