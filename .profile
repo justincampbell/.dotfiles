@@ -10,10 +10,15 @@ export PATH=$HOME/.cabal/bin:$PATH # Haskell/Cabal
 export PATH=/usr/local/bin:/usr/local/sbin:$HOME/.dotfiles/bin:$PATH
 export PATH=bin:$PATH
 
-# chruby
+# ruby
 source /usr/local/opt/chruby/share/chruby/chruby.sh
 [[ -f .ruby-version ]] || chruby 2.1.0
-detect_chruby() { chruby $(cat .ruby-version) && cat .ruby-version ;}
+print_ruby() { basename $RUBY_ROOT ;}
+detect_chruby() { chruby $(cat .ruby-version) && print_ruby ;}
+alias 19='chruby ruby-1.9 && print_ruby'
+alias 20='chruby ruby-2.0 && print_ruby'
+alias 21='chruby ruby-2.1 && print_ruby'
+alias jr='chruby jruby && print_ruby'
 
 # git + prompt
 eval "$(hub alias -s)" # Git ♥ 's GitHub
