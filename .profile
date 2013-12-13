@@ -32,6 +32,9 @@ alias :q=exit
 # The Silver Searcher
 alias ack=ag
 
+# StarCraft
+alias starcraft_race="ruby -e 'puts %w[Terran Zerg Protoss].sample'"
+
 # Heroku
 production() { heroku $@ --remote production ;}
 staging() { heroku $@ --remote staging ;}
