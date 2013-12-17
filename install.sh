@@ -13,6 +13,7 @@ ln -fs ~/.dotfiles/.vimrc ~/.vimrc
 
 git config --global color.ui true
 git config --global commit.template ~/.git_commit_template
+git config --global github.user "justincampbell"
 git config --global help.autocorrect 25
 git config --global push.default simple
 git config --global user.email "justin@justincampbell.me"
