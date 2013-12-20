@@ -33,11 +33,16 @@ random_color() {
   echo -n `tput setaf $(generate_random_color)`
 }
 
+git_status() {
+  git -c color.status=always status --branch --short --untracked=normal |
+  sed -E 's/\.{3}[^ ]*$//g'
+}
+
 prompt_command() {
   [[ -d .git ]] &&
   [[ `history 1` != *'git status'* ]] &&
   echo -n ${dark_gray} &&
-  git status --branch --short --untracked=normal
+  git_status
 
   set_ps1
 }
