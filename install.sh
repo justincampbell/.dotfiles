@@ -19,3 +19,5 @@ git config --global push.default simple
 git config --global user.email "justin@justincampbell.me"
 git config --global user.name "Justin Campbell"
 git config --global web.browser open
+
+bundle config --global jobs `sysctl -n hw.ncpu`
