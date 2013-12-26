@@ -194,6 +194,9 @@ vnoremap <Leader>s :sort<cr>
 " Macro repeat
 nnoremap <Space> @q
 
+" Insert debugger
+nnoremap <Leader>d irequire 'debugger'; debugger<Esc>
+
 " Frequently used operations
 command! ConvertCamelCaseToUnderScore :%s/\<\u\|\l\u/\=len(submatch(0)) == 1 ? tolower(submatch(0)) : submatch(0)[0].'_'.tolower(submatch(0)[1])/gc
 command! ConvertRubyHashSyntax19 :%s/:\([^ ]*\)\(\s*\)=>/\1:/g
