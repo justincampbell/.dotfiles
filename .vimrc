@@ -156,7 +156,7 @@ let g:rbpt_colorpairs = [
       \ ['darkred',     'DarkOrchid3'],
       \ ['red',         'firebrick3'],
       \ ]
-let g:rbpt_max = 13
+let g:rbpt_max = len(g:rbpt_colorpairs)
 
 " seeing-is-beleiving
 map <F4> <Plug>(seeing-is-believing-mark)
