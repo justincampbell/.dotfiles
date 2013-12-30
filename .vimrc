@@ -129,7 +129,6 @@ let NERDRemoveExtraSpaces=1
 let NERDSpaceDelims=1
 
 map <leader>/ <plug>NERDCommenterToggle<CR>
-imap <leader>/ <Esc><plug>NERDCommenterToggle<CR>i
 
 " Gist
 let g:gist_clip_command = 'pbcopy'
