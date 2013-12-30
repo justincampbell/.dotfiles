@@ -105,10 +105,6 @@ set smartcase
 " Smarter tab-completion
 set wildmode=list:list,full
 
-" Use Command-left/right to change buffer
-noremap <D-left>  :bp<CR>
-noremap <D-right> :bn<CR>
-
 " Smarter split opening
 set splitbelow
 set splitright
