@@ -23,7 +23,7 @@ else
   BATTERY=" ~$BATTERY 🔋"
 fi
 
-if netstat -R -i | grep "0x800" > /dev/null; then
+if scutil -r 8.8.8.8 | grep "^Reachable$" > /dev/null; then
   NETSTAT=" 📶"
 else
   NETSTAT=" ❌"
