@@ -23,4 +23,10 @@ else
   BATTERY=" ~$BATTERY 🔋"
 fi
 
-echo "$LOAD_AVERAGE/$CORE_COUNT |${LINES}|$BATTERY"
+if scutil -r 8.8.8.8 | grep "^Reachable$" > /dev/null; then
+  NETSTAT=" 📶"
+else
+  NETSTAT=" ❌"
+fi
+
+echo "$LOAD_AVERAGE/$CORE_COUNT |${LINES}|$BATTERY $NETSTAT"
