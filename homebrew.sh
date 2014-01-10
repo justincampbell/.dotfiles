@@ -8,6 +8,7 @@ formulae=(
   git
   heroku-toolbelt
   hub
+  nvm
   ruby-install
   tree
   vim
