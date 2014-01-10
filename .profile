@@ -1,17 +1,17 @@
+export BREW_PREFIX=/usr/local/opt
 export BROWSER=open
 export EC2_HOME="/usr/local/Library/LinkedKegs/ec2-api-tools/jars"
 export EDITOR=vim
 export GOPATH=".gopath"
-export JAVA_HOME="$(/usr/libexec/java_home)"
 export HISTCONTROL=ignoreboth
 export HISTSIZE=10000
-export PATH=/usr/local/share/npm/bin:$PATH # Node/NPM
+export JAVA_HOME="$(/usr/libexec/java_home)"
 export PATH=$HOME/.cabal/bin:$PATH # Haskell/Cabal
 export PATH=/usr/local/bin:/usr/local/sbin:$HOME/.dotfiles/bin:$PATH
 export PATH=bin:$PATH
 
 # ruby
-source /usr/local/opt/chruby/share/chruby/chruby.sh
+source $BREW_PREFIX/chruby/share/chruby/chruby.sh
 [[ -f .ruby-version ]] || chruby 2.1.0
 print_ruby() { basename $RUBY_ROOT ;}
 detect_chruby() { chruby $(cat .ruby-version) && print_ruby ;}
@@ -21,8 +21,8 @@ alias 21='chruby ruby-2.1 && print_ruby'
 alias jr='chruby jruby && print_ruby'
 
 # git + prompt
-eval "$(hub alias -s)" # Git ♥ 's GitHub
-source /usr/local/etc/bash_completion.d/git-completion.bash
+alias git=hub # Git ♥ 's GitHub
+source $BREW_PREFIX/git/etc/bash_completion.d/git-completion.bash
 source ~/.dotfiles/prompt.sh
 
 # use
