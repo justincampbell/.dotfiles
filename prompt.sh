@@ -33,15 +33,27 @@ random_color() {
   echo -n `tput setaf $(generate_random_color)`
 }
 
+ruby_status() {
+  if ! [[ -f .ruby-version ]]; then
+    return
+  fi
+
+  if ! grep -e $RUBY_VERSION .ruby-version > /dev/null; then
+    echo -n "${red}Ruby using $RUBY_VERSION, but should be " &&
+    cat .ruby-version
+  fi
+}
+
 git_status() {
+  [[ -d .git ]] &&
+  [[ `history 1` != *'git status'* ]] &&
+  echo -n ${dark_gray} &&
   git -c color.status=always status --branch --short --untracked=normal |
   sed -E 's/\.{3}[^ ]*$//g'
 }
 
 prompt_command() {
-  [[ -d .git ]] &&
-  [[ `history 1` != *'git status'* ]] &&
-  echo -n ${dark_gray} &&
+  ruby_status
   git_status
 
   set_ps1
