@@ -18,9 +18,13 @@ LOAD_AVERAGE=`uptime | awk '{ print $(NF-2) }'`
 
 BATTERY=`pmset -g batt | grep "discharging" | cut -f 4 -d " "`
 if [[ $BATTERY == "" ]]; then
-  BATTERY=" 🔌"
+  BATTERY="🔌"
 else
-  BATTERY=" ~$BATTERY 🔋"
+  if [[ $BATTERY =~ ^0: ]]; then
+    BATTERY="~$BATTERY ❗️🔋"
+  else
+    BATTERY="~$BATTERY 🔋"
+  fi
 fi
 
 if scutil -r 8.8.8.8 | grep "^Reachable$" > /dev/null; then
@@ -29,4 +33,4 @@ else
   NETSTAT=" ❌"
 fi
 
-echo "$LOAD_AVERAGE/$CORE_COUNT |${LINES}|$BATTERY $NETSTAT "
+echo "$LOAD_AVERAGE/$CORE_COUNT |${LINES}| $BATTERY $NETSTAT "
