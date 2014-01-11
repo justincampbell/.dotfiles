@@ -8,6 +8,7 @@ export HISTSIZE=10000
 export JAVA_HOME="$(/usr/libexec/java_home)"
 export PATH=$HOME/.cabal/bin:$PATH # Haskell/Cabal
 export PATH=/usr/local/bin:/usr/local/sbin:$HOME/.dotfiles/bin:$PATH
+export PATH=/usr/local/share/npm/bin:$PATH # Node/NPM
 export PATH=bin:$PATH
 
 # ruby
@@ -19,6 +20,10 @@ alias 19='chruby ruby-1.9 && print_ruby'
 alias 20='chruby ruby-2.0 && print_ruby'
 alias 21='chruby ruby-2.1 && print_ruby'
 alias jr='chruby jruby && print_ruby'
+
+# node
+source $BREW_PREFIX/nvm/nvm.sh
+nvm use 0.10 > /dev/null
 
 # git + prompt
 alias git=hub # Git ♥ 's GitHub
