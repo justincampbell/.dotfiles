@@ -20,6 +20,8 @@ BATTERY=`pmset -g batt | grep "discharging" | cut -f 4 -d " "`
 if [[ $BATTERY == "" ]]; then
   BATTERY="🔌"
 else
+  if [[ $BATTERY == "(no" ]]; then BATTERY="?:??"; fi
+
   if [[ $BATTERY =~ ^0: ]]; then
     BATTERY="~$BATTERY ❗️🔋"
   else
