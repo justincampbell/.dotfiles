@@ -20,6 +20,11 @@ formulae=(
 casks=(
   iterm2
   slate
+  qlcolorcode
+  qlmarkdown
+  qlstephen
+  quicklook-csv
+  quicklook-json
 )
 
 which -s brew && brew update
