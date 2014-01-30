@@ -1,0 +1,3 @@
+#!/bin/bash -ex
+
+rm ~/Desktop/Screen\ Shot\ *.png
