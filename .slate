@@ -8,8 +8,10 @@ alias middle-top    screenOriginY+(screenSizeY-${middle-height})/3
 
 alias twitter-width 480
 alias buddies-width 200
-alias buddies-margin 25
+alias margin 25
 alias menu-bar-height 22
+alias mail-width 550
+alias mail-height 800
 
 alias recenter move screenOriginX+(screenSizeX-windowSizeX)/2;screenOriginY+(screenSizeY-windowSizeY)/3 windowSizeX;windowSizeY
 alias full     move screenOriginX;screenOriginY screenSizeX;screenSizeY
@@ -17,7 +19,8 @@ alias left     move screenOriginX;screenOriginY screenSizeX/2;screenSizeY
 alias right    move screenSizeX/2;screenOriginY screenSizeX/2;screenSizeY
 alias center   move ${middle-left};screenOriginY ${middle-width};screenSizeY
 alias middle   move ${middle-left};${middle-top} ${middle-width};${middle-height}
-alias buddies  move screenSizeX-(${buddies-width}+${buddies-margin});${menu-bar-height}+${buddies-margin} ${buddies-width};screenSizeY-(${buddies-margin}*2)
+alias buddies  move screenSizeX-(${buddies-width}+${margin});${menu-bar-height}+${margin} ${buddies-width};screenSizeY-(${margin}*2)
+alias mail     move screenSizeX-(${mail-width}+${buddies-width}+${margin}*2);${menu-bar-height}+${margin} ${mail-width};${mail-height}
 alias twitter  move screenOriginX;screenOriginY ${twitter-width};screenSizeY
 
 alias trigger cmd;shift;space
@@ -29,6 +32,7 @@ bind right:${trigger}  ${right}
 bind c:${trigger}      ${center}
 bind m:${trigger}      ${middle}
 bind b:${trigger}      ${buddies}
+bind g:${trigger}      ${mail}
 bind t:${trigger}      ${twitter}
 bind g:${trigger}      grid
 bind r:${trigger}      relaunch
