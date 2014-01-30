@@ -1,5 +1,7 @@
 #!/bin/bash -e
 
+brew tap homebrew/binary
+
 formulae=(
   ag
   brew-cask
@@ -9,6 +11,7 @@ formulae=(
   heroku-toolbelt
   hub
   nvm
+  reattach-to-user-namespace
   ruby-install
   tree
   vim
