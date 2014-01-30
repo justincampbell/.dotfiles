@@ -1,0 +1,18 @@
+#!/bin/bash
+
+wrap=${1:-16}
+
+for n in {0..255}; do
+  tput setaf $n
+
+  string="  $n"
+  echo -n "${string: -3} "
+
+  if [ $(expr $(expr $n + 1) % $wrap) == 0 ]; then
+    echo
+  fi
+done
+
+tput sgr0
+
+echo
