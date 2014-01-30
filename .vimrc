@@ -201,5 +201,6 @@ command! ConvertRubyHashSyntax19 :%s/:\([^ ]*\)\(\s*\)=>/\1:/g
 command! DeleteComments :g/^\s*#\|\/\//d
 command! RemoveTrailingWhitespace :%s/ \+$//g
 
-" Disable CtrlP caching
+" CtrlP
+let g:ctrlp_max_height = 100
 let g:ctrlp_use_caching = 0
