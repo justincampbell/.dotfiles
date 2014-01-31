@@ -197,8 +197,9 @@ vnoremap <Leader>s :sort<cr>
 " Macro repeat
 nnoremap <Space> @q
 
-" Insert debugger
-nnoremap <Leader>d irequire 'debugger'; debugger<Esc>
+" Insert debuggers
+nnoremap <Leader>d irequire 'debugger'; debugger<Esc>==
+nnoremap <Leader>p ibinding.pry<Esc>==
 
 " Frequently used operations
 command! ConvertCamelCaseToUnderScore :%s/\<\u\|\l\u/\=len(submatch(0)) == 1 ? tolower(submatch(0)) : submatch(0)[0].'_'.tolower(submatch(0)[1])/gc
