@@ -52,6 +52,9 @@ set mouse=a
 " Automatically reload files
 set autoread
 
+" Lazily redraw screen
+set lazyredraw
+
 " Set swap location
 set directory=/tmp
 
