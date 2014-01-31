@@ -96,6 +96,7 @@ autocmd BufWinLeave * call clearmatches()
 
 " Filetype syntax highlighting
 autocmd BufNewFile,BufRead *.jbuilder set filetype=ruby
+autocmd BufNewFile,BufRead *.skim set filetype=slim
 
 " 80-column line
 set colorcolumn=81
