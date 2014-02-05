@@ -1,8 +1,8 @@
 #!/bin/sh
 
 NUM_LINES=10
-TOP=`top -l 1 | head -n 4 | tail -n 1 | awk '{printf "%3d%%\n", $3}'`
-CPU=${TOP%\%*}
+IDLE=`top -l 1 | head -n 4 | tail -n 1 | awk '{printf "%3d%%\n", $7}'`
+CPU=`expr 100 - ${IDLE%\%*}`
 ACTIVE_LINES=$(($CPU/$NUM_LINES))
 LINES=""
 BAR_CHARACTER="█"
