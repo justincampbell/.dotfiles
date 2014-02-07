@@ -34,6 +34,5 @@ bind m:${trigger}      ${middle}
 bind b:${trigger}      ${buddies}
 bind g:${trigger}      ${mail}
 bind t:${trigger}      ${twitter}
-bind g:${trigger}      grid
 bind r:${trigger}      relaunch
 bind return:${trigger} undo
