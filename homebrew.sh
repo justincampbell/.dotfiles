@@ -1,6 +1,11 @@
 #!/bin/bash -e
 
+which -s brew && brew update
+which -s brew || ruby -e "$(curl -fsSL https://raw.github.com/Homebrew/homebrew/go/install)"
+
 brew tap homebrew/binary
+brew tap phinze/cask
+brew tap thoughtbot/formulae
 
 formulae=(
   ag
@@ -30,9 +35,6 @@ casks=(
   slate
   sparrow
 )
-
-which -s brew && brew update
-which -s brew || ruby -e "$(curl -fsSL https://raw.github.com/mxcl/homebrew/go)"
 
 if ! brew doctor; then
   echo "
