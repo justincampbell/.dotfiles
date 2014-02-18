@@ -1,6 +1,6 @@
 export BREW_PREFIX=/usr/local/opt
 export BROWSER=open
-export EC2_HOME="/usr/local/Library/LinkedKegs/ec2-api-tools/jars"
+export EC2_HOME=$(find /usr/local/Cellar/ec2-api-tools -type d -name libexec | head -n 1)
 export EDITOR=vim
 export GOPATH=".gopath"
 export HISTCONTROL=ignoreboth
