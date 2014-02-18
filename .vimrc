@@ -200,8 +200,8 @@ vnoremap <Leader>s :sort<cr>
 nnoremap <Space> @q
 
 " Insert debuggers
-nnoremap <Leader>d irequire 'debugger'; debugger<Esc>==
-nnoremap <Leader>p ibinding.pry<Esc>==
+nnoremap <Leader>d Orequire 'debugger'; debugger<Esc>
+nnoremap <Leader>p Orequire 'pry'; binding.pry<Esc>
 
 " Focus RSpec block
 nnoremap <Leader>f $? do$<Return>hi, :focus<Esc>
