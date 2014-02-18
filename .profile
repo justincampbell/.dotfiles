@@ -15,7 +15,7 @@ export PATH=bin:$PATH
 source $BREW_PREFIX/chruby/share/chruby/chruby.sh
 print_ruby() { basename $RUBY_ROOT ;}
 detect_chruby() { chruby $(cat .ruby-version) && print_ruby ;}
-[ -f .ruby-version ] && detect_chruby || chruby 2.1.0
+[ -f .ruby-version ] && detect_chruby || chruby 2.0.0
 alias 19='chruby ruby-1.9 && print_ruby'
 alias 20='chruby ruby-2.0 && print_ruby'
 alias 21='chruby ruby-2.1 && print_ruby'
