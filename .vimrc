@@ -101,6 +101,7 @@ autocmd BufNewFile,BufRead *.skim set filetype=slim
 
 " Filetype-specific settings
 autocmd FileType gitcommit,markdown set spell
+autocmd FileType markdown set wrap
 
 " 80-column line
 set colorcolumn=81
