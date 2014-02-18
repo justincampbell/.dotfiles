@@ -6,8 +6,12 @@ export GOPATH="~/.gopath"
 export HISTCONTROL=ignoreboth
 export HISTSIZE=10000
 export JAVA_HOME="$(/usr/libexec/java_home)"
+
+export PATH=$GOPATH/bin:$PATH # Go
+export PATH=$HOME/.bin:$PATH # Dotfiles
 export PATH=$HOME/.cabal/bin:$PATH # Haskell/Cabal
-export PATH=/usr/local/bin:/usr/local/sbin:$HOME/.dotfiles/bin:$PATH
+export PATH=$HOME/.dotfiles/bin:$PATH # Dotfiles
+export PATH=/usr/local/bin:/usr/local/sbin:$PATH # Homebrew
 export PATH=/usr/local/share/npm/bin:$PATH # Node/NPM
 export PATH=bin:$PATH
 
