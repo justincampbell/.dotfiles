@@ -100,7 +100,7 @@ autocmd BufNewFile,BufRead *.jbuilder set filetype=ruby
 autocmd BufNewFile,BufRead *.skim set filetype=slim
 
 " Filetype-specific settings
-autocmd BufNewFile,BufRead *.md,*.markdown set spell
+autocmd FileType gitcommit,markdown set spell
 
 " 80-column line
 set colorcolumn=81
