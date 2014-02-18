@@ -95,7 +95,7 @@ autocmd BufWinEnter,InsertLeave * match ExtraWhitespace /\s\+$/
 autocmd InsertEnter * match ExtraWhitespace /\s\+\%#\@<!$/
 autocmd BufWinLeave * call clearmatches()
 
-" Filetype syntax highlighting
+" Filetype mappings
 autocmd BufNewFile,BufRead *.jbuilder set filetype=ruby
 autocmd BufNewFile,BufRead *.skim set filetype=slim
 
