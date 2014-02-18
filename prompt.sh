@@ -51,7 +51,7 @@ git_status() {
   [[ `history 1` != *'git status'* ]] &&
   echo -n ${dark_gray} &&
   git -c color.status=always status --branch --short --untracked=normal |
-  sed -E 's/\.{3}[^ ]*$//g'
+  sed -E 's/\.{3}[^ ]*$//g' | tr '\n' '|' | sed -e 's/\|/\'$'\n/' | tr '|' ' ' | tr -s '\n '
 }
 
 prompt_command() {
