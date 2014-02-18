@@ -9,6 +9,7 @@ brew tap thoughtbot/formulae
 
 formulae=(
   ag
+  boot2docker
   brew-cask
   chruby
   cloc
