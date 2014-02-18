@@ -30,6 +30,9 @@ alias git=hub # Git ♥ 's GitHub
 source $BREW_PREFIX/git/etc/bash_completion.d/git-completion.bash
 source ~/.dotfiles/prompt.sh
 
+# boot2docker
+alias docker='docker -H tcp://0.0.0.0:4243'
+
 # use
 alias use="source _use"
 
