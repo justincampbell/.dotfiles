@@ -35,6 +35,7 @@ Bundle 'scrooloose/nerdtree'
 Bundle 'scrooloose/syntastic'
 Bundle 'slim-template/vim-slim'
 Bundle 'terryma/vim-multiple-cursors'
+Bundle 'thoughtbot/vim-rspec'
 Bundle 'tpope/vim-classpath'
 Bundle 'tpope/vim-endwise'
 Bundle 'tpope/vim-fireplace'
@@ -222,3 +223,17 @@ autocmd FileType qf execute line("$") . "wincmd _"
 
 " Close quickfix with Esc
 autocmd FileType qf nnoremap <buffer> <Esc> :cclose<cr>
+
+" Make
+nnoremap <Leader>m :silent wa\|make!\|redraw!\|copen<cr>
+autocmd BufEnter Gemfile* set makeprg=bundle
+autocmd BufEnter Rakefile set makeprg=rake
+autocmd BufEnter *.rb set makeprg=rspec
+autocmd BufEnter *_spec.rb compiler rspec
+autocmd BufEnter *_spec.rb set makeprg=rspec\ %
+
+" RSpec
+nnoremap <Leader>ra :call RunAllSpecs()<CR>
+nnoremap <Leader>rl :call RunLastSpec()<CR>
+nnoremap <Leader>rs :call RunNearestSpec()<CR>
+nnoremap <Leader>rt :call RunCurrentSpecFile()<CR>
