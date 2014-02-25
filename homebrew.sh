@@ -53,5 +53,5 @@ for formula in "${formulae[@]}"; do
 done
 
 for cask in "${casks[@]}"; do
-  brew cask install $cask --force
+  brew cask install $cask
 done
