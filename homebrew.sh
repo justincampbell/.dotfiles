@@ -35,6 +35,8 @@ casks=(
   quicklook-json
   slate
   sparrow
+  vagrant
+  virtualbox
 )
 
 if ! brew doctor; then
