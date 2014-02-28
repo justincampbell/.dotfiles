@@ -41,6 +41,7 @@ alias docker='docker -H tcp://0.0.0.0:4243'
 alias use="source _use"
 
 # Directory jumping
+code() { cd ~/Code/`ls -at ~/Code | selecta` ;}
 cdcode() { cd ~/Code ;}
 cddotfiles() { cd ~/.dotfiles ;}
 cdnotes() { cd ~/Notes ;}
