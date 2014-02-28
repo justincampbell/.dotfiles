@@ -46,11 +46,21 @@ ruby_status() {
   fi
 }
 
+in_git_repo() {
+  dir=${1:-.}
+  count=`expr 0$2 + 1`
+
+  if [[ $count == "10" ]]; then return 1; fi
+  if [[ -d $dir/.git ]]; then return 0; fi
+
+  in_git_repo $dir/.. $count
+}
+
 git_status() {
-  [[ -d .git ]] &&
+  in_git_repo &&
   [[ `history 1` != *'git status'* ]] &&
   echo -n ${dark_gray} &&
-  git -c color.status=always status --branch --short --untracked=normal |
+  git -c color.status=always status --branch --short --untracked=normal . |
   sed -E 's/\.{3}[^ ]*$//g' | tr '\n' '|' | sed -e 's/\|/\'$'\n/' | tr '|' ' ' | tr -s '\n '
 }
 
