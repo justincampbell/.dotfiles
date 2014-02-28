@@ -40,6 +40,12 @@ alias docker='docker -H tcp://0.0.0.0:4243'
 # use
 alias use="source _use"
 
+# Directory jumping
+cdcode() { cd ~/Code ;}
+cddotfiles() { cd ~/.dotfiles ;}
+cdnotes() { cd ~/Notes ;}
+cdroot() { cd `git rev-parse --git-dir`/.. ;}
+
 # remove Dropbox when opening new terminal tabs
 [[ -d ${PWD/Dropbox\//} ]] && cd ${PWD/Dropbox\//}
 
