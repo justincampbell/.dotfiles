@@ -1,4 +1,3 @@
-" Vundle
 set nocompatible
 filetype off
 set rtp+=~/.vim/bundle/vundle/
@@ -16,6 +15,7 @@ Bundle 'fsouza/go.vim'
 Bundle 'godlygeek/tabular'
 Bundle 'guns/vim-clojure-static'
 Bundle 'hwartig/vim-seeing-is-believing'
+Bundle 'ivyl/vim-bling'
 Bundle 'jgdavey/vim-blockle'
 Bundle 'justincampbell/vim-eighties'
 Bundle 'justincampbell/vim-railscasts'
