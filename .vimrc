@@ -173,7 +173,9 @@ let g:rbpt_max = len(g:rbpt_colorpairs)
 
 " seeing-is-beleiving
 map <F4> <Plug>(seeing-is-believing-mark)
+imap <F4> <Plug>(seeing-is-believing-mark)
 map <F5> <Plug>(seeing-is-believing-run)
+imap <F5> <Plug>(seeing-is-believing-run)
 
 " alias common mistyped commands to correct command
 cabbrev E e
