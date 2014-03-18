@@ -37,11 +37,17 @@ source ~/.dotfiles/prompt.sh
 # boot2docker
 alias docker='docker -H tcp://0.0.0.0:4243'
 
+# google
+google() { open "http://www.google.com/search?q=$@" ;}
+
 # use
 alias use="source _use"
 
 # Directory jumping
-code() { cd ~/Code/`ls -at ~/Code | selecta` ;}
+code() {
+  code_directory=${1:-`ls -at ~/Code | selecta`}
+  cd ~/Code/$code_directory
+}
 cdcode() { cd ~/Code ;}
 cddotfiles() { cd ~/.dotfiles ;}
 cdnotes() { cd ~/Notes ;}
