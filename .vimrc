@@ -220,6 +220,7 @@ command! RemoveTrailingWhitespace :%s/ \+$//g
 " CtrlP
 let g:ctrlp_max_height = 100
 let g:ctrlp_use_caching = 0
+let g:ctrlp_working_path_mode = ''
 
 " Automatically adjust quickfix height
 autocmd FileType qf execute line("$") . "wincmd _"
