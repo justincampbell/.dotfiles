@@ -4,6 +4,7 @@ which -s brew && brew update
 which -s brew || ruby -e "$(curl -fsSL https://raw.github.com/Homebrew/homebrew/go/install)"
 
 brew tap homebrew/binary
+brew tap justincampbell/formulae
 brew tap phinze/cask
 brew tap thoughtbot/formulae
 
@@ -20,6 +21,7 @@ formulae=(
   reattach-to-user-namespace
   ruby-install
   tree
+  use
   vim
   watch
   wemux

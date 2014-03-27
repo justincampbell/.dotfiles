@@ -41,7 +41,7 @@ alias docker='docker -H tcp://0.0.0.0:4243'
 google() { open "http://www.google.com/search?q=$@" ;}
 
 # use
-alias use="source _use"
+source $BREW_PREFIX/use/share/use/use.sh
 
 # Directory jumping
 code() {
