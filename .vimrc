@@ -113,6 +113,7 @@ autocmd BufNewFile,BufRead *.md,*.markdown set filetype=markdown
 " Filetype-specific settings
 autocmd FileType gitcommit,markdown set spell
 autocmd FileType markdown set wrap
+autocmd FileType "" set wrap
 
 " 80-column line
 set colorcolumn=81
