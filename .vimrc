@@ -72,6 +72,13 @@ highlight SignColumn ctermbg=0
 highlight NonText ctermbg=0 ctermfg=0
 highlight Vertsplit ctermbg=233 ctermfg=233
 
+" Tabs
+highlight! link TabLineFill CursorColumn
+highlight TabLine ctermfg=7 ctermbg=234 cterm=none
+highlight TabLineSel ctermfg=166 ctermbg=234
+map <Tab> :tabn<cr>
+map <S-Tab> :tabp<cr>
+
 " Line numbers
 set number
 set numberwidth=1
