@@ -138,6 +138,9 @@ set scrolloff=5
 " Show leader keystrokes in the bottom right
 set showcmd
 
+" Extra leader mappings
+nmap , \
+
 " Always show filename
 set laststatus=2
 
