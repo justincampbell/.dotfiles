@@ -37,8 +37,9 @@ source ~/.dotfiles/prompt.sh
 # boot2docker
 alias docker='docker -H tcp://0.0.0.0:4243'
 
-# google
+# Gui aliases
 google() { open "http://www.google.com/search?q=$@" ;}
+marked() { open $@ -a /Applications/Marked.app ;}
 
 # use
 source $BREW_PREFIX/use/share/use/use.sh
