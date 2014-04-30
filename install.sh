@@ -13,6 +13,7 @@ ln -fs ~/.dotfiles/.vimrc ~/.vimrc
 
 git config --global alias.changed 'diff --name-only master..HEAD'
 git config --global alias.contributors 'shortlog --summary --email --numbered'
+git config --global alias.graph 'log --all --date=relative --decorate --graph --oneline'
 git config --global color.ui true
 git config --global commit.template ~/.git_commit_template
 git config --global github.user "justincampbell"
