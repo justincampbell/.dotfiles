@@ -65,6 +65,8 @@ git_status() {
 }
 
 prompt_command() {
+  (dotmusic &)
+
   ruby_status
   git_status
 
