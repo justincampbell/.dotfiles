@@ -11,6 +11,7 @@ ln -fs ~/.dotfiles/.slate ~/.slate
 ln -fs ~/.dotfiles/.tmux.conf ~/.tmux.conf
 ln -fs ~/.dotfiles/.vimrc ~/.vimrc
 
+git config --global alias.changed 'diff --name-only master..HEAD'
 git config --global alias.contributors 'shortlog --summary --email --numbered'
 git config --global color.ui true
 git config --global commit.template ~/.git_commit_template
