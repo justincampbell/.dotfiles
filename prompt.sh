@@ -64,10 +64,17 @@ git_status() {
   sed -E 's/\.{3}[^ ]*$//g' | tr '\n' '|' | sed -e 's/\|/\'$'\n/' | tr '|' ' ' | tr -s '\n '
 }
 
+use_status() {
+  if [[ $USE != "" ]]; then
+    echo -n "${dark_gray}$USE "
+  fi
+}
+
 prompt_command() {
   (dotmusic &)
 
   ruby_status
+  use_status
   git_status
 
   set_ps1
