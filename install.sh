@@ -24,7 +24,3 @@ git config --global user.name "Justin Campbell"
 git config --global web.browser open
 
 bundle config --global jobs `sysctl -n hw.ncpu`
-
-curl https://raw.github.com/garybernhardt/selecta/master/selecta \
-  -o /usr/local/bin/selecta && \
-  chmod +x /usr/local/bin/selecta

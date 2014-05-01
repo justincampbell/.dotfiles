@@ -20,6 +20,7 @@ formulae=(
   nvm
   reattach-to-user-namespace
   ruby-install
+  selecta
   tree
   use
   vim
