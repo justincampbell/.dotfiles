@@ -2,6 +2,7 @@
 
 cyan=`tput setaf 6`
 red=`tput setaf 1`
+yellow=`tput setaf 3`
 dark_gray=`tput setaf 241`
 reset=`tput sgr0`
 
@@ -66,7 +67,7 @@ git_status() {
 
 use_status() {
   if [[ $USE != "" ]]; then
-    echo -n "${dark_gray}$USE "
+    echo -e "${yellow}$USE"
   fi
 }
 
