@@ -44,11 +44,11 @@ marked() { open $@ -a /Applications/Marked.app ;}
 # use
 source $BREW_PREFIX/use/share/use/use.sh
 
+# Fuzzy finders
+branch() { git checkout ${1:-$(git branch | grep -v "^* "| selecta)} ;}
+code() { cd ~/Code/${1:-$(ls -at ~/Code | selecta)} ;}
+
 # Directory jumping
-code() {
-  code_directory=${1:-`ls -at ~/Code | selecta`}
-  cd ~/Code/$code_directory
-}
 cdcode() { cd ~/Code ;}
 cddotfiles() { cd ~/.dotfiles ;}
 cdnotes() { cd ~/Notes ;}
