@@ -3,7 +3,8 @@ export BROWSER=open
 export DOCKER_HOST=tcp://192.168.59.103:2375
 export EC2_HOME=$(find /usr/local/Cellar/ec2-api-tools -type d -name libexec | head -n 1)
 export EDITOR=vim
-export GOPATH=$(stat -f ~/.gopath)
+export GOPATH=$(stat -f ~/Code/go)
+export GOBIN=$GOPATH/bin
 export HISTCONTROL=ignoreboth
 export HISTSIZE=10000
 export JAVA_HOME="$(/usr/libexec/java_home)"
@@ -45,9 +46,18 @@ source $BREW_PREFIX/use/share/use/use.sh
 # Fuzzy finders
 branch() { git checkout ${1:-$(git branch | grep -v "^* "| selecta)} ;}
 code() { cd ~/Code/${1:-$(ls -at ~/Code | selecta)} ;}
+gocode() {
+  cd $GOPATH/src/${1:-$(
+  find $GOPATH/src -type d -maxdepth 3 | \
+    grep "src/.*/.*/.*$" | \
+    cut -f 7-9 -d "/" | \
+    selecta
+  )}
+}
 
 # Directory jumping
 cdcode() { cd ~/Code ;}
+cdgo() { cd $GOPATH ;}
 cddotfiles() { cd ~/.dotfiles ;}
 cdnotes() { cd ~/Notes ;}
 cdroot() { cd `git rev-parse --git-dir`/.. ;}
