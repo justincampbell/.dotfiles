@@ -242,8 +242,27 @@ let g:ctrlp_max_height = 100
 let g:ctrlp_use_caching = 0
 let g:ctrlp_working_path_mode = ''
 
+" Wrap quickfix text
+autocmd FileType qf setlocal wrap linebreak
+
 " Automatically adjust quickfix height
 autocmd FileType qf execute line("$") . "wincmd _"
 
 " Close quickfix with Esc
 autocmd FileType qf nnoremap <buffer> <Esc> :cclose<cr>
+
+" Dispatch
+nnoremap <Leader>f :FocusDispatch<space>''<left>
+nnoremap <Leader>F :FocusDispatch!<cr>
+nnoremap <Leader>l :Copen<cr>
+nnoremap <Leader>L :Copen!<cr>
+nnoremap <Leader>t :wa<cr>:Dispatch<cr>
+nnoremap <Leader>T :wa<cr>:Dispatch!<cr>
+autocmd FileType go let b:dispatch = 'go test'
+autocmd FileType sh let b:dispatch = 'make'
+autocmd FileType make let b:dispatch = 'make'
+autocmd BufEnter *_spec.rb let b:dispatch = 'bundle exec rspec --format progress %'
+autocmd BufEnter *_test.bats compiler bats
+autocmd BufEnter *_test.bats let b:dispatch = 'bats --tap %'
+autocmd BufEnter *_test.rb let b:dispatch = 'bundle exec testrb %'
+autocmd BufEnter Gemfile let b:dispatch = 'bundle'
