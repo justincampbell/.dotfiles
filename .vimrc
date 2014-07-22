@@ -3,59 +3,84 @@ filetype off
 set rtp+=~/.vim/bundle/Vundle.vim
 call vundle#begin()
 Plugin 'gmarik/Vundle.vim'
+
 Plugin 'airblade/vim-gitgutter'
 Plugin 'beloglazov/vim-online-thesaurus'
 Plugin 'bling/vim-airline'
-Plugin 'dag/vim2hs'
-Plugin 'ecomba/vim-ruby-refactoring'
-Plugin 'ekalinin/Dockerfile.vim'
-Plugin 'elixir-lang/vim-elixir'
 Plugin 'ervandew/supertab'
-Plugin 'fatih/vim-go'
 Plugin 'godlygeek/tabular'
-Plugin 'guns/vim-clojure-static'
-Plugin 'guns/vim-sexp'
-Plugin 'hwartig/vim-seeing-is-believing'
 Plugin 'ivyl/vim-bling'
-Plugin 'jgdavey/vim-blockle'
 Plugin 'justincampbell/vim-eighties'
 Plugin 'justincampbell/vim-railscasts'
-Plugin 'kchmck/vim-coffee-script'
 Plugin 'kien/ctrlp.vim'
 Plugin 'kien/rainbow_parentheses.vim'
-Plugin 'markcornick/vim-bats'
 Plugin 'mattn/gist-vim'
 Plugin 'mattn/webapi-vim'
 Plugin 'michaeljsmith/vim-indent-object'
 Plugin 'mileszs/ack.vim'
 Plugin 'nathanaelkane/vim-indent-guides'
-Plugin 'nelstrom/vim-markdown-folding'
-Plugin 'pangloss/vim-javascript'
 Plugin 'rking/ag.vim'
-Plugin 'rosstimson/bats.vim'
 Plugin 'scrooloose/nerdcommenter'
 Plugin 'scrooloose/nerdtree'
 Plugin 'scrooloose/syntastic'
-Plugin 'slim-template/vim-slim'
 Plugin 'terryma/vim-multiple-cursors'
-Plugin 'tpope/vim-classpath'
 Plugin 'tpope/vim-dispatch'
 Plugin 'tpope/vim-endwise'
-Plugin 'tpope/vim-fireplace'
 Plugin 'tpope/vim-fugitive'
-Plugin 'tpope/vim-leiningen'
-Plugin 'tpope/vim-markdown'
 Plugin 'tpope/vim-projectionist'
-Plugin 'tpope/vim-rails'
-Plugin 'tpope/vim-rake'
 Plugin 'tpope/vim-repeat'
-Plugin 'tpope/vim-sexp-mappings-for-regular-people'
 Plugin 'tpope/vim-surround'
-Plugin 'vim-ruby/vim-ruby'
 Plugin 'vim-scripts/matchit.zip'
 Plugin 'vim-scripts/multvals.vim'
 Plugin 'wikitopian/hardmode'
+
+" Clojure
+Plugin 'guns/vim-clojure-static'
+Plugin 'guns/vim-sexp'
+Plugin 'tpope/vim-classpath'
+Plugin 'tpope/vim-fireplace'
+Plugin 'tpope/vim-leiningen'
+Plugin 'tpope/vim-sexp-mappings-for-regular-people'
+
+" CoffeeScript
+Plugin 'kchmck/vim-coffee-script'
+
+" Docker
+Plugin 'ekalinin/Dockerfile.vim'
+
+" Elixir
+Plugin 'elixir-lang/vim-elixir'
+
+" Go
+Plugin 'fatih/vim-go'
+
+" Haskell
+Plugin 'dag/vim2hs'
+
+" JavaScript
+Plugin 'pangloss/vim-javascript'
+
+" Markdown
+Plugin 'nelstrom/vim-markdown-folding'
+Plugin 'tpope/vim-markdown'
+
+" Ruby
+Plugin 'ecomba/vim-ruby-refactoring'
+Plugin 'hwartig/vim-seeing-is-believing'
+Plugin 'jgdavey/vim-blockle'
+Plugin 'tpope/vim-rails'
+Plugin 'tpope/vim-rake'
+Plugin 'vim-ruby/vim-ruby'
+
+" Shell
+Plugin 'markcornick/vim-bats'
+Plugin 'rosstimson/bats.vim'
+
+" Slim
+Plugin 'slim-template/vim-slim'
+
 call vundle#end()
+
 filetype plugin indent on
 
 " Mouse
