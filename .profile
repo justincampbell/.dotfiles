@@ -1,5 +1,6 @@
 export BREW_PREFIX=/usr/local/opt
 export BROWSER=open
+export DOCKER_HOST=tcp://192.168.59.103:2375
 export EC2_HOME=$(find /usr/local/Cellar/ec2-api-tools -type d -name libexec | head -n 1)
 export EDITOR=vim
 export GOPATH=$(stat -f ~/.gopath)
@@ -33,9 +34,6 @@ nvm use 0.10 > /dev/null
 alias git=hub # Git ♥ 's GitHub
 source $BREW_PREFIX/git/etc/bash_completion.d/git-completion.bash
 source ~/.dotfiles/prompt.sh
-
-# boot2docker
-alias docker='docker -H tcp://0.0.0.0:4243'
 
 # Gui aliases
 google() { open "http://www.google.com/search?q=$@" ;}
