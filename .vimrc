@@ -72,6 +72,9 @@ Plugin 'tpope/vim-rails'
 Plugin 'tpope/vim-rake'
 Plugin 'vim-ruby/vim-ruby'
 
+" Scala
+Plugin 'derekwyatt/vim-scala'
+
 " Shell
 Plugin 'markcornick/vim-bats'
 Plugin 'rosstimson/bats.vim'
