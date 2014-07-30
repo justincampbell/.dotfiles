@@ -11,6 +11,7 @@ ln -fs ~/.dotfiles/.slate ~/.slate
 ln -fs ~/.dotfiles/.tmux.conf ~/.tmux.conf
 ln -fs ~/.dotfiles/.vimrc ~/.vimrc
 
+git config --global alias.changelog 'log --no-merges --pretty=format:"%s (%an)"'
 git config --global alias.changed 'diff --name-only master..HEAD'
 git config --global alias.contributors 'shortlog --summary --email --numbered'
 git config --global alias.graph 'log --all --date=relative --decorate --graph --oneline'
