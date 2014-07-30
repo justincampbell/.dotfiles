@@ -82,7 +82,7 @@ prompt_command() {
 }
 
 set_ps1() {
-  PS1='\[\033]0;\W\]\[${red}\]${?##0} \[${cyan}\]\W\[$(random_color)\]$ \[${reset}\]'
+  PS1='\[\033]0;\W\]\n\[${red}\]${?##0} \[${cyan}\]\W\[$(random_color)\]$ \[${reset}\]'
 }
 
 set_ps1
