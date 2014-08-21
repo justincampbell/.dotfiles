@@ -56,6 +56,8 @@ Plugin 'fatih/vim-go'
 
 " Haskell
 Plugin 'dag/vim2hs'
+Plugin 'eagletmt/ghcmod-vim'
+Plugin 'shougo/vimproc.vim'
 
 " JavaScript
 Plugin 'pangloss/vim-javascript'
@@ -102,6 +104,7 @@ set directory=/tmp
 autocmd ColorScheme * highlight Visual ctermbg=236
 colorscheme railscasts
 syntax on
+highlight! link Conceal Keyword
 
 " Sign and number columns
 highlight SignColumn ctermbg=0
@@ -150,6 +153,9 @@ autocmd BufNewFile,BufRead *.md,*.markdown set filetype=markdown
 autocmd FileType gitcommit,markdown set spell
 autocmd FileType markdown set wrap
 autocmd FileType "" set wrap
+autocmd FileType haskell set shiftwidth=4
+autocmd FileType haskell nnoremap <Leader>hc :GhcModCheckAsync<cr>
+autocmd FileType haskell nnoremap <Leader>ht :GhcModType<cr>
 
 " 80-column line
 set colorcolumn=81
