@@ -71,6 +71,9 @@ alias :q=exit
 # The Silver Searcher
 alias ack=ag
 
+# Lock the screen
+alias lock="/System/Library/CoreServices/Menu\ Extras/User.menu/Contents/Resources/CGSession -suspend"
+
 # Heroku
 production() { heroku $@ --remote production ;}
 staging() { heroku $@ --remote staging ;}
