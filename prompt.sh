@@ -41,7 +41,7 @@ ruby_status() {
 
   RUBY_VERSION=${RUBY_VERSION:-system}
 
-  if ! grep -e $RUBY_VERSION .ruby-version > /dev/null; then
+  if ! echo $RUBY_VERSION | grep $(cat .ruby-version) > /dev/null; then
     echo -n "${red}Ruby using $RUBY_VERSION, but should be " &&
     cat .ruby-version
   fi
