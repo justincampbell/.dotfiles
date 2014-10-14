@@ -1,5 +1,6 @@
 export BREW_PREFIX=/usr/local/opt
 export BROWSER=open
+export CLICOLOR=true
 export DOCKER_HOST=tcp://192.168.59.103:2375
 export EC2_HOME=$(find /usr/local/Cellar/ec2-api-tools -type d -name libexec | head -n 1)
 export EDITOR=vim
