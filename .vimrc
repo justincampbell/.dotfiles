@@ -277,6 +277,9 @@ autocmd FileType qf execute line("$") . "wincmd _"
 " Close quickfix with Esc
 autocmd FileType qf nnoremap <buffer> <Esc> :cclose<cr>
 
+" Remove color column in quickfix
+autocmd FileType qf set colorcolumn=0
+
 " Dispatch
 nnoremap <Leader>f :FocusDispatch<space>''<left>
 nnoremap <Leader>F :FocusDispatch!<cr>
