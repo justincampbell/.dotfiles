@@ -232,12 +232,6 @@ imap <F4> <Plug>(seeing-is-believing-mark)
 map <F5> <Plug>(seeing-is-believing-run)
 imap <F5> <Plug>(seeing-is-believing-run)
 
-" alias common mistyped commands to correct command
-cabbrev E e
-cabbrev Q q
-cabbrev W w
-cabbrev Wq wq
-
 " The Silver Searcher
 let g:ag_binary = system("which ag | xargs echo -n")
 if filereadable(g:ag_binary)
