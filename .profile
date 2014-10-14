@@ -82,5 +82,8 @@ staging() { heroku $@ --remote staging ;}
 # Start wemux if it's not already running elsewhere
 pgrep -q tmux\|tmate\|wemux || wemux
 
+# Show q-queue status
+q-queue -s
+
 # reset return code to 0
 true
