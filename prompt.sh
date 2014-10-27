@@ -58,11 +58,22 @@ in_git_repo() {
 }
 
 git_status() {
-  in_git_repo &&
-  [[ `history 1` != *'git status'* ]] &&
-  echo -n ${dark_gray} &&
-  git -c color.status=always status --branch --short --untracked=normal . |
-  sed -E 's/\.{3}[^ ]*$//g' | tr '\n' '|' | sed -e 's/\|/\'$'\n/' | tr '|' ' ' | tr -s '\n '
+  if !(in_git_repo && [[ `history 1` != *'git status'* ]]); then
+    return
+  fi
+
+  local status=$(git -c color.status=always status --branch --short --untracked=normal . | sed -E 's/\.{3}[^ ]*$//g')
+  local status_size=$(expr $(echo "$status" | grep -v "^\#\#" | wc -c))
+
+  echo -n ${dark_gray}
+
+  if [[ $status_size -gt $(tput cols) ]]; then
+    echo "$status" | head -n 1
+    local changed_files=$(expr $(echo "$status" | wc -l) - 1)
+    echo $red"$changed_files files changed"
+  else
+    echo "$status" | tr '\n' '|' | sed -e 's/\|/\'$'\n/' | tr '|' ' ' | tr -s '\n '
+  fi
 }
 
 use_status() {
