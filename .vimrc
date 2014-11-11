@@ -75,6 +75,9 @@ Plugin 'tpope/vim-rails'
 Plugin 'tpope/vim-rake'
 Plugin 'vim-ruby/vim-ruby'
 
+" Rust
+Plugin 'wting/rust.vim'
+
 " Scala
 Plugin 'derekwyatt/vim-scala'
 
