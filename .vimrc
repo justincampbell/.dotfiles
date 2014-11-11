@@ -240,8 +240,8 @@ if filereadable(g:ag_binary)
 endif
 
 " vim-airline
-let g:airline_left_sep=''
-let g:airline_right_sep=''
+let g:airline_left_alt_sep=''
+let g:airline_right_alt_sep=''
 let g:airline_section_a='' " mode
 let g:airline_section_b='' " branch
 let g:airline_section_z='' " ruler
