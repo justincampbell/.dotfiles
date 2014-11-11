@@ -14,13 +14,18 @@ formulae=(
   brew-cask
   chruby
   cloc
+  dotmusic
   git
   heroku-toolbelt
   hub
   nvm
+  q-queue
   reattach-to-user-namespace
+  rr
   ruby-install
   selecta
+  tmux-pomodoro
+  tmux-status-bar
   tree
   use
   vim
