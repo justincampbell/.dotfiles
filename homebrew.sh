@@ -5,13 +5,12 @@ which -s brew || ruby -e "$(curl -fsSL https://raw.github.com/Homebrew/homebrew/
 
 brew tap homebrew/binary
 brew tap justincampbell/formulae
-brew tap phinze/cask
 brew tap thoughtbot/formulae
 
 formulae=(
   ag
   boot2docker
-  brew-cask
+  caskroom/cask/brew-cask
   chruby
   cloc
   dotmusic
@@ -48,9 +47,7 @@ casks=(
 )
 
 if ! brew doctor; then
-  echo "
-\`brew doctor\` failed. Please resolve issues before continuing.
-  "
+  echo "\`brew doctor\` failed. Please resolve issues before continuing."
   exit 1
 fi
 
