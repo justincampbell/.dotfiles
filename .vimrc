@@ -260,6 +260,10 @@ nnoremap <Space> @q
 nnoremap <Leader>d Orequire 'debugger'; debugger<Esc>
 nnoremap <Leader>p Orequire 'pry'; binding.pry<Esc>
 
+" Exit insert mode with jk/kj
+inoremap jk <Esc>
+inoremap kj <Esc>
+
 " Frequently used operations
 command! ConvertCamelCaseToUnderScore :%s/\<\u\|\l\u/\=len(submatch(0)) == 1 ? tolower(submatch(0)) : submatch(0)[0].'_'.tolower(submatch(0)[1])/gc
 command! ConvertRubyHashSyntax19 :%s/:\([^ ]*\)\(\s*\)=>/\1:/g
