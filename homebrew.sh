@@ -1,7 +1,7 @@
 #!/bin/bash -e
 
 which -s brew && brew update
-which -s brew || ruby -e "$(curl -fsSL https://raw.github.com/Homebrew/homebrew/go/install)"
+which -s brew || ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
 
 brew tap homebrew/binary
 brew tap justincampbell/formulae
