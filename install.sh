@@ -26,4 +26,6 @@ git config --global user.email "justin@justincampbell.me"
 git config --global user.name "Justin Campbell"
 git config --global web.browser open
 
+mkdir -p ~/Code
+
 which bundle && bundle config --global jobs `sysctl -n hw.ncpu`
