@@ -5,6 +5,7 @@ printf "irb"
   irb/completion
   irb/ext/save-history
   pp
+  super_require
   wirble
 ].each do |path|
   printf " #{path}"
