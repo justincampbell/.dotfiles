@@ -17,7 +17,6 @@ Plugin 'kien/rainbow_parentheses.vim'
 Plugin 'mattn/gist-vim'
 Plugin 'mattn/webapi-vim'
 Plugin 'michaeljsmith/vim-indent-object'
-Plugin 'mileszs/ack.vim'
 Plugin 'nathanaelkane/vim-indent-guides'
 Plugin 'rking/ag.vim'
 Plugin 'scrooloose/nerdcommenter'
@@ -235,13 +234,6 @@ imap <F4> <Plug>(seeing-is-believing-mark)
 map <F5> <Plug>(seeing-is-believing-run)
 imap <F5> <Plug>(seeing-is-believing-run)
 
-" The Silver Searcher
-let g:ag_binary = system("which ag | xargs echo -n")
-if filereadable(g:ag_binary)
-  let g:ackprg = g:ag_binary . ' --nocolor --nogroup --column'
-  let g:ctrlp_user_command = g:ag_binary . ' %s -l --nocolor -g ""'
-endif
-
 " vim-airline
 let g:airline_left_alt_sep=''
 let g:airline_right_alt_sep=''
@@ -270,9 +262,13 @@ command! ConvertRubyHashSyntax19 :%s/:\([^ ]*\)\(\s*\)=>/\1:/g
 command! DeleteComments :g/^\s*#\|\/\//d
 command! RemoveTrailingWhitespace :%s/ \+$//g
 
+" The Silver Searcher
+let g:ag_binary = system("which ag | xargs echo -n")
+
 " CtrlP
 let g:ctrlp_max_height = 100
 let g:ctrlp_use_caching = 0
+let g:ctrlp_user_command = g:ag_binary . ' %s -l --nocolor -g ""'
 let g:ctrlp_working_path_mode = ''
 
 " Wrap quickfix text

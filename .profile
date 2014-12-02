@@ -71,9 +71,6 @@ cdroot() { cd `git rev-parse --git-dir`/.. ;}
 # vim-brained
 alias :q=exit
 
-# The Silver Searcher
-alias ack=ag
-
 # Lock the screen
 alias lock="/System/Library/CoreServices/Menu\ Extras/User.menu/Contents/Resources/CGSession -suspend"
 
