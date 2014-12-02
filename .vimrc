@@ -67,6 +67,10 @@ Plugin 'pangloss/vim-javascript'
 Plugin 'nelstrom/vim-markdown-folding'
 Plugin 'tpope/vim-markdown'
 
+" OCaml
+Plugin 'ocamlpro/ocp-indent'
+Plugin 'the-lambda-church/merlin'
+
 " Ruby
 Plugin 'ecomba/vim-ruby-refactoring'
 Plugin 'hwartig/vim-seeing-is-believing'
