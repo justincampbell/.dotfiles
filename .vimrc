@@ -5,6 +5,7 @@ call vundle#begin()
 Plugin 'gmarik/Vundle.vim'
 
 Plugin 'airblade/vim-gitgutter'
+Plugin 'andrewradev/switch.vim'
 Plugin 'beloglazov/vim-online-thesaurus'
 Plugin 'bling/vim-airline'
 Plugin 'ervandew/supertab'
@@ -270,6 +271,9 @@ let g:ctrlp_max_height = 100
 let g:ctrlp_use_caching = 0
 let g:ctrlp_user_command = g:ag_binary . ' %s -l --nocolor -g ""'
 let g:ctrlp_working_path_mode = ''
+
+" Switch
+nnoremap <leader>- :Switch<CR>
 
 " Wrap quickfix text
 autocmd FileType qf setlocal wrap linebreak
