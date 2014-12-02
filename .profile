@@ -34,6 +34,7 @@ nvm use 0.10 > /dev/null
 
 # git + prompt
 alias git=hub # Git ♥ 's GitHub
+alias clone='cd ~/Code; git clone $1'
 source $BREW_PREFIX/git/etc/bash_completion.d/git-completion.bash
 source ~/.dotfiles/prompt.sh
 
