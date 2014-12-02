@@ -92,6 +92,9 @@ Plugin 'rosstimson/bats.vim'
 " Slim
 Plugin 'slim-template/vim-slim'
 
+" Thrift
+Plugin 'solarnz/thrift.vim'
+
 call vundle#end()
 
 filetype plugin indent on
