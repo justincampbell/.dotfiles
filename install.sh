@@ -11,6 +11,9 @@ ln -fs ~/.dotfiles/.slate ~/.slate
 ln -fs ~/.dotfiles/.tmux.conf ~/.tmux.conf
 ln -fs ~/.dotfiles/.vimrc ~/.vimrc
 
+mkdir -p ~/Code
+
+# git
 git config --global alias.changed 'diff --name-only master..HEAD'
 git config --global alias.changelog 'log --no-merges --pretty=format:"%s (%an)"'
 git config --global alias.contributors 'shortlog --summary --email --numbered'
@@ -26,10 +29,10 @@ git config --global user.email "justin@justincampbell.me"
 git config --global user.name "Justin Campbell"
 git config --global web.browser open
 
-mkdir -p ~/Code
-
+# bundler
 which bundle && bundle config --global jobs `sysctl -n hw.ncpu`
 
+# vim-plug
 mkdir -p ~/.vim/autoload
 curl -fLo ~/.vim/autoload/plug.vim \
   https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
