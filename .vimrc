@@ -1,103 +1,97 @@
-set nocompatible
-filetype off
-set rtp+=~/.vim/bundle/Vundle.vim
-call vundle#begin()
-Plugin 'gmarik/Vundle.vim'
+call plug#begin('~/.vim/plugged')
 
-Plugin 'airblade/vim-gitgutter'
-Plugin 'andrewradev/switch.vim'
-Plugin 'beloglazov/vim-online-thesaurus'
-Plugin 'bling/vim-airline'
-Plugin 'ervandew/supertab'
-Plugin 'godlygeek/tabular'
-Plugin 'ivyl/vim-bling'
-Plugin 'justincampbell/vim-eighties'
-Plugin 'justincampbell/vim-railscasts'
-Plugin 'kien/ctrlp.vim'
-Plugin 'kien/rainbow_parentheses.vim'
-Plugin 'mattn/gist-vim'
-Plugin 'mattn/webapi-vim'
-Plugin 'michaeljsmith/vim-indent-object'
-Plugin 'nathanaelkane/vim-indent-guides'
-Plugin 'rking/ag.vim'
-Plugin 'scrooloose/nerdcommenter'
-Plugin 'scrooloose/nerdtree'
-Plugin 'scrooloose/syntastic'
-Plugin 'terryma/vim-multiple-cursors'
-Plugin 'tpope/vim-dispatch'
-Plugin 'tpope/vim-endwise'
-Plugin 'tpope/vim-fugitive'
-Plugin 'tpope/vim-projectionist'
-Plugin 'tpope/vim-repeat'
-Plugin 'tpope/vim-speeddating'
-Plugin 'tpope/vim-surround'
-Plugin 'vim-scripts/matchit.zip'
-Plugin 'vim-scripts/multvals.vim'
-Plugin 'wikitopian/hardmode'
+Plug 'airblade/vim-gitgutter'
+Plug 'andrewradev/switch.vim'
+Plug 'beloglazov/vim-online-thesaurus'
+Plug 'bling/vim-airline'
+Plug 'ervandew/supertab'
+Plug 'godlygeek/tabular'
+Plug 'ivyl/vim-bling'
+Plug 'justincampbell/vim-eighties'
+Plug 'justincampbell/vim-railscasts'
+Plug 'kien/ctrlp.vim'
+Plug 'kien/rainbow_parentheses.vim'
+Plug 'mattn/gist-vim'
+Plug 'mattn/webapi-vim'
+Plug 'michaeljsmith/vim-indent-object'
+Plug 'nathanaelkane/vim-indent-guides'
+Plug 'rking/ag.vim'
+Plug 'scrooloose/nerdcommenter'
+Plug 'scrooloose/nerdtree'
+Plug 'scrooloose/syntastic'
+Plug 'terryma/vim-multiple-cursors'
+Plug 'tpope/vim-dispatch'
+Plug 'tpope/vim-endwise'
+Plug 'tpope/vim-fugitive'
+Plug 'tpope/vim-projectionist'
+Plug 'tpope/vim-repeat'
+Plug 'tpope/vim-speeddating'
+Plug 'tpope/vim-surround'
+Plug 'vim-scripts/matchit.zip'
+Plug 'vim-scripts/multvals.vim'
+Plug 'wikitopian/hardmode'
 
 " Clojure
-Plugin 'guns/vim-clojure-static'
-Plugin 'guns/vim-sexp'
-Plugin 'tpope/vim-classpath'
-Plugin 'tpope/vim-fireplace'
-Plugin 'tpope/vim-leiningen'
-Plugin 'tpope/vim-sexp-mappings-for-regular-people'
+Plug 'guns/vim-clojure-static'
+Plug 'guns/vim-sexp'
+Plug 'tpope/vim-classpath'
+Plug 'tpope/vim-fireplace'
+Plug 'tpope/vim-leiningen'
+Plug 'tpope/vim-sexp-mappings-for-regular-people'
 
 " CoffeeScript
-Plugin 'kchmck/vim-coffee-script'
+Plug 'kchmck/vim-coffee-script'
 
 " Docker
-Plugin 'ekalinin/Dockerfile.vim'
+Plug 'ekalinin/Dockerfile.vim'
 
 " Elixir
-Plugin 'elixir-lang/vim-elixir'
+Plug 'elixir-lang/vim-elixir'
 
 " Go
-Plugin 'fatih/vim-go'
+Plug 'fatih/vim-go'
 
 " Haskell
-Plugin 'dag/vim2hs'
-Plugin 'eagletmt/ghcmod-vim'
-Plugin 'shougo/vimproc.vim'
+Plug 'dag/vim2hs'
+Plug 'eagletmt/ghcmod-vim'
+Plug 'shougo/vimproc.vim'
 
 " JavaScript
-Plugin 'pangloss/vim-javascript'
+Plug 'pangloss/vim-javascript'
 
 " Markdown
-Plugin 'nelstrom/vim-markdown-folding'
-Plugin 'tpope/vim-markdown'
+Plug 'nelstrom/vim-markdown-folding'
+Plug 'tpope/vim-markdown'
 
 " OCaml
-Plugin 'ocamlpro/ocp-indent'
-Plugin 'the-lambda-church/merlin'
+Plug 'ocamlpro/ocp-indent'
+Plug 'the-lambda-church/merlin'
 
 " Ruby
-Plugin 'ecomba/vim-ruby-refactoring'
-Plugin 'hwartig/vim-seeing-is-believing'
-Plugin 'jgdavey/vim-blockle'
-Plugin 'tpope/vim-rails'
-Plugin 'tpope/vim-rake'
-Plugin 'vim-ruby/vim-ruby'
+Plug 'ecomba/vim-ruby-refactoring'
+Plug 'hwartig/vim-seeing-is-believing'
+Plug 'jgdavey/vim-blockle'
+Plug 'tpope/vim-rails'
+Plug 'tpope/vim-rake'
+Plug 'vim-ruby/vim-ruby'
 
 " Rust
-Plugin 'wting/rust.vim'
+Plug 'wting/rust.vim'
 
 " Scala
-Plugin 'derekwyatt/vim-scala'
+Plug 'derekwyatt/vim-scala'
 
 " Shell
-Plugin 'markcornick/vim-bats'
-Plugin 'rosstimson/bats.vim'
+Plug 'markcornick/vim-bats'
+Plug 'rosstimson/bats.vim'
 
 " Slim
-Plugin 'slim-template/vim-slim'
+Plug 'slim-template/vim-slim'
 
 " Thrift
-Plugin 'solarnz/thrift.vim'
+Plug 'solarnz/thrift.vim'
 
-call vundle#end()
-
-filetype plugin indent on
+call plug#end()
 
 " Mouse
 set mouse=a

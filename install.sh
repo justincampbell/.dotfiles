@@ -29,3 +29,7 @@ git config --global web.browser open
 mkdir -p ~/Code
 
 which bundle && bundle config --global jobs `sysctl -n hw.ncpu`
+
+mkdir -p ~/.vim/autoload
+curl -fLo ~/.vim/autoload/plug.vim \
+  https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
