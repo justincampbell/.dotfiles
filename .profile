@@ -74,6 +74,9 @@ alias :q=exit
 # Lock the screen
 alias lock="/System/Library/CoreServices/Menu\ Extras/User.menu/Contents/Resources/CGSession -suspend"
 
+# Show screen size
+alias xy="tput cols; tput lines"
+
 # Heroku
 production() { heroku $@ --remote production ;}
 staging() { heroku $@ --remote staging ;}
