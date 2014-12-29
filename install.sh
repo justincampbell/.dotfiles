@@ -14,6 +14,7 @@ ln -fs ~/.dotfiles/.vimrc ~/.vimrc
 mkdir -p ~/Code
 
 # git
+git config --global alias.amend 'commit --amend --reuse-message HEAD'
 git config --global alias.changed 'diff --name-only master..HEAD'
 git config --global alias.changelog 'log --no-merges --pretty=format:"%s (%an)"'
 git config --global alias.contributors 'shortlog --summary --email --numbered'
