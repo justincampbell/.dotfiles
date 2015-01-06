@@ -15,7 +15,7 @@ mkdir -p ~/Code
 
 # git
 git config --global alias.amend 'commit --amend --reuse-message HEAD'
-git config --global alias.changed 'diff --name-only master..HEAD'
+git config --global alias.changed 'diff --name-only origin/master..HEAD'
 git config --global alias.changelog 'log --no-merges --pretty=format:"%s (%an)"'
 git config --global alias.contributors 'shortlog --summary --email --numbered'
 git config --global alias.graph 'log --all --date=relative --decorate --graph --oneline'
