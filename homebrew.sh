@@ -14,6 +14,7 @@ formulae=(
   chruby
   cloc
   dotmusic
+  emoji-weather
   git
   heroku-toolbelt
   hub
