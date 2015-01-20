@@ -43,6 +43,9 @@ clone() {
 source $BREW_PREFIX/git/etc/bash_completion.d/git-completion.bash
 source ~/.dotfiles/prompt.sh
 
+# neovim
+alias vim=nvim
+
 # Gui aliases
 google() { open "http://www.google.com/search?q=$@" ;}
 marked() { open $@ -a /Applications/Marked.app ;}

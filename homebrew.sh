@@ -18,6 +18,7 @@ formulae=(
   git
   heroku-toolbelt
   hub
+  neovim
   nvm
   q-queue
   reattach-to-user-namespace
@@ -28,7 +29,6 @@ formulae=(
   tmux-status-bar
   tree
   use
-  vim
   watch
   wemux
   wget

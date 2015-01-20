@@ -11,6 +11,9 @@ ln -fs ~/.dotfiles/.slate ~/.slate
 ln -fs ~/.dotfiles/.tmux.conf ~/.tmux.conf
 ln -fs ~/.dotfiles/.vimrc ~/.vimrc
 
+ln -fs ~/.vim ~/.nvim
+ln -fs ~/.vimrc ~/.nvimrc
+
 mkdir -p ~/Code
 
 # git
