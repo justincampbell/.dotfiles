@@ -60,6 +60,9 @@ Plug 'shougo/vimproc.vim'
 " JavaScript
 Plug 'pangloss/vim-javascript'
 
+" JSON
+Plug 'elzr/vim-json'
+
 " Markdown
 Plug 'nelstrom/vim-markdown-folding'
 Plug 'tpope/vim-markdown'
