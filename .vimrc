@@ -193,6 +193,7 @@ set showcmd
 
 " Extra leader mappings
 nmap , \
+vmap , \
 
 " Always show filename
 set laststatus=2
