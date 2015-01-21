@@ -314,10 +314,14 @@ nnoremap <Leader>L :Copen!<cr>
 nnoremap <Leader>t :wa<cr>:Dispatch<cr>
 nnoremap <Leader>T :wa<cr>:Dispatch!<cr>
 autocmd FileType go let b:dispatch = 'go test'
-autocmd FileType sh let b:dispatch = 'make'
+autocmd FileType haskell let b:dispatch = 'cabal test --show-details=always'
 autocmd FileType make let b:dispatch = 'make'
+autocmd FileType sh let b:dispatch = 'make'
+autocmd BufEnter *.bats compiler bats
+autocmd BufEnter *.bats let b:dispatch = 'bats --tap %'
+autocmd BufEnter *.gemspec let b:dispatch = 'bundle'
 autocmd BufEnter *_spec.rb let b:dispatch = 'bundle exec rspec --format progress %'
-autocmd BufEnter *_test.bats compiler bats
-autocmd BufEnter *_test.bats let b:dispatch = 'bats --tap %'
+autocmd BufEnter *_test.coffee let b:dispatch = 'npm test'
+autocmd BufEnter *_test.js let b:dispatch = 'npm test'
 autocmd BufEnter *_test.rb let b:dispatch = 'bundle exec testrb %'
 autocmd BufEnter Gemfile let b:dispatch = 'bundle'
