@@ -303,6 +303,9 @@ autocmd FileType qf execute line("$") . "wincmd _"
 " Remove color column in quickfix
 autocmd FileType qf set colorcolumn=0
 
+" vim-go
+let g:go_fmt_command = "goimports"
+
 " Dispatch
 nnoremap <Leader>f :FocusDispatch<space>''<left>
 nnoremap <Leader>F :FocusDispatch!<cr>
