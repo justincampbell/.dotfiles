@@ -71,6 +71,9 @@ Plug 'tpope/vim-markdown'
 Plug 'ocamlpro/ocp-indent'
 Plug 'the-lambda-church/merlin'
 
+" PureScript
+Plug 'raichoo/purescript-vim'
+
 " Ruby
 Plug 'ecomba/vim-ruby-refactoring'
 Plug 'hwartig/vim-seeing-is-believing'
