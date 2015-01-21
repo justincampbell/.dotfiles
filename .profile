@@ -55,7 +55,7 @@ source $BREW_PREFIX/use/share/use/use.sh
 
 # Fuzzy finders
 branch() { git checkout ${1:-$(git branch | grep -v "^* "| selecta)} ;}
-code() { cd ~/Code/${1:-$(ls -at ~/Code | selecta)} ;}
+code() { cd ~/Code; cd ${1:-$(ls -at ~/Code | selecta)} ;}
 cookbook() { cd ~/Code/cookbooks/${1:-$(ls -at ~/Code/cookbooks | selecta)} ;}
 gocode() {
   cd $GOPATH/src/${1:-$(
