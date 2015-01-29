@@ -14,6 +14,7 @@ export PATH=$GOPATH/bin:$PATH # Go
 export PATH=$HOME/.bin:$PATH # Dotfiles
 export PATH=$HOME/.cabal/bin:$HOME/Library/Haskell/bin:$PATH # Haskell/Cabal
 export PATH=$HOME/.dotfiles/bin:$PATH # Dotfiles
+export PATH=$HOME/.nimble/bin:$PATH # Nim
 export PATH=/usr/local/bin:/usr/local/sbin:$PATH # Homebrew
 export PATH=/usr/local/share/npm/bin:$PATH # Node/NPM
 export PATH=bin:$PATH

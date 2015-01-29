@@ -67,6 +67,9 @@ Plug 'elzr/vim-json'
 Plug 'nelstrom/vim-markdown-folding'
 Plug 'tpope/vim-markdown'
 
+" Nim
+Plug 'zah/nimrod.vim'
+
 " OCaml
 Plug 'ocamlpro/ocp-indent'
 Plug 'the-lambda-church/merlin'
