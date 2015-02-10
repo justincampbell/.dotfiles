@@ -103,6 +103,12 @@ Plug 'solarnz/thrift.vim'
 
 call plug#end()
 
+" MacVim
+set guifont=Monaco:h18
+set guioptions+=c " No popup dialogs
+set guioptions-=L " Hide vertical scrollbars
+set guioptions-=r " Hide scrollbars
+
 " Mouse
 set mouse=a
 
@@ -122,9 +128,9 @@ syntax on
 highlight! link Conceal Keyword
 
 " Sign and number columns
-highlight SignColumn ctermbg=0
-highlight NonText ctermbg=0 ctermfg=0
-highlight Vertsplit ctermbg=233 ctermfg=233
+highlight SignColumn ctermbg=0 guibg=#111111
+highlight NonText ctermbg=0 ctermfg=0 guibg=#000000
+highlight Vertsplit ctermbg=233 ctermfg=233 guibg=#111111
 
 " Tabs
 highlight! link TabLineFill CursorColumn
