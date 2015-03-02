@@ -4,6 +4,7 @@ export CLICOLOR=true
 export DOCKER_HOST=tcp://192.168.59.103:2375
 export EC2_HOME=$([ -d /usr/local/Cellar/ec2-api-tools ] && find /usr/local/Cellar/ec2-api-tools -type d -name libexec | head -n 1)
 export EDITOR=vim
+export FORECAST_IO_API_KEY=$(cat ~/.forecast)
 export GOBIN=$GOPATH/bin
 export GOPATH=$(stat -f ~/Code/go)
 export HISTCONTROL=ignoreboth
