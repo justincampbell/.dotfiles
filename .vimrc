@@ -171,6 +171,7 @@ autocmd BufNewFile,BufRead *.skim set filetype=slim
 autocmd BufNewFile,BufRead *.md,*.markdown set filetype=markdown
 
 " Filetype-specific settings
+autocmd FileType gitcommit,markdown set nonumber
 autocmd FileType gitcommit,markdown set spell
 autocmd FileType markdown set wrap
 autocmd FileType "" set wrap
