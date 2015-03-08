@@ -173,8 +173,7 @@ autocmd BufNewFile,BufRead *.md,*.markdown set filetype=markdown
 " Filetype-specific settings
 autocmd FileType gitcommit,markdown set nonumber
 autocmd FileType gitcommit,markdown set spell
-autocmd FileType markdown set wrap
-autocmd FileType "" set wrap
+autocmd FileType markdown,"" set wrap
 autocmd FileType haskell set shiftwidth=4
 autocmd FileType haskell nnoremap <Leader>hc :GhcModCheckAsync<cr>
 autocmd FileType haskell nnoremap <Leader>ht :GhcModType<cr>
