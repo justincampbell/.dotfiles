@@ -43,11 +43,6 @@ formulae=(
 
 casks=(
   iterm2
-  qlcolorcode
-  qlmarkdown
-  qlstephen
-  quicklook-csv
-  quicklook-json
   slate
   sparrow
   vagrant
