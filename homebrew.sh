@@ -19,12 +19,12 @@ formulae=(
   heroku-toolbelt
   hub
   neovim
+  pick
   nvm
   q-queue
   reattach-to-user-namespace
   rr
   ruby-install
-  selecta
   tmux-pomodoro
   tmux-status-bar
   tree

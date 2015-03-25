@@ -55,15 +55,15 @@ marked() { open $@ -a /Applications/Marked.app ;}
 source $BREW_PREFIX/use/share/use/use.sh
 
 # Fuzzy finders
-branch() { git checkout ${1:-$(git branch | grep -v "^* "| selecta)} ;}
-code() { cd ~/Code; cd ${1:-$(ls -at ~/Code | selecta)} ;}
-cookbook() { cd ~/Code/cookbooks/${1:-$(ls -at ~/Code/cookbooks | selecta)} ;}
+branch() { git checkout ${1:-$(git branch | grep -v "^* "| pick)} ;}
+code() { cd ~/Code; cd ${1:-$(ls -at ~/Code | pick)} ;}
+cookbook() { cd ~/Code/cookbooks/${1:-$(ls -at ~/Code/cookbooks | pick)} ;}
 gocode() {
   cd $GOPATH/src/${1:-$(
   find $GOPATH/src -type d -maxdepth 3 | \
     grep "src/.*/.*/.*$" | \
     cut -f 7-9 -d "/" | \
-    selecta
+    pick
   )}
 }
 
