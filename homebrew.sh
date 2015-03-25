@@ -49,7 +49,6 @@ casks=(
   java
   iterm2
   slate
-  sparrow
   vagrant
   virtualbox
 )
