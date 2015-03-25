@@ -42,6 +42,11 @@ formulae=(
 )
 
 casks=(
+  1password
+  arq
+  dropbox
+  flux
+  java
   iterm2
   slate
   sparrow
