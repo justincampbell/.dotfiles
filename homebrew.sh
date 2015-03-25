@@ -26,6 +26,7 @@ formulae=(
   hub
   neovim
   pick
+  python
   nvm
   q-queue
   reattach-to-user-namespace
