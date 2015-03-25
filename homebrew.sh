@@ -10,6 +10,7 @@ fi
 
 brew tap homebrew/binary
 brew tap justincampbell/formulae
+brew tap neovim/homebrew-neovim
 brew tap thoughtbot/formulae
 
 formulae=(
