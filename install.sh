@@ -10,6 +10,7 @@ ln -fs ~/.dotfiles/.rdebugrc ~/.rdebugrc
 ln -fs ~/.dotfiles/.slate ~/.slate
 ln -fs ~/.dotfiles/.tmux.conf ~/.tmux.conf
 ln -fs ~/.dotfiles/.vimrc ~/.vimrc
+ln -fs ~/.dotfiles/gitignore ~/.gitignore
 
 ln -fs ~/.vim ~/.nvim
 ln -fs ~/.vimrc ~/.nvimrc
@@ -26,6 +27,7 @@ git config --global alias.ignore '!gitignoreio() { curl https://www.gitignore.io
 git config --global alias.yolo 'push --force --no-verify'
 git config --global color.ui true
 git config --global commit.template ~/.git_commit_template
+git config --global core.excludesfile ~/.gitignore
 git config --global github.user "justincampbell"
 git config --global help.autocorrect 25
 git config --global pull.ff only
