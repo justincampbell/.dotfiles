@@ -32,7 +32,7 @@ alias jr='chruby jruby && print_ruby'
 
 # node
 source $BREW_PREFIX/nvm/nvm.sh
-nvm use 0.11 > /dev/null
+nvm use 0.12 > /dev/null
 
 # git + prompt
 alias git=hub # Git ♥ 's GitHub
