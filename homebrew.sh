@@ -3,6 +3,11 @@
 which -s brew && brew update
 which -s brew || ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
 
+if ! brew doctor; then
+  echo "\`brew doctor\` failed. Please resolve issues before continuing."
+  exit 1
+fi
+
 brew tap homebrew/binary
 brew tap justincampbell/formulae
 brew tap thoughtbot/formulae
@@ -46,11 +51,6 @@ casks=(
   vagrant
   virtualbox
 )
-
-if ! brew doctor; then
-  echo "\`brew doctor\` failed. Please resolve issues before continuing."
-  exit 1
-fi
 
 brew tap | grep "cask" > /dev/null || brew tap phinze/homebrew-cask
 
