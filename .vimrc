@@ -18,8 +18,9 @@ Plug 'michaeljsmith/vim-indent-object'
 Plug 'nathanaelkane/vim-indent-guides'
 Plug 'rking/ag.vim'
 Plug 'scrooloose/nerdcommenter'
-Plug 'scrooloose/nerdtree'
 Plug 'scrooloose/syntastic'
+Plug 'shougo/unite.vim'
+Plug 'shougo/vimfiler.vim'
 Plug 'terryma/vim-multiple-cursors'
 Plug 'tpope/vim-dispatch'
 Plug 'tpope/vim-endwise'
@@ -206,6 +207,9 @@ vmap , \
 
 " Always show filename
 set laststatus=2
+
+" VimFiler
+let g:vimfiler_as_default_explorer = 1
 
 " Indent-Guides
 autocmd VimEnter * :IndentGuidesEnable
