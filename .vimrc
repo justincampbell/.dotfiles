@@ -44,6 +44,9 @@ Plug 'tpope/vim-sexp-mappings-for-regular-people'
 " CoffeeScript
 Plug 'kchmck/vim-coffee-script'
 
+" CSS
+Plug 'ap/vim-css-color'
+
 " Docker
 Plug 'ekalinin/Dockerfile.vim'
 
