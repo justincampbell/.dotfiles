@@ -15,6 +15,8 @@ ln -fs ~/.dotfiles/gitignore ~/.gitignore
 ln -fs ~/.vim ~/.nvim
 ln -fs ~/.vimrc ~/.nvimrc
 
+ln -fs ~/Dropbox/Notes ~/Notes
+
 mkdir -p ~/Code
 
 # git
