@@ -46,8 +46,9 @@ casks=(
   arq
   dropbox
   flux
-  java
   iterm2
+  java
+  nvalt
   slate
   vagrant
   virtualbox
