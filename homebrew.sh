@@ -49,6 +49,7 @@ casks=(
   iterm2
   java
   nvalt
+  skype
   slate
   vagrant
   virtualbox
