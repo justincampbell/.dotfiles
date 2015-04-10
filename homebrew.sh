@@ -55,7 +55,7 @@ casks=(
   virtualbox
 )
 
-brew tap | grep "cask" > /dev/null || brew tap phinze/homebrew-cask
+brew tap | grep "cask" > /dev/null || brew tap caskroom/homebrew-cask
 
 for formula in "${formulae[@]}"; do
   brew install $formula || brew upgrade $formula
