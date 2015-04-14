@@ -185,6 +185,7 @@ autocmd FileType markdown,"" set wrap
 autocmd FileType haskell set shiftwidth=4
 autocmd FileType haskell nnoremap <Leader>hc :GhcModCheckAsync<cr>
 autocmd FileType haskell nnoremap <Leader>ht :GhcModType<cr>
+autocmd FileType ocaml nnoremap <Leader>ot :MerlinTypeOf<cr>
 
 " 80-column line
 set colorcolumn=81
