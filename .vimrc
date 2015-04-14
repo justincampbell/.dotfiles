@@ -31,6 +31,7 @@ Plug 'tpope/vim-speeddating'
 Plug 'tpope/vim-surround'
 Plug 'vim-scripts/matchit.zip'
 Plug 'vim-scripts/multvals.vim'
+Plug 'vim-scripts/syntaxattr.vim'
 Plug 'wikitopian/hardmode'
 
 " Clojure
