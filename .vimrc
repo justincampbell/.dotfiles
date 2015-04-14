@@ -60,7 +60,7 @@ Plug 'fatih/vim-go'
 " Haskell
 Plug 'dag/vim2hs'
 Plug 'eagletmt/ghcmod-vim'
-Plug 'shougo/vimproc.vim'
+Plug 'shougo/vimproc.vim', { 'do': 'make' }
 
 " JavaScript
 Plug 'pangloss/vim-javascript'
@@ -77,7 +77,7 @@ Plug 'zah/nimrod.vim'
 
 " OCaml
 Plug 'ocamlpro/ocp-indent'
-Plug 'the-lambda-church/merlin'
+Plug 'the-lambda-church/merlin', { 'do': './configure && make' }
 
 " PureScript
 Plug 'raichoo/purescript-vim'
