@@ -283,6 +283,7 @@ vnoremap <Leader>a( :Tabularize /(/l1l0<CR>
 vnoremap <Leader>a, :Tabularize /,\zs/l0r1<CR>
 vnoremap <Leader>a/ :Tabularize /\/\/<CR>
 vnoremap <Leader>a: :Tabularize /:\zs/l0r1<CR>
+vnoremap <Leader>a; :Tabularize /;\zs/l0r1<CR>
 vnoremap <Leader>a<Space> :Tabularize /<Space><CR>
 vnoremap <Leader>a= :Tabularize /=<CR>
 vnoremap <Leader>a\| :Tabularize /\|<CR>
