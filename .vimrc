@@ -217,6 +217,7 @@ vmap , \
 set laststatus=2
 
 " VimFiler
+let g:netrw_menu = 0
 let g:vimfiler_as_default_explorer = 1
 
 " Indent-Guides
