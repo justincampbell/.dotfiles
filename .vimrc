@@ -341,7 +341,7 @@ autocmd FileType go let b:dispatch = 'go test'
 autocmd FileType haskell let b:dispatch = 'cabal test --show-details=always'
 autocmd FileType make let b:dispatch = 'make'
 autocmd FileType sh let b:dispatch = 'make'
-autocmd FileType tf let b:dispatch = 'terraform plan -input=false'
+autocmd FileType terraform let b:dispatch = 'terraform plan -input=false'
 autocmd BufEnter *.bats compiler bats
 autocmd BufEnter *.bats let b:dispatch = 'bats --tap %'
 autocmd BufEnter *.gemspec let b:dispatch = 'bundle'
