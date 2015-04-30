@@ -43,12 +43,22 @@ clone() {
 }
 source $BREW_PREFIX/git/etc/bash_completion.d/git-completion.bash
 source ~/.dotfiles/prompt.sh
+for subcommand in add checkout commit pull push status; do
+  eval "alias $subcommand='git $subcommand'"
+done
+git_changed() {
+  echo "$(git changed) $(git status --short | sed -e 's/^ //' | cut -f 2 -d " ")" | sort | uniq
+}
+
+# OCaml
+. ~/.opam/opam-init/init.sh
 
 # neovim
 alias vim=nvim
 
 # Gui aliases
 google() { open "http://www.google.com/search?q=$@" ;}
+graphviz() { open "$@" -a /Applications/Marked.app ;}
 marked() { open "$@" -a /Applications/Marked.app ;}
 
 # use
