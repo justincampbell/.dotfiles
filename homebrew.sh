@@ -24,6 +24,7 @@ formulae=(
   git
   heroku-toolbelt
   hub
+  jq
   neovim
   pick
   python
