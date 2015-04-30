@@ -12,9 +12,6 @@ ln -fs ~/.dotfiles/.tmux.conf ~/.tmux.conf
 ln -fs ~/.dotfiles/.vimrc ~/.vimrc
 ln -fs ~/.dotfiles/gitignore ~/.gitignore
 
-ln -fs ~/.vim ~/.nvim
-ln -fs ~/.vimrc ~/.nvimrc
-
 ln -fs ~/Dropbox/Notes ~/Notes
 
 mkdir -p ~/Code
@@ -42,7 +39,8 @@ git config --global web.browser open
 # bundler
 which bundle && bundle config --global jobs `sysctl -n hw.ncpu`
 
-# vim-plug
-mkdir -p ~/.vim/autoload
-curl -fLo ~/.vim/autoload/plug.vim \
+# vim
+ln -fs ~/.vim ~/.nvim
+ln -fs ~/.vimrc ~/.nvimrc
+mkdir -p ~/.vim/autoload && curl -fLo ~/.vim/autoload/plug.vim \
   https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
