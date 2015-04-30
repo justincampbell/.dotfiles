@@ -49,7 +49,7 @@ alias vim=nvim
 
 # Gui aliases
 google() { open "http://www.google.com/search?q=$@" ;}
-marked() { open $@ -a /Applications/Marked.app ;}
+marked() { open "$@" -a /Applications/Marked.app ;}
 
 # use
 source $BREW_PREFIX/use/share/use/use.sh
