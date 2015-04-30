@@ -132,6 +132,7 @@ set directory=/tmp
 " Colors
 autocmd ColorScheme * highlight Visual ctermbg=236
 colorscheme railscasts
+set background=dark
 syntax on
 highlight! link Conceal Keyword
 
