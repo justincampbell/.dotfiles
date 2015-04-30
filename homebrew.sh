@@ -49,6 +49,7 @@ casks=(
   flux
   iterm2
   java
+  launchrocket
   nvalt
   skype
   slate
