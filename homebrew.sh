@@ -63,6 +63,8 @@ for formula in "${formulae[@]}"; do
   brew install $formula || brew upgrade $formula
 done
 
+brew linkapps
+
 for cask in "${casks[@]}"; do
   brew cask install $cask
 done
