@@ -55,6 +55,7 @@ Plug 'ekalinin/Dockerfile.vim'
 Plug 'elixir-lang/vim-elixir'
 
 " Go
+Plug 'benmills/vim-golang-alternate'
 Plug 'fatih/vim-go'
 
 " Haskell
