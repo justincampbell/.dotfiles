@@ -249,20 +249,17 @@ autocmd Syntax * RainbowParenthesesLoadRound
 autocmd Syntax * RainbowParenthesesLoadSquare
 autocmd Syntax * RainbowParenthesesLoadBraces
 let g:rbpt_colorpairs = [
-      \ ['brown',       'RoyalBlue3'],
-      \ ['Darkblue',    'SeaGreen3'],
-      \ ['darkgreen',   'firebrick3'],
-      \ ['darkcyan',    'RoyalBlue3'],
-      \ ['darkred',     'SeaGreen3'],
-      \ ['darkmagenta', 'DarkOrchid3'],
-      \ ['brown',       'firebrick3'],
-      \ ['darkmagenta', 'DarkOrchid3'],
-      \ ['Darkblue',    'firebrick3'],
-      \ ['darkgreen',   'RoyalBlue3'],
-      \ ['darkcyan',    'SeaGreen3'],
-      \ ['darkred',     'DarkOrchid3'],
-      \ ['red',         'firebrick3'],
+      \ ['lightblue',  'lightblue'],
+      \ ['lightgreen', 'lightgreen'],
+      \ ['lightred',   'lightred'],
+      \ ['darkblue',   'darkblue'],
+      \ ['darkgreen',  'darkgreen'],
+      \ ['darkred',    'darkred'],
+      \ ['blue',       'blue'],
+      \ ['green',      'green'],
+      \ ['red',        'red'],
       \ ]
+let g:rbpt_colorpairs = g:rbpt_colorpairs + g:rbpt_colorpairs
 let g:rbpt_max = len(g:rbpt_colorpairs)
 
 " seeing-is-beleiving
