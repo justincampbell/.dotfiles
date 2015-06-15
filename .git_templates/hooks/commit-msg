@@ -1,0 +1,16 @@
+#!/bin/sh
+
+exitcode=0
+
+tput setaf 1
+
+length=$(head -n 1 $1 | wc -m | xargs echo)
+
+if [ "$length" -gt "50" ]; then
+  exitcode=1
+  echo "${red}First line of commit message was $length/50 characters long"
+fi
+
+tput sgr0
+
+exit $exitcode

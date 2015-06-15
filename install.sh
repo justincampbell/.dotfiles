@@ -3,6 +3,7 @@
 ln -fs ~/.dotfiles/.agignore ~/.agignore
 ln -fs ~/.dotfiles/.gemrc ~/.gemrc
 ln -fs ~/.dotfiles/.git_commit_template ~/.git_commit_template
+ln -fs ~/.dotfiles/.git_templates ~/.git_templates
 ln -fs ~/.dotfiles/.hushlogin ~/.hushlogin
 ln -fs ~/.dotfiles/.irbrc ~/.irbrc
 ln -fs ~/.dotfiles/.profile ~/.profile
@@ -30,6 +31,7 @@ git config --global core.excludesfile ~/.gitignore
 git config --global credential.helper osxkeychain
 git config --global github.user "justincampbell"
 git config --global help.autocorrect 25
+git config --global init.templatedir '~/.git_templates'
 git config --global pull.ff only
 git config --global push.default current
 git config --global user.email "justin@justincampbell.me"
