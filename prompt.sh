@@ -34,6 +34,13 @@ random_color() {
   echo -n `tput setaf $(generate_random_color)`
 }
 
+function display_duration () {
+  ((h=${1}/3600))
+  ((m=(${1}%3600)/60))
+  ((s=${1}%60))
+  printf "%02d:%02d:%02d\n" $h $m $s
+}
+
 ruby_status() {
   if ! [[ -f .ruby-version ]]; then
     return
@@ -82,9 +89,24 @@ use_status() {
   fi
 }
 
+timer_start() {
+  timer=${timer:-$SECONDS}
+}
+trap 'timer_start' DEBUG
+
+timer_status() {
+  timer_seconds=$(($SECONDS - $timer))
+  unset timer
+  if [[ $timer_seconds -ge 5 ]]; then
+    echo -n $yellow
+    display_duration $timer_seconds
+  fi
+}
+
 prompt_command() {
   (dotmusic &)
 
+  timer_status
   ruby_status
   use_status
   git_status
