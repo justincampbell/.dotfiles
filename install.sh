@@ -27,7 +27,6 @@ git config --global alias.ignore '!gitignoreio() { curl https://www.gitignore.io
 git config --global alias.track '!track() { git branch --set-upstream-to=origin/$(git rev-parse --abbrev-ref HEAD) ;}; track'
 git config --global alias.yolo 'push --force --no-verify'
 git config --global color.ui true
-git config --global commit.template ~/.git_commit_template
 git config --global core.excludesfile ~/.gitignore
 git config --global credential.helper osxkeychain
 git config --global github.user "justincampbell"
