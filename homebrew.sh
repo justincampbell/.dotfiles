@@ -20,15 +20,16 @@ formulae=(
   chruby
   cloc
   dotmusic
+  dsh
   emoji-weather
   git
   heroku-toolbelt
   hub
   jq
   neovim
+  nvm
   pick
   python
-  nvm
   q-queue
   reattach-to-user-namespace
   rr
