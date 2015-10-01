@@ -5,7 +5,6 @@ printf "irb"
   irb/completion
   irb/ext/save-history
   pp
-  super_require
   wirble
 ].each do |path|
   printf " #{path}"
@@ -138,6 +137,15 @@ if defined? Wirble
   }
 
   Wirble.colorize
+end
+
+def super_require(gem_name)
+  require gem_name
+rescue LoadError
+  require 'rubygems/dependency_installer'
+  puts "Installing #{gem_name}..."
+  Gem::DependencyInstaller.new.install gem_name
+  require gem_name
 end
 
 puts "\n#{RUBY_DESCRIPTION}"
