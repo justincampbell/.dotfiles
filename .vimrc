@@ -53,6 +53,7 @@ Plug 'ekalinin/Dockerfile.vim'
 
 " Elixir
 Plug 'elixir-lang/vim-elixir'
+Plug 'mattreduce/vim-mix'
 
 " Go
 Plug 'benmills/vim-golang-alternate'
@@ -345,6 +346,8 @@ autocmd FileType sh let b:dispatch = 'make'
 autocmd FileType terraform let b:dispatch = 'terraform plan -input=false'
 autocmd BufEnter *.bats compiler bats
 autocmd BufEnter *.bats let b:dispatch = 'bats --tap %'
+autocmd BufEnter *.ex let b:dispatch = 'mix test'
+autocmd BufEnter *.exs let b:dispatch = 'mix test %'
 autocmd BufEnter *.gemspec let b:dispatch = 'bundle'
 autocmd BufEnter *_spec.rb let b:dispatch = 'bundle exec rspec --format progress %'
 autocmd BufEnter *_test.coffee let b:dispatch = 'npm test'
@@ -352,3 +355,4 @@ autocmd BufEnter *_test.js let b:dispatch = 'npm test'
 autocmd BufEnter *_test.rb let b:dispatch = 'bundle exec testrb %'
 autocmd BufEnter Gemfile let b:dispatch = 'bundle'
 autocmd BufEnter db/migrate/*.rb let b:dispatch = 'bundle exec rake db:migrate'
+autocmd BufEnter mix.exs let b:dispatch = 'mix deps.get'
