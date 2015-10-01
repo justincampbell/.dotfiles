@@ -5,6 +5,7 @@ ln -fs ~/.dotfiles/.gemrc ~/.gemrc
 ln -fs ~/.dotfiles/.git_commit_template ~/.git_commit_template
 ln -fs ~/.dotfiles/.git_templates ~/.git_templates
 ln -fs ~/.dotfiles/.hushlogin ~/.hushlogin
+ln -fs ~/.dotfiles/.iex.exs ~/.iex.exs
 ln -fs ~/.dotfiles/.irbrc ~/.irbrc
 ln -fs ~/.dotfiles/.profile ~/.profile
 ln -fs ~/.dotfiles/.rdebugrc ~/.rdebugrc
