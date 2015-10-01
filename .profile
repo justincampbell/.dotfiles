@@ -43,9 +43,6 @@ clone() {
 }
 source $BREW_PREFIX/git/etc/bash_completion.d/git-completion.bash
 source ~/.dotfiles/prompt.sh
-for subcommand in add checkout commit pull push status; do
-  eval "alias $subcommand='git $subcommand'"
-done
 git_changed() {
   echo "$(git changed) $(git status --short | sed -e 's/^ //' | cut -f 2 -d " ")" | sort | uniq
 }
