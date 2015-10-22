@@ -1,5 +1,9 @@
 #!/bin/sh
 
+if grep "^fixup!" $1; then
+  exit 0
+fi
+
 exitcode=0
 
 tput setaf 1
