@@ -1,0 +1,47 @@
+#!/usr/bin/env ruby
+
+require 'json'
+require 'net/http'
+require 'uri'
+
+api_key = ENV['NASA_API_KEY']
+
+unless api_key
+  puts "Please set NASA_API_KEY. You can create one at https://api.nasa.gov/index.html"
+  exit 1
+end
+
+json_url = "https://api.nasa.gov/planetary/apod?api_key=#{api_key}"
+json = Net::HTTP.get(URI.parse(json_url))
+apod = JSON.parse(json)
+
+unless apod['media_type'] == "image"
+  puts "No image today (#{apod['media_type']})"
+  exit 1
+end
+
+puts "\033[1m#{apod['title']}\033[0m", apod['explanation']
+
+image_url = apod['url']
+image_filename = File.basename(image_url)
+image = Net::HTTP.get(URI.parse(image_url))
+file_path = File.join("/tmp", image_filename.split('/').last)
+
+File.open file_path, File::CREAT|File::RDWR do |file|
+  file.write image
+end
+
+script = <<-SCRIPT
+  tell application "Finder"
+    set apod to POSIX file "#{file_path}" as string
+    set desktop picture to file apod
+  end tell
+SCRIPT
+
+output = `osascript -e '#{script}'`
+process = $?
+
+unless process.success?
+  puts output
+  exit 1
+end
