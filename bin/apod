@@ -4,6 +4,26 @@ require 'json'
 require 'net/http'
 require 'uri'
 
+module Screen
+  module_function
+
+  def width
+    `tput cols`.to_i
+  end
+end
+
+class String
+  def wrap(width)
+    split("\n").collect { |line|
+      if line.length > width
+        line.gsub(/(.{1,#{width}})(\s+|$)/, "\\1\n").strip
+      else
+        line
+      end
+    } * "\n"
+  end
+end
+
 api_key = ENV['NASA_API_KEY']
 
 unless api_key
@@ -20,7 +40,7 @@ unless apod['media_type'] == "image"
   exit 1
 end
 
-puts "\033[1m#{apod['title']}\033[0m", apod['explanation']
+puts "\033[1m#{apod['title']}\033[0m", apod['explanation'].wrap(Screen.width)
 
 image_url = apod['url']
 image_filename = File.basename(image_url)
