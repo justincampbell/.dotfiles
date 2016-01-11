@@ -28,6 +28,7 @@ alias 19='chruby ruby-1.9 && print_ruby'
 alias 20='chruby ruby-2.0 && print_ruby'
 alias 21='chruby ruby-2.1 && print_ruby'
 alias 22='chruby ruby-2.2 && print_ruby'
+alias 23='chruby ruby-2.3 && print_ruby'
 alias jr='chruby jruby && print_ruby'
 
 # node
