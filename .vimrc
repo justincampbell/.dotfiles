@@ -65,6 +65,10 @@ Plug 'dag/vim2hs'
 Plug 'eagletmt/ghcmod-vim'
 Plug 'shougo/vimproc.vim', { 'do': 'make' }
 
+" HCL
+Plug 'fatih/vim-hclfmt'
+Plug 'b4b4r07/vim-hcl'
+
 " JavaScript
 Plug 'pangloss/vim-javascript'
 
@@ -107,7 +111,7 @@ Plug 'rosstimson/bats.vim'
 Plug 'slim-template/vim-slim'
 
 " Terraform
-Plug 'markcornick/vim-terraform'
+Plug 'bkad/vim-terraform'
 
 " Thrift
 Plug 'solarnz/thrift.vim'
