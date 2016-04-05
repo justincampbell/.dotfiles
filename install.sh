@@ -30,6 +30,7 @@ git config --global alias.lastweek 'log --all --no-merges --oneline --since "8 d
 git config --global alias.track '!track() { git branch --set-upstream-to=origin/$(git rev-parse --abbrev-ref HEAD) ;}; track'
 git config --global alias.yolo 'push --force --no-verify'
 git config --global color.ui true
+git config --global commit.gpgsign true
 git config --global core.excludesfile ~/.gitignore
 git config --global credential.helper osxkeychain
 git config --global github.user "justincampbell"
@@ -40,6 +41,7 @@ git config --global push.default current
 git config --global rebase.autosquash true
 git config --global user.email "justin@justincampbell.me"
 git config --global user.name "Justin Campbell"
+git config --global user.signingkey $(gpg --list-keys | grep ^pub | sed -n 's/.*\/\(.*\) .*/\1/p')
 git config --global web.browser open
 
 # bundler
