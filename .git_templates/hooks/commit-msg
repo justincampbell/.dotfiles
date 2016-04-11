@@ -8,7 +8,7 @@ exitcode=0
 
 tput setaf 1
 
-length=$(head -n 1 $1 | wc -m | xargs echo)
+length=$(head -n 1 $1 | xargs echo -n | wc -m | xargs echo)
 
 if [ "$length" -gt "50" ]; then
   exitcode=1

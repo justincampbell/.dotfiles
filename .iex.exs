@@ -13,6 +13,6 @@ end
 user = System.get_env("USER")
 IO.puts "\n  #{greeting}, #{user}!\n"
 
-defmodule Observer do
-  def start, do: :observer.start
+defmodule H do
+  def observer, do: :observer.start
 end
