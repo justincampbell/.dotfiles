@@ -189,6 +189,7 @@ autocmd BufNewFile,BufRead *.skim set filetype=slim
 autocmd BufNewFile,BufRead *.md,*.markdown set filetype=markdown
 
 " Filetype-specific settings
+autocmd FileType elixir inoremap \|> \|><Esc>==la
 autocmd FileType gitcommit,markdown set nonumber
 autocmd FileType gitcommit,markdown set spell
 autocmd FileType markdown,"" set wrap
@@ -197,7 +198,6 @@ autocmd FileType haskell nnoremap <Leader>hc :GhcModCheckAsync<cr>
 autocmd FileType haskell nnoremap <Leader>ht :GhcModType<cr>
 autocmd FileType ocaml nnoremap <Leader>ot :MerlinTypeOf<cr>
 autocmd FileType terraform inoremap #{ ${
-autocmd FileType elixir inoremap \|> \|><Esc>==la
 autocmd BufEnter *.es6 set filetype=javascript
 
 " 80-column line
