@@ -15,4 +15,5 @@ IO.puts "\n  #{greeting}, #{user}!\n"
 
 defmodule H do
   def observer, do: :observer.start
+  def routes, do: Mix.Tasks.Phoenix.Routes.run([])
 end
