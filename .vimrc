@@ -56,6 +56,9 @@ Plug 'ekalinin/Dockerfile.vim'
 " Elixir
 Plug 'elixir-lang/vim-elixir'
 Plug 'mattreduce/vim-mix'
+Plug 'powerman/vim-plugin-AnsiEsc'
+Plug 'sanmiguel/helpex.vim'
+Plug 'slashmili/alchemist.vim'
 
 " Go
 Plug 'benmills/vim-golang-alternate'
@@ -190,6 +193,7 @@ autocmd BufNewFile,BufRead *.md,*.markdown set filetype=markdown
 
 " Filetype-specific settings
 autocmd FileType elixir inoremap \|> \|><Esc>==la
+autocmd FileType elixir let g:SuperTabDefaultCompletionType = "<C-X><C-O>"
 autocmd FileType gitcommit,markdown set nonumber
 autocmd FileType gitcommit,markdown set spell
 autocmd FileType markdown,"" set wrap
