@@ -1,3 +1,4 @@
 #!/bin/bash -ex
 
-rm ~/Desktop/Screen\ Shot\ *.png
+rm -f ~/Desktop/Screen\ Shot\ *.png
+rm -f ~/Desktop/Screen\ Recording\ *.gif

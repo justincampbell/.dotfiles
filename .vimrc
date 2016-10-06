@@ -194,6 +194,7 @@ autocmd BufNewFile,BufRead *.md,*.markdown set filetype=markdown
 " Filetype-specific settings
 autocmd FileType elixir inoremap \|> \|><Esc>==la
 autocmd FileType elixir let g:SuperTabDefaultCompletionType = "<C-X><C-O>"
+autocmd FileType elixir nnoremap gd :Ag '^\s*def\w+\s.*[\s\.]<cword>[\s$]'<cr><cr>
 autocmd FileType gitcommit,markdown set nonumber
 autocmd FileType gitcommit,markdown set spell
 autocmd FileType markdown,"" set wrap
