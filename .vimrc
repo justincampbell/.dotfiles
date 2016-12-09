@@ -215,6 +215,8 @@ autocmd FileType haskell nnoremap <Leader>ht :GhcModType<cr>
 autocmd FileType markdown,"" set wrap
 autocmd FileType ocaml nnoremap <Leader>ot :MerlinTypeOf<cr>
 autocmd FileType ruby nnoremap gd :Ag '^\s*(def\|class\|module)\s.*(self\.)?<cword>[\s\($]'<cr>
+autocmd FileType ruby nnoremap <Leader>d Orequire 'debugger'; debugger<Esc>
+autocmd FileType ruby nnoremap <Leader>p Orequire 'pry'; binding.pry<Esc>
 autocmd FileType terraform inoremap #{ ${
 autocmd BufEnter *.es6 set filetype=javascript
 
