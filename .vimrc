@@ -154,7 +154,8 @@ autocmd ColorScheme * highlight Visual ctermbg=236
 colorscheme railscasts
 set background=dark
 syntax on
-highlight! link Conceal Keyword
+highlight! link Conceal SpecialKey
+highlight! link qfLineNr WarningMsg
 
 " Sign and number columns
 highlight SignColumn ctermbg=0 guibg=#111111
