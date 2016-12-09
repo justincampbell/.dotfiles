@@ -35,6 +35,7 @@ Plug 'vim-scripts/matchit.zip'
 Plug 'vim-scripts/multvals.vim'
 Plug 'vim-scripts/syntaxattr.vim'
 Plug 'wikitopian/hardmode'
+Plug 'zerowidth/vim-copy-as-rtf'
 
 " Clojure
 Plug 'guns/vim-clojure-static'
