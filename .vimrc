@@ -85,6 +85,9 @@ Plug 'elzr/vim-json'
 Plug 'nelstrom/vim-markdown-folding'
 Plug 'tpope/vim-markdown'
 
+" Nginx
+Plug 'evanmiller/nginx-vim-syntax'
+
 " Nim
 Plug 'zah/nimrod.vim'
 
