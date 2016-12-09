@@ -120,6 +120,9 @@ Plug 'rosstimson/bats.vim'
 " Slim
 Plug 'slim-template/vim-slim'
 
+" Swift
+Plug 'keith/swift.vim'
+
 " Terraform
 Plug 'bkad/vim-terraform'
 
