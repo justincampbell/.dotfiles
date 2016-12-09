@@ -99,6 +99,7 @@ Plug 'the-lambda-church/merlin', { 'do': './configure && make' }
 Plug 'raichoo/purescript-vim'
 
 " Ruby
+Plug 'alexbel/vim-rubygems'
 Plug 'ecomba/vim-ruby-refactoring'
 Plug 'hwartig/vim-seeing-is-believing'
 Plug 'jgdavey/vim-blockle'
