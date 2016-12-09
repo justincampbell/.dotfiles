@@ -218,6 +218,8 @@ autocmd FileType ruby nnoremap gd :Ag '^\s*(def\|class\|module)\s.*(self\.)?<cwo
 autocmd FileType ruby nnoremap <Leader>d Orequire 'debugger'; debugger<Esc>
 autocmd FileType ruby nnoremap <Leader>p Orequire 'pry'; binding.pry<Esc>
 autocmd FileType terraform inoremap #{ ${
+autocmd FileType terraform inoremap do<cr> {<cr><cr>}<Up><Tab>
+autocmd FileType terraform inoremap {<cr> {<cr><cr>}<Up><Tab>
 autocmd BufEnter *.es6 set filetype=javascript
 
 " 80-column line
