@@ -314,6 +314,7 @@ vnoremap <Leader>s :sort<cr>
 vnoremap <Leader>a# :Tabularize /#<CR>
 vnoremap <Leader>a( :Tabularize /(/l1l0<CR>
 vnoremap <Leader>a, :Tabularize /,\zs/l0r1<CR>
+vnoremap <Leader>a- :Tabularize /-/l1r0<CR>
 vnoremap <Leader>a/ :Tabularize /\/\/<CR>
 vnoremap <Leader>a: :Tabularize /:\zs/l0r1<CR>
 vnoremap <Leader>a; :Tabularize /;\zs/l0r1<CR>
