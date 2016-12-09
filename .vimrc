@@ -197,6 +197,7 @@ autocmd InsertEnter * match ExtraWhitespace /\s\+\%#\@<!$/
 autocmd BufWinLeave * call clearmatches()
 
 " Filetype mappings
+autocmd BufNewFile,BufRead *.crl set filetype=ruby
 autocmd BufNewFile,BufRead *.jbuilder set filetype=ruby
 autocmd BufNewFile,BufRead *.skim set filetype=slim
 autocmd BufNewFile,BufRead *.md,*.markdown set filetype=markdown
