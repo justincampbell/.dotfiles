@@ -212,6 +212,7 @@ autocmd FileType markdown,"" set wrap
 autocmd FileType haskell set shiftwidth=4
 autocmd FileType haskell nnoremap <Leader>hc :GhcModCheckAsync<cr>
 autocmd FileType haskell nnoremap <Leader>ht :GhcModType<cr>
+autocmd FileType markdown,"" set wrap
 autocmd FileType ocaml nnoremap <Leader>ot :MerlinTypeOf<cr>
 autocmd FileType terraform inoremap #{ ${
 autocmd BufEnter *.es6 set filetype=javascript
