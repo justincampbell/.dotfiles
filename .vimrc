@@ -325,9 +325,6 @@ vnoremap <Leader>a\| :Tabularize /\|<CR>
 " Macro repeat
 nnoremap <Space> @q
 
-" Insert debuggers
-nnoremap <Leader>d Orequire 'debugger'; debugger<Esc>
-nnoremap <Leader>p Orequire 'pry'; binding.pry<Esc>
 
 " Exit insert mode with jk/kj
 inoremap jk <Esc>
