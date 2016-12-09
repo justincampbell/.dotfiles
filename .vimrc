@@ -75,6 +75,7 @@ Plug 'fatih/vim-hclfmt'
 Plug 'b4b4r07/vim-hcl'
 
 " JavaScript
+Plug 'mustache/vim-mustache-handlebars'
 Plug 'pangloss/vim-javascript'
 
 " JSON
