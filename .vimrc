@@ -221,6 +221,7 @@ autocmd FileType terraform inoremap #{ ${
 autocmd FileType terraform inoremap do<cr> {<cr><cr>}<Up><Tab>
 autocmd FileType terraform inoremap {<cr> {<cr><cr>}<Up><Tab>
 autocmd BufEnter *.es6 set filetype=javascript
+autocmd BufEnter *.job set filetype=nomad
 
 " 80-column line
 set colorcolumn=81
