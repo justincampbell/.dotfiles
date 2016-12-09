@@ -55,6 +55,7 @@ Plug 'ekalinin/Dockerfile.vim'
 
 " Elixir
 Plug 'elixir-lang/vim-elixir'
+Plug 'lucidstack/hex.vim'
 Plug 'mattreduce/vim-mix'
 Plug 'powerman/vim-plugin-AnsiEsc'
 Plug 'sanmiguel/helpex.vim'
