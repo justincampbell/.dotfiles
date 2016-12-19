@@ -4,7 +4,6 @@ Plug 'airblade/vim-gitgutter'
 Plug 'andrewradev/switch.vim'
 Plug 'beloglazov/vim-online-thesaurus'
 Plug 'dockyard/vim-easydir'
-Plug 'ervandew/supertab'
 Plug 'godlygeek/tabular'
 Plug 'ivyl/vim-bling'
 Plug 'justincampbell/vim-eighties'
@@ -18,6 +17,7 @@ Plug 'nathanaelkane/vim-indent-guides'
 Plug 'rking/ag.vim'
 Plug 'scrooloose/nerdcommenter'
 Plug 'scrooloose/syntastic'
+Plug 'shougo/deoplete.nvim', { 'do': ':UpdateRemotePlugins' }
 Plug 'shougo/unite.vim'
 Plug 'shougo/vimfiler.vim'
 Plug 'terryma/vim-multiple-cursors'
@@ -62,9 +62,14 @@ Plug 'powerman/vim-plugin-AnsiEsc'
 Plug 'sanmiguel/helpex.vim'
 Plug 'slashmili/alchemist.vim'
 
+" Git
+Plug 'severeoverfl0w/deoplete-github'
+
 " Go
 Plug 'benmills/vim-golang-alternate'
 Plug 'fatih/vim-go'
+Plug 'nsf/gocode', { 'rtp': 'vim', 'do': '~/.vim/plugged/gocode/nvim/symlink.sh' }
+" Plug 'zchee/deoplete-go', { 'do': 'make'}
 
 " Haskell
 Plug 'dag/vim2hs'
@@ -102,6 +107,7 @@ Plug 'raichoo/purescript-vim'
 " Ruby
 Plug 'alexbel/vim-rubygems'
 Plug 'ecomba/vim-ruby-refactoring'
+Plug 'fishbullet/deoplete-ruby'
 Plug 'hwartig/vim-seeing-is-believing'
 Plug 'jgdavey/vim-blockle'
 Plug 'tpope/vim-rails'
@@ -233,9 +239,6 @@ set incsearch
 set ignorecase
 set smartcase
 
-" Smarter tab-completion
-set wildmode=list:list,full
-
 " Smarter split opening
 set splitbelow
 set splitright
@@ -353,13 +356,17 @@ nnoremap <leader>- :Switch<CR>
 autocmd FileType qf setlocal wrap linebreak
 
 " Automatically adjust quickfix height
-autocmd FileType qf execute line("$") . "wincmd _"
+autocmd FileType qf execute min([line("$"), &lines * 3/5]) . "wincmd _"
 
 " Remove color column in quickfix
 autocmd FileType qf set colorcolumn=0
 
 " vim-go
 let g:go_fmt_command = "goimports"
+
+" Deoplete
+let g:deoplete#enable_at_startup = 1
+set completeopt+=noinsert
 
 " Dispatch
 nnoremap <Leader>f :FocusDispatch<space>''<left>
