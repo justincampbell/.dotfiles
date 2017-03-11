@@ -30,7 +30,7 @@ alias 23='chruby ruby-2.3 && print_ruby'
 
 # node
 source $BREW_PREFIX/nvm/nvm.sh
-nvm use 0.12 > /dev/null
+nvm use stable > /dev/null
 
 # git + prompt
 alias git=hub # Git ♥ 's GitHub
