@@ -23,13 +23,10 @@ export PATH=bin:$PATH
 source $BREW_PREFIX/chruby/share/chruby/chruby.sh
 print_ruby() { basename $RUBY_ROOT ;}
 detect_chruby() { chruby $(cat .ruby-version) && print_ruby ;}
-[ -f .ruby-version ] && detect_chruby || chruby 2.1
-alias 19='chruby ruby-1.9 && print_ruby'
-alias 20='chruby ruby-2.0 && print_ruby'
+[ -f .ruby-version ] && detect_chruby || chruby 2.3
 alias 21='chruby ruby-2.1 && print_ruby'
 alias 22='chruby ruby-2.2 && print_ruby'
 alias 23='chruby ruby-2.3 && print_ruby'
-alias jr='chruby jruby && print_ruby'
 
 # node
 source $BREW_PREFIX/nvm/nvm.sh
