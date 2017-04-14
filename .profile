@@ -94,6 +94,7 @@ alias xy="tput cols; tput lines"
 # Heroku
 production() { heroku $@ --remote production ;}
 staging() { heroku $@ --remote staging ;}
+pr() { pr=$1; shift; heroku $@ --app $(git remote -v | grep ^staging | grep "(push)" | cut -f 4 -d "/" | cut -f 1 -d ".")-pr-$pr ;}
 
 # Start wemux if it's not already running elsewhere
 pgrep -q tmux\|tmate\|wemux || wemux
