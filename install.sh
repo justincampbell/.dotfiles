@@ -27,6 +27,7 @@ git config --global alias.contributors 'shortlog --summary --email --numbered'
 git config --global alias.graph 'log --all --date=relative --decorate --graph --oneline'
 git config --global alias.ignore '!gitignoreio() { curl https://www.gitignore.io/api/$@ ;}; gitignoreio'
 git config --global alias.lastweek 'log --all --no-merges --oneline --since "8 days ago" --author justincampbell'
+git config --global alias.pull-request 'pull-request --browse'
 git config --global alias.track '!track() { git branch --set-upstream-to=origin/$(git rev-parse --abbrev-ref HEAD) ;}; track'
 git config --global alias.yolo 'push --force --no-verify'
 git config --global branch.autosetuprebase always
