@@ -39,7 +39,6 @@ formulae=(
   tree
   use
   watch
-  wemux
   wget
 )
 
