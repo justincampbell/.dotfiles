@@ -109,5 +109,27 @@ pr() { pr=$1; shift; heroku $@ --app $(git remote -v | grep ^staging | grep "(pu
 # Show q-queue status
 q-queue -s
 
+publicip() {
+  curl https://api.ipify.org
+}
+
+charles() {
+  export ALL_PROXY=http://localhost:8888
+  export FTP_PROXY=$ALL_PROXY
+  export HTTPS_PROXY=$ALL_PROXY
+  export HTTP_PROXY=$ALL_PROXY
+  export RSYNC_PROXY=$ALL_PROXY
+  export ftp_proxy=$ALL_PROXY
+  export http_proxy=$ALL_PROXY
+  export https_proxy=$ALL_PROXY
+  export rsync_proxy=$ALL_PROXY
+
+  export SSL_CERT_FILE=~/.charles/charles-ssl-proxying-certificate.pem
+}
+
+fix_camera() {
+  sudo killall VDCAssistant
+}
+
 # reset return code to 0
 true
