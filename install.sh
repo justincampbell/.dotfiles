@@ -55,6 +55,3 @@ ln -fs ~/.vim ~/.nvim
 ln -fs ~/.vimrc ~/.nvimrc
 mkdir -p ~/.vim/autoload && curl -fLo ~/.vim/autoload/plug.vim \
   https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
-
-# Haskell
-grep require-sandbox ~/.cabal/config || echo "require-sandbox: True" >> ~/.cabal/config

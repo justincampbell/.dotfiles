@@ -11,7 +11,6 @@ export HISTSIZE=10000
 export JAVA_HOME="$(/usr/libexec/java_home)"
 
 export PATH=$GOPATH/bin:$PATH # Go
-export PATH=$HOME/.cabal/bin:$HOME/Library/Haskell/bin:$PATH # Haskell/Cabal
 export PATH=$HOME/.dotfiles/bin:$PATH # Dotfiles
 export PATH=$HOME/.nimble/bin:$PATH # Nim
 export PATH=/usr/local/bin:/usr/local/sbin:$PATH # Homebrew
