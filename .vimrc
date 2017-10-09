@@ -6,6 +6,7 @@ Plug 'beloglazov/vim-online-thesaurus'
 Plug 'dockyard/vim-easydir'
 Plug 'godlygeek/tabular'
 Plug 'ivyl/vim-bling'
+Plug 'janko-m/vim-test'
 Plug 'junegunn/goyo.vim'
 Plug 'junegunn/limelight.vim'
 Plug 'justincampbell/vim-eighties'
@@ -386,13 +387,16 @@ endfunction
 autocmd! User GoyoEnter nested call <SID>goyo_enter()
 autocmd! User GoyoLeave nested call <SID>goyo_leave()
 
-" Dispatch
+" Dispatch/vim-test
+let test#strategy = "dispatch"
 nnoremap <Leader>f :FocusDispatch<space>''<left>
-nnoremap <Leader>F :FocusDispatch!<cr>
-nnoremap <Leader>l :Copen<cr>
-nnoremap <Leader>L :Copen!<cr>
-nnoremap <Leader>t :wa<cr>:Dispatch<cr>
-nnoremap <Leader>T :wa<cr>:Dispatch!<cr>
+nnoremap <Leader>F :FocusDispatch!<CR>
+nnoremap <Leader>l :Copen<CR>
+nnoremap <Leader>L :Copen!<CR>
+nnoremap <Leader>m :wa<CR>:Dispatch<CR>
+nnoremap <Leader>M :wa<CR>:Dispatch!<CR>
+nnoremap <silent> <Leader>t :wa<CR>:TestFile<CR>
+nnoremap <silent> <Leader>T :wa<cr>:TestNearest<CR>
 autocmd FileType go let b:dispatch = 'go test'
 autocmd FileType haskell let b:dispatch = 'cabal test --show-details=always'
 autocmd FileType make let b:dispatch = 'make'
