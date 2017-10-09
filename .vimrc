@@ -6,6 +6,8 @@ Plug 'beloglazov/vim-online-thesaurus'
 Plug 'dockyard/vim-easydir'
 Plug 'godlygeek/tabular'
 Plug 'ivyl/vim-bling'
+Plug 'junegunn/goyo.vim'
+Plug 'junegunn/limelight.vim'
 Plug 'justincampbell/vim-eighties'
 Plug 'justincampbell/vim-railscasts'
 Plug 'kien/ctrlp.vim'
@@ -367,6 +369,22 @@ let g:go_fmt_command = "goimports"
 " Deoplete
 let g:deoplete#enable_at_startup = 1
 set completeopt+=noinsert
+
+" Goyo/Limelight
+let g:limelight_conceal_ctermfg = 'gray'
+
+function! s:goyo_enter()
+  Limelight
+  silent !tmux set status off
+endfunction
+
+function! s:goyo_leave()
+  Limelight!
+  silent !tmux set status on
+endfunction
+
+autocmd! User GoyoEnter nested call <SID>goyo_enter()
+autocmd! User GoyoLeave nested call <SID>goyo_leave()
 
 " Dispatch
 nnoremap <Leader>f :FocusDispatch<space>''<left>
