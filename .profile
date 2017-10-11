@@ -100,7 +100,18 @@ alias xy="tput cols; tput lines"
 # Heroku
 production() { heroku $@ --remote production ;}
 staging() { heroku $@ --remote staging ;}
-pr() { pr=$1; shift; heroku $@ --app $(git remote -v | grep ^staging | grep "(push)" | cut -f 4 -d "/" | cut -f 1 -d ".")-pr-$pr ;}
+pr() {
+  pr=$1
+  if [[ $pr =~ ^[0-9]+$ ]]; then
+    shift
+  else
+    issue=$(hub issue | head -n 1)
+    pr=$(echo $issue | cut -f 1 -d "]" | xargs echo)
+    echo -e "Using latest PR\n$issue)"
+  fi
+  app=$(git remote -v | grep ^staging | grep "(push)" | cut -f 4 -d "/" | cut -f 1 -d ".")-pr-$pr
+  heroku $@ --app $app
+}
 
 # Start Tmux if not running
 [ -z "$TMUX" ] && (tmux attach || tmux)
