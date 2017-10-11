@@ -112,6 +112,7 @@ pr() {
   app=$(git remote -v | grep ^staging | grep "(push)" | cut -f 4 -d "/" | cut -f 1 -d ".")-pr-$pr
   heroku $@ --app $app
 }
+promote() { staging pipelines:promote ;}
 
 # Start Tmux if not running
 [ -z "$TMUX" ] && (tmux attach || tmux)
