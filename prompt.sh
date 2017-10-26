@@ -21,9 +21,9 @@ contains() {
 
 generate_random_color() {
   random_color="0"
-  blacklist=("0" "8" "16" "17" "18" "59")
+  disallowed=("0" "8" "16" "17" "18" "59")
 
-  until $(! contains "${blacklist[@]}" "$random_color"); do
+  until $(! contains "${disallowed[@]}" "$random_color"); do
     random_color=$(jot -r 1 1 230)
   done
 
