@@ -41,6 +41,25 @@ function display_duration () {
   printf "%02d:%02d:%02d\n" $h $m $s
 }
 
+node_status() {
+  if ! [[ -f .nvmrc ]]; then
+    return
+  fi
+
+  NODE_VERSION=$(node -v)
+  NVMRC_VERSION=$(cat .nvmrc)
+
+  if [[ "$NVMRC_VERSION" == lts/* ]]; then
+    NVMRC_VERSION=$(nvm alias --no-colors $NVMRC_VERSION | cut -f 3 -d " ")
+  else
+    NVMRC_VERSION="v$NVMRC_VERSION"
+  fi
+
+  if [ "$NODE_VERSION" != "$NVMRC_VERSION" ]; then
+    echo "${red}Node using $NODE_VERSION, but should be $NVMRC_VERSION"
+  fi
+}
+
 ruby_status() {
   if ! [[ -f .ruby-version ]]; then
     return
@@ -107,6 +126,7 @@ prompt_command() {
   (dotmusic &)
 
   timer_status
+  node_status
   ruby_status
   use_status
   git_status
