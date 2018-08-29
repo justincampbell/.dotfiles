@@ -66,7 +66,7 @@ branch() {
 }
 code() { cd ~/Code; cd ${1:-$(ls -at ~/Code | pick)} ;}
 cookbook() { cd ~/Code/cookbooks/${1:-$(ls -at ~/Code/cookbooks | pick)} ;}
-gocode() {
+codego() {
   cd $GOPATH/src/${1:-$(
   find $GOPATH/src -type d -maxdepth 3 | \
     grep "src/.*/.*/.*$" | \
