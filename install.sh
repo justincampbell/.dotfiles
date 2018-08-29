@@ -47,9 +47,6 @@ git config --global user.name "Justin Campbell"
 git config --global user.signingkey $(gpg --list-keys | grep ^pub | sed -n 's/.*\/\(.*\) .*/\1/p')
 git config --global web.browser open
 
-# bundler
-which bundle && bundle config --global jobs `sysctl -n hw.ncpu`
-
 # vim
 ln -fs ~/.vim ~/.nvim
 ln -fs ~/.vimrc ~/.nvimrc

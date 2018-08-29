@@ -43,9 +43,6 @@ git_changed() {
   echo "$(git changed) $(git status --short | sed -e 's/^ //' | cut -f 2 -d " ")" | sort | uniq
 }
 
-# OCaml
-. ~/.opam/opam-init/init.sh
-
 # neovim
 alias vim=nvim
 
