@@ -11,7 +11,6 @@ export HISTSIZE=10000
 
 export PATH=$GOPATH/bin:$PATH # Go
 export PATH=$HOME/.dotfiles/bin:$PATH # Dotfiles
-export PATH=$HOME/.nimble/bin:$PATH # Nim
 export PATH=/usr/local/bin:/usr/local/sbin:$PATH # Homebrew
 export PATH=node_modules/.bin:/usr/local/share/npm/bin:$PATH # Node/NPM
 export PATH=bin:$PATH
