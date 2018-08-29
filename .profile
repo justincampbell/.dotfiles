@@ -52,7 +52,7 @@ graphviz() { open "$@" -a /Applications/Graphviz.app ;}
 marked() { open "$@" -a /Applications/Marked.app ;}
 
 # use
-source $BREW_PREFIX/use/share/use/use.sh
+source /usr/local/share/use/use.sh
 
 # Fuzzy finders
 branch() {
