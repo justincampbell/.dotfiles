@@ -19,16 +19,17 @@ Plug 'michaeljsmith/vim-indent-object'
 Plug 'nathanaelkane/vim-indent-guides'
 Plug 'rking/ag.vim'
 Plug 'scrooloose/nerdcommenter'
-Plug 'scrooloose/syntastic'
 Plug 'shougo/deoplete.nvim', { 'do': ':UpdateRemotePlugins' }
 Plug 'shougo/unite.vim'
 Plug 'shougo/vimfiler.vim'
 Plug 'terryma/vim-multiple-cursors'
+Plug 'tpope/vim-db'
 Plug 'tpope/vim-dispatch'
 Plug 'tpope/vim-endwise'
 Plug 'tpope/vim-fugitive'
 Plug 'tpope/vim-projectionist'
 Plug 'tpope/vim-repeat'
+Plug 'tpope/vim-rhubarb'
 Plug 'tpope/vim-speeddating'
 Plug 'tpope/vim-surround'
 Plug 'tpope/vim-unimpaired'
@@ -37,16 +38,9 @@ Plug 'vim-airline/vim-airline-themes'
 Plug 'vim-scripts/matchit.zip'
 Plug 'vim-scripts/multvals.vim'
 Plug 'vim-scripts/syntaxattr.vim'
+Plug 'w0rp/ale'
 Plug 'wikitopian/hardmode'
 Plug 'zerowidth/vim-copy-as-rtf'
-
-" Clojure
-Plug 'guns/vim-clojure-static'
-Plug 'guns/vim-sexp'
-Plug 'tpope/vim-classpath'
-Plug 'tpope/vim-fireplace'
-Plug 'tpope/vim-leiningen'
-Plug 'tpope/vim-sexp-mappings-for-regular-people'
 
 " CoffeeScript
 Plug 'kchmck/vim-coffee-script'
@@ -65,23 +59,18 @@ Plug 'powerman/vim-plugin-AnsiEsc'
 Plug 'sanmiguel/helpex.vim'
 Plug 'slashmili/alchemist.vim'
 
-" Git
-Plug 'severeoverfl0w/deoplete-github'
-
 " Go
 Plug 'benmills/vim-golang-alternate'
-Plug 'fatih/vim-go'
+Plug 'fatih/vim-go', { 'do': ':GoInstallBinaries' }
 Plug 'nsf/gocode', { 'rtp': 'vim', 'do': '~/.vim/plugged/gocode/nvim/symlink.sh' }
-" Plug 'zchee/deoplete-go', { 'do': 'make'}
-
-" Haskell
-Plug 'dag/vim2hs'
-Plug 'eagletmt/ghcmod-vim'
-Plug 'shougo/vimproc.vim', { 'do': 'make' }
+Plug 'zchee/deoplete-go', { 'do': 'make'}
 
 " HCL
 Plug 'fatih/vim-hclfmt'
 Plug 'b4b4r07/vim-hcl'
+
+" HTML
+Plug 'mattn/emmet-vim'
 
 " JavaScript
 Plug 'mustache/vim-mustache-handlebars'
@@ -93,16 +82,6 @@ Plug 'elzr/vim-json'
 " Markdown
 Plug 'nelstrom/vim-markdown-folding'
 Plug 'tpope/vim-markdown'
-
-" Nginx
-Plug 'evanmiller/nginx-vim-syntax'
-
-" Nim
-Plug 'zah/nimrod.vim'
-
-" OCaml
-Plug 'ocamlpro/ocp-indent'
-Plug 'the-lambda-church/merlin', { 'do': './configure && make' }
 
 " PureScript
 Plug 'raichoo/purescript-vim'
@@ -117,12 +96,6 @@ Plug 'tpope/vim-rails'
 Plug 'tpope/vim-rake'
 Plug 'vim-ruby/vim-ruby'
 
-" Rust
-Plug 'wting/rust.vim'
-
-" Scala
-Plug 'derekwyatt/vim-scala'
-
 " Shell
 Plug 'markcornick/vim-bats'
 Plug 'rosstimson/bats.vim'
@@ -135,9 +108,6 @@ Plug 'keith/swift.vim'
 
 " Terraform
 Plug 'bkad/vim-terraform'
-
-" Thrift
-Plug 'solarnz/thrift.vim'
 
 call plug#end()
 
@@ -156,7 +126,8 @@ set autoread
 " Lazily redraw screen
 set lazyredraw
 
-" Set swap location
+" Set swap/backup location
+set backupdir=/tmp
 set directory=/tmp
 
 " Colors
@@ -165,7 +136,11 @@ colorscheme railscasts
 set background=dark
 syntax on
 highlight! link Conceal SpecialKey
+highlight! link Search IncSearch
 highlight! link qfLineNr WarningMsg
+
+" Hide search results automatically
+autocmd BufWinLeave,BufWrite,InsertEnter * let @/ = ""
 
 " Sign and number columns
 highlight SignColumn ctermbg=0 guibg=#111111
@@ -188,6 +163,29 @@ set nowrap
 
 " Backspace over anything
 set backspace=eol,indent,start
+
+" ALE
+let g:ale_echo_msg_error_str = '❗️'
+let g:ale_echo_msg_warning_str = '🙄'
+let g:ale_echo_msg_format = '[%linter%] %severity% %s'
+let g:ale_fix_on_save = 1
+let g:ale_javascript_prettier_use_local_config = 1
+let g:ale_lint_on_text_changed = 'never'
+let g:ale_open_list = 1
+let g:ale_sign_error = '!'
+let g:ale_sign_warning = '?'
+
+let g:ale_fixers = {}
+let g:ale_fixers['javascript'] = ['prettier', 'importjs']
+
+let g:ale_linters = {}
+let g:ale_linters['go'] = ['go build', 'golint']
+let g:ale_linters['handlebars'] = ['ember-template-lint']
+let g:ale_linters['html'] = []
+let g:ale_linters['ruby'] = ['ruby']
+let g:ale_linters['sh'] = ['shellcheck']
+let g:ale_linters['sql'] = ['sqlint']
+let g:ale_linters['vim'] = ['vint']
 
 " Soft tabs
 set expandtab
@@ -222,10 +220,12 @@ autocmd FileType markdown,"" set wrap
 autocmd FileType haskell set shiftwidth=4
 autocmd FileType haskell nnoremap <Leader>hc :GhcModCheckAsync<cr>
 autocmd FileType haskell nnoremap <Leader>ht :GhcModType<cr>
+autocmd FileType javascript inoremap #{ ${
 autocmd FileType markdown,"" set wrap
 autocmd FileType ocaml nnoremap <Leader>ot :MerlinTypeOf<cr>
 autocmd FileType ruby nnoremap gd :Ag '^\s*(def\|class\|module)\s.*(self\.)?<cword>[\s\($]'<cr>
 autocmd FileType ruby nnoremap <Leader>d Orequire 'debugger'; debugger<Esc>
+autocmd FileType ruby nnoremap <Leader>p Orequire 'irb'; binding.irb<Esc>
 autocmd FileType ruby nnoremap <Leader>p Orequire 'pry'; binding.pry<Esc>
 autocmd FileType terraform inoremap #{ ${
 autocmd FileType terraform inoremap do<cr> {<cr><cr>}<Up><Tab>
@@ -238,8 +238,9 @@ set colorcolumn=81
 highlight! link ColorColumn CursorColumn
 
 " Smart search
-set incsearch
 set ignorecase
+set inccommand=split
+set incsearch
 set smartcase
 
 " Smarter split opening
@@ -307,6 +308,8 @@ map <F5> <Plug>(seeing-is-believing-run)
 imap <F5> <Plug>(seeing-is-believing-run)
 
 " vim-airline
+let g:airline#extensions#ale#error_symbol = '❗️'
+let g:airline#extensions#ale#warning_symbol = '🙄'
 let g:airline_left_alt_sep=''
 let g:airline_right_alt_sep=''
 let g:airline_section_a='' " mode
@@ -331,7 +334,6 @@ vnoremap <Leader>a\| :Tabularize /\|<CR>
 
 " Macro repeat
 nnoremap <Space> @q
-
 
 " Exit insert mode with jk/kj
 inoremap jk <Esc>
@@ -359,19 +361,22 @@ nnoremap <leader>- :Switch<CR>
 autocmd FileType qf setlocal wrap linebreak
 
 " Automatically adjust quickfix height
-autocmd FileType qf execute min([line("$"), &lines * 3/5]) . "wincmd _"
+autocmd FileType qf execute min([line("$"), &lines * 2/5]) . "wincmd _"
 
 " Remove color column in quickfix
 autocmd FileType qf set colorcolumn=0
 
 " vim-go
+highlight! link goSameId SpellRare
 let g:go_fmt_command = "goimports"
 
 " Deoplete
 let g:deoplete#enable_at_startup = 1
 set completeopt+=noinsert
+set completeopt-=preview
 
 " Goyo/Limelight
+let g:goyo_height = '100%'
 let g:limelight_conceal_ctermfg = 'gray'
 
 function! s:goyo_enter()
@@ -386,6 +391,10 @@ endfunction
 
 autocmd! User GoyoEnter nested call <SID>goyo_enter()
 autocmd! User GoyoLeave nested call <SID>goyo_leave()
+
+" Markdown
+nnoremap hi I# <Esc>V:s/# #/##/g<Esc>
+nnoremap hd ^vd
 
 " Dispatch/vim-test
 let test#strategy = "dispatch"
@@ -414,3 +423,7 @@ autocmd BufEnter *_test.rb let b:dispatch = 'bundle exec testrb %'
 autocmd BufEnter Gemfile let b:dispatch = 'bundle'
 autocmd BufEnter db/migrate/*.rb let b:dispatch = 'bundle exec rake db:migrate'
 autocmd BufEnter mix.exs let b:dispatch = 'mix deps.get'
+
+" JavaScript comments
+inoremap /**<Tab> /**<CR><CR>/<Up><Space>
+nnoremap <Leader>jsd yiwO/**<CR><CR>/<Up><Space><Esc>pA<Space>.<Left>
