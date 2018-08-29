@@ -4,6 +4,7 @@ cyan=`tput setaf 6`
 red=`tput setaf 1`
 yellow=`tput setaf 3`
 dark_gray=`tput setaf 241`
+bold=`tput bold`
 reset=`tput sgr0`
 
 contains() {
@@ -56,7 +57,7 @@ node_status() {
   fi
 
   if [ "$NODE_VERSION" != "$NVMRC_VERSION" ]; then
-    echo "${red}Node using $NODE_VERSION, but should be $NVMRC_VERSION"
+    echo "${red}${bold}Node${reset}${red} using $NODE_VERSION, but should be $NVMRC_VERSION"
   fi
 }
 
@@ -68,7 +69,7 @@ ruby_status() {
   RUBY_VERSION=${RUBY_VERSION:-system}
 
   if ! echo $RUBY_VERSION | grep $(cat .ruby-version) > /dev/null; then
-    echo -n "${red}Ruby using $RUBY_VERSION, but should be " &&
+    echo -n "${red}${bold}Ruby${reset}${red} using $RUBY_VERSION, but should be " &&
     cat .ruby-version
   fi
 }
