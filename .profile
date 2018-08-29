@@ -48,7 +48,7 @@ alias vim=nvim
 
 # Gui aliases
 google() { open "http://www.google.com/search?q=$@" ;}
-graphviz() { open "$@" -a /Applications/Marked.app ;}
+graphviz() { open "$@" -a /Applications/Graphviz.app ;}
 marked() { open "$@" -a /Applications/Marked.app ;}
 
 # use
