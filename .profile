@@ -26,7 +26,8 @@ alias 24='chruby ruby-2.4 && print_ruby'
 alias 25='chruby ruby-2.5 && print_ruby'
 
 # node
-source $BREW_PREFIX/nvm/nvm.sh
+export NVM_DIR=/usr/local/opt/nvm
+[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
 nvm use stable > /dev/null
 
 # git + prompt
