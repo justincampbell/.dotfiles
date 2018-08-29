@@ -8,7 +8,6 @@ export GOBIN=$GOPATH/bin
 export GOPATH=$(stat -f ~/Code/go)
 export HISTCONTROL=ignoreboth
 export HISTSIZE=10000
-export JAVA_HOME="$(/usr/libexec/java_home)"
 
 export PATH=$GOPATH/bin:$PATH # Go
 export PATH=$HOME/.dotfiles/bin:$PATH # Dotfiles
