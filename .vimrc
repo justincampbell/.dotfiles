@@ -216,6 +216,7 @@ autocmd FileType elixir let g:SuperTabDefaultCompletionType = "<C-X><C-O>"
 autocmd FileType elixir nnoremap gd :Ag '^\s*def\w+\s.*[\s\.]<cword>[\s$]'<cr><cr>
 autocmd FileType gitcommit,markdown set nonumber
 autocmd FileType gitcommit,markdown set spell
+autocmd FileType go nnoremap <Leader>gc :GoCoverageToggle<cr>
 autocmd FileType markdown,"" set wrap
 autocmd FileType haskell set shiftwidth=4
 autocmd FileType haskell nnoremap <Leader>hc :GhcModCheckAsync<cr>
