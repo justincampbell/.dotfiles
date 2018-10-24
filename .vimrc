@@ -7,6 +7,7 @@ Plug 'dockyard/vim-easydir'
 Plug 'godlygeek/tabular'
 Plug 'ivyl/vim-bling'
 Plug 'janko-m/vim-test'
+Plug 'jgdavey/tslime.vim'
 Plug 'junegunn/goyo.vim'
 Plug 'junegunn/limelight.vim'
 Plug 'justincampbell/vim-eighties'
@@ -394,16 +395,27 @@ autocmd! User GoyoLeave nested call <SID>goyo_leave()
 nnoremap hi I# <Esc>V:s/# #/##/g<Esc>
 nnoremap hd ^vd
 
-" Dispatch/vim-test
-let test#strategy = "dispatch"
+" vim-test
+autocmd WinEnter,VimResized * call SetTestStrategy()
+function! SetTestStrategy()
+  if (winheight('%') > 40)
+    let g:test#strategy = "tslime"
+  else
+    let g:test#strategy = "dispatch"
+  endif
+endfunction
+let g:tslime_always_current_session = 1
+let g:tslime_always_current_window = 1
+nnoremap <silent> <Leader>t :wa<CR>:TestFile<CR>
+nnoremap <silent> <Leader>T :wa<cr>:TestNearest<CR>
+
+" Dispatch
 nnoremap <Leader>f :FocusDispatch<space>''<left>
 nnoremap <Leader>F :FocusDispatch!<CR>
 nnoremap <Leader>l :Copen<CR>
 nnoremap <Leader>L :Copen!<CR>
 nnoremap <Leader>m :wa<CR>:Dispatch<CR>
 nnoremap <Leader>M :wa<CR>:Dispatch!<CR>
-nnoremap <silent> <Leader>t :wa<CR>:TestFile<CR>
-nnoremap <silent> <Leader>T :wa<cr>:TestNearest<CR>
 autocmd FileType go let b:dispatch = 'go test'
 autocmd FileType haskell let b:dispatch = 'cabal test --show-details=always'
 autocmd FileType make let b:dispatch = 'make'
