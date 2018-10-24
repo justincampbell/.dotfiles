@@ -124,8 +124,6 @@ timer_status() {
 }
 
 prompt_command() {
-  (dotmusic &)
-
   timer_status
   node_status
   ruby_status
