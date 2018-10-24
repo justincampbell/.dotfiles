@@ -221,12 +221,12 @@ autocmd FileType elixir nnoremap gd :Ag '^\s*def\w+\s.*[\s\.]<cword>[\s$]'<cr><c
 autocmd FileType gitcommit,markdown set nonumber
 autocmd FileType gitcommit,markdown set spell
 autocmd FileType go nnoremap <Leader>gc :GoCoverageToggle<cr>
+autocmd FileType markdown,"" set linebreak
 autocmd FileType markdown,"" set wrap
 autocmd FileType haskell set shiftwidth=4
 autocmd FileType haskell nnoremap <Leader>hc :GhcModCheckAsync<cr>
 autocmd FileType haskell nnoremap <Leader>ht :GhcModType<cr>
 autocmd FileType javascript inoremap #{ ${
-autocmd FileType markdown,"" set wrap
 autocmd FileType ocaml nnoremap <Leader>ot :MerlinTypeOf<cr>
 autocmd FileType ruby nnoremap gd :Ag '^\s*(def\|class\|module)\s.*(self\.)?<cword>[\s\($]'<cr>
 autocmd FileType ruby nnoremap <Leader>d Orequire 'debugger'; debugger<Esc>
