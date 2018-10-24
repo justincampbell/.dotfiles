@@ -46,9 +46,3 @@ git config --global user.email "justin@justincampbell.me"
 git config --global user.name "Justin Campbell"
 git config --global user.signingkey $(gpg --list-keys | grep ^pub | sed -n 's/.*\/\(.*\) .*/\1/p')
 git config --global web.browser open
-
-# vim
-ln -fs ~/.vim ~/.nvim
-ln -fs ~/.vimrc ~/.nvimrc
-mkdir -p ~/.vim/autoload && curl -fLo ~/.vim/autoload/plug.vim \
-  https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
