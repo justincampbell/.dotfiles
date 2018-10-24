@@ -55,23 +55,31 @@ marked() { open "$@" -a /Applications/Marked.app ;}
 source /usr/local/share/use/use.sh
 
 # Fuzzy finders
+# [ -f ~/.fzf.bash ] && source ~/.fzf.bash
 branch() {
   git checkout ${1:-$(
   git for-each-ref \
     --sort=-committerdate \
     --format='%(refname:short)' \
     refs/heads/ \
-    | pick
+    | fzf
   )}
 }
-code() { cd ~/Code; cd ${1:-$(ls -at ~/Code | pick)} ;}
+code() {
+  cd ~/Code/${1:-$(
+  find ~/Code -type d -maxdepth 2 | \
+    grep ".*/.*$" | \
+    cut -f 5-6 -d "/" | \
+    fzf
+  )}
+}
 cookbook() { cd ~/Code/cookbooks/${1:-$(ls -at ~/Code/cookbooks | pick)} ;}
 codego() {
   cd $GOPATH/src/${1:-$(
   find $GOPATH/src -type d -maxdepth 3 | \
     grep "src/.*/.*/.*$" | \
     cut -f 7-9 -d "/" | \
-    pick
+    fzf
   )}
 }
 

@@ -11,7 +11,6 @@ Plug 'junegunn/goyo.vim'
 Plug 'junegunn/limelight.vim'
 Plug 'justincampbell/vim-eighties'
 Plug 'justincampbell/vim-railscasts'
-Plug 'kien/ctrlp.vim'
 Plug 'kien/rainbow_parentheses.vim'
 Plug 'mattn/gist-vim'
 Plug 'mattn/webapi-vim'
@@ -41,6 +40,10 @@ Plug 'vim-scripts/syntaxattr.vim'
 Plug 'w0rp/ale'
 Plug 'wikitopian/hardmode'
 Plug 'zerowidth/vim-copy-as-rtf'
+
+" fzf
+Plug '/usr/local/opt/fzf'
+Plug 'junegunn/fzf.vim'
 
 " CoffeeScript
 Plug 'kchmck/vim-coffee-script'
@@ -346,14 +349,8 @@ command! ConvertRubyHashSyntax19 :%s/:\([^ ]*\)\(\s*\)=>/\1:/g
 command! DeleteComments :g/^\s*#\|\/\//d
 command! RemoveTrailingWhitespace :%s/ \+$//g
 
-" The Silver Searcher
-let g:ag_binary = system("which ag | xargs echo -n")
-
-" CtrlP
-let g:ctrlp_max_height = 100
-let g:ctrlp_use_caching = 0
-let g:ctrlp_user_command = g:ag_binary . ' %s -l --nocolor -g ""'
-let g:ctrlp_working_path_mode = ''
+" fzf
+nnoremap <C-P> :FZF<CR>
 
 " Switch
 nnoremap <leader>- :Switch<CR>
