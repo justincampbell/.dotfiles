@@ -42,6 +42,10 @@ Plug 'w0rp/ale'
 Plug 'wikitopian/hardmode'
 Plug 'zerowidth/vim-copy-as-rtf'
 
+" UltiSnips
+Plug 'honza/vim-snippets'
+Plug 'sirver/ultisnips'
+
 " fzf
 Plug '/usr/local/opt/fzf'
 Plug 'junegunn/fzf.vim'
@@ -373,6 +377,11 @@ let g:go_fmt_command = "goimports"
 let g:deoplete#enable_at_startup = 1
 set completeopt+=noinsert
 set completeopt-=preview
+
+" UltiSnips
+let g:UltiSnipsExpandTrigger="<Tab>"
+let g:UltiSnipsJumpForwardTrigger="<Tab>"
+call deoplete#custom#source('ultisnips', 'rank', 1000)
 
 " Goyo/Limelight
 let g:goyo_height = '100%'
