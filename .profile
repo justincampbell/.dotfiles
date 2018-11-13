@@ -103,8 +103,14 @@ alias lock="/System/Library/CoreServices/Menu\ Extras/User.menu/Contents/Resourc
 alias xy="tput cols; tput lines"
 
 # Heroku
-production() { heroku $@ --remote production ;}
-staging() { heroku $@ --remote staging ;}
+production() {
+  echo $ heroku $@ --remote production
+  heroku $@ --remote production
+}
+staging() {
+  echo $ heroku $@ --remote staging
+  heroku $@ --remote staging
+}
 pr() {
   pr=$1
   if [[ $pr =~ ^[0-9]+$ ]]; then
@@ -114,6 +120,7 @@ pr() {
     echo -e "Using latest PR\n$issue)"
   fi
   app=$(git remote -v | grep ^staging | grep "(push)" | cut -f 4 -d "/" | cut -f 1 -d ".")-pr-$pr
+  echo $ heroku $@ --app $app
   heroku $@ --app $app
 }
 promote() { staging pipelines:promote ;}
