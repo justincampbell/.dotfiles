@@ -110,8 +110,7 @@ pr() {
   if [[ $pr =~ ^[0-9]+$ ]]; then
     shift
   else
-    issue=$(hub issue | head -n 1)
-    pr=$(echo $issue | cut -f 1 -d "]" | xargs echo)
+    pr=$(hub pr list --format="%I")
     echo -e "Using latest PR\n$issue)"
   fi
   app=$(git remote -v | grep ^staging | grep "(push)" | cut -f 4 -d "/" | cut -f 1 -d ".")-pr-$pr
