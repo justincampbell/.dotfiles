@@ -4,6 +4,7 @@ export CLICOLOR=true
 export EC2_HOME=$([ -d /usr/local/Cellar/ec2-api-tools ] && find /usr/local/Cellar/ec2-api-tools -type d -name libexec | head -n 1)
 export EDITOR=nvim
 export FORECAST_IO_API_KEY=$(cat ~/.forecast)
+export GO111MODULE=on
 export GOBIN=$GOPATH/bin
 export GOPATH=$(stat -f ~/Code/go)
 export HISTCONTROL=ignoreboth
@@ -151,6 +152,28 @@ charles() {
 
 fix_camera() {
   sudo killall VDCAssistant
+}
+
+# Go Modules
+mod() {
+  value="${1}"
+
+  if [ -z "$value" ]; then
+    case "${GO111MODULE}" in
+      "on")
+        value="off"
+        ;;
+      "off")
+        value="auto"
+        ;;
+      *)
+        value="on"
+        ;;
+    esac
+  fi
+
+  export GO111MODULE="$value"
+  env | grep GO111MODULE
 }
 
 # reset return code to 0
