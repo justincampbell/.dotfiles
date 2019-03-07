@@ -101,7 +101,9 @@ alias :q=exit
 alias lock="/System/Library/CoreServices/Menu\ Extras/User.menu/Contents/Resources/CGSession -suspend"
 
 # Show screen size
-alias xy="tput cols; tput lines"
+xy() {
+  echo "$(tput cols)x$(tput lines)"
+}
 
 # Heroku
 production() {
