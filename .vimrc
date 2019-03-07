@@ -400,10 +400,6 @@ endfunction
 autocmd! User GoyoEnter nested call <SID>goyo_enter()
 autocmd! User GoyoLeave nested call <SID>goyo_leave()
 
-" Markdown
-nnoremap hi I# <Esc>V:s/# #/##/g<Esc>
-nnoremap hd ^vd
-
 " vim-test
 autocmd WinEnter,VimResized * call SetTestStrategy()
 function! SetTestStrategy()
