@@ -28,6 +28,7 @@ git config --global alias.track '!track() { git branch --set-upstream-to=origin/
 git config --global alias.yolo 'push --force --no-verify'
 git config --global branch.autosetuprebase always
 git config --global color.ui true
+git config --global commit.cleanup scissors
 git config --global commit.gpgsign true
 git config --global commit.verbose true
 git config --global core.excludesfile ~/.gitignore
