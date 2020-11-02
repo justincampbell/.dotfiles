@@ -40,9 +40,12 @@ export NVM_DIR=~/.nvm
 # git + prompt
 alias git=hub # Git ♥ 's GitHub
 clone() {
-  cd ~/Code
-  git clone $1
-  cd $(echo $1 | cut -f 2 -d /)
+  org=$(echo $1 | cut -f 1 -d /)
+  repo=$(echo $1 | cut -f 2 -d /)
+  mkdir -p ~/Code/$org
+  cd ~/Code/$org
+  git clone $org/$repo
+  cd $repo
 }
 source $BREW_PREFIX/git/etc/bash_completion.d/git-completion.bash
 source ~/.dotfiles/prompt.sh
