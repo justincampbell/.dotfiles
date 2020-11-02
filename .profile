@@ -54,6 +54,7 @@ git_changed() {
 }
 
 # neovim
+alias vi=nvim
 alias vim=nvim
 
 # use
