@@ -16,6 +16,9 @@ export PATH=/usr/local/bin:/usr/local/sbin:$PATH # Homebrew
 export PATH=node_modules/.bin:/usr/local/share/npm/bin:$PATH # Node/NPM
 export PATH=bin:$PATH
 
+# Functions
+source ~/.dotfiles/functions.sh
+
 # ruby
 source $BREW_PREFIX/chruby/share/chruby/chruby.sh
 print_ruby() { basename $RUBY_ROOT ;}
@@ -47,49 +50,8 @@ git_changed() {
 # neovim
 alias vim=nvim
 
-# Gui aliases
-google() { open "https://www.google.com/search?q=$@" ;}
-graphviz() { open "$@" -a /Applications/Graphviz.app ;}
-marked() { open "$@" -a /Applications/Marked.app ;}
-
 # use
 source /usr/local/share/use/use.sh
-
-# Fuzzy finders
-# [ -f ~/.fzf.bash ] && source ~/.fzf.bash
-branch() {
-  git checkout ${1:-$(
-  git for-each-ref \
-    --sort=-committerdate \
-    --format='%(refname:short)' \
-    refs/heads/ \
-    | fzf
-  )}
-}
-code() {
-  cd ~/Code/${1:-$(
-  find ~/Code -type d -maxdepth 2 | \
-    grep ".*/.*$" | \
-    cut -f 5-6 -d "/" | \
-    fzf
-  )}
-}
-cookbook() { cd ~/Code/cookbooks/${1:-$(ls -at ~/Code/cookbooks | pick)} ;}
-codego() {
-  cd $GOPATH/src/${1:-$(
-  find $GOPATH/src -type d -maxdepth 3 | \
-    grep "src/.*/.*/.*$" | \
-    cut -f 7-9 -d "/" | \
-    fzf
-  )}
-}
-
-# Directory jumping
-cdcode() { cd ~/Code ;}
-cdgo() { cd $GOPATH ;}
-cddotfiles() { cd ~/.dotfiles ;}
-cdnotes() { cd ~/Notes ;}
-cdroot() { cd `git rev-parse --git-dir`/.. ;}
 
 # remove Dropbox when opening new terminal tabs
 [[ -d ${PWD/Dropbox\//} ]] && cd ${PWD/Dropbox\//}
@@ -100,83 +62,11 @@ alias :q=exit
 # Lock the screen
 alias lock="/System/Library/CoreServices/Menu\ Extras/User.menu/Contents/Resources/CGSession -suspend"
 
-# Show screen size
-xy() {
-  echo "$(tput cols)x$(tput lines)"
-}
-
-# Heroku
-production() {
-  echo $ heroku $@ --remote production
-  heroku $@ --remote production
-}
-staging() {
-  echo $ heroku $@ --remote staging
-  heroku $@ --remote staging
-}
-pr() {
-  pr=$1
-  if [[ $pr =~ ^[0-9]+$ ]]; then
-    shift
-  else
-    pr=$(hub pr list --format="%I")
-    echo -e "Using latest PR\n$issue)"
-  fi
-  app=$(git remote -v | grep ^staging | grep "(push)" | cut -f 4 -d "/" | cut -f 1 -d ".")-pr-$pr
-  echo $ heroku $@ --app $app
-  heroku $@ --app $app
-}
-promote() { staging pipelines:promote ;}
-
 # Start Tmux if not running
 [ -z "$TMUX" ] && (tmux attach || tmux)
 
 # Show q-queue status
 q-queue -s
-
-publicip() {
-  curl https://api.ipify.org
-}
-
-charles() {
-  export ALL_PROXY=http://localhost:8888
-  export FTP_PROXY=$ALL_PROXY
-  export HTTPS_PROXY=$ALL_PROXY
-  export HTTP_PROXY=$ALL_PROXY
-  export RSYNC_PROXY=$ALL_PROXY
-  export ftp_proxy=$ALL_PROXY
-  export http_proxy=$ALL_PROXY
-  export https_proxy=$ALL_PROXY
-  export rsync_proxy=$ALL_PROXY
-
-  export SSL_CERT_FILE=~/.charles/charles-ssl-proxying-certificate.pem
-}
-
-fix_camera() {
-  sudo killall VDCAssistant
-}
-
-# Go Modules
-mod() {
-  value="${1}"
-
-  if [ -z "$value" ]; then
-    case "${GO111MODULE}" in
-      "on")
-        value="off"
-        ;;
-      "off")
-        value="auto"
-        ;;
-      *)
-        value="on"
-        ;;
-    esac
-  fi
-
-  export GO111MODULE="$value"
-  env | grep GO111MODULE
-}
 
 # reset return code to 0
 true
