@@ -10,6 +10,7 @@ export GOBIN=$GOPATH/bin
 export GOPATH=$(stat -f ~/Code/go)
 export HISTCONTROL=ignoreboth
 export HISTSIZE=10000
+export SLACK_TOKEN="$(cat ~/.slack)"
 
 export PATH=$GOPATH/bin:$PATH # Go
 export PATH=$HOME/.dotfiles/bin:$PATH # Dotfiles
