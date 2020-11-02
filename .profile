@@ -35,8 +35,7 @@ alias 27='chruby ruby-2.7 && print_ruby'
 
 # node
 export NVM_DIR=~/.nvm
-[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
-nvm use stable > /dev/null
+[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh" --no-use
 
 # git + prompt
 alias git=hub # Git ♥ 's GitHub
