@@ -1,3 +1,4 @@
+export BASH_SILENCE_DEPRECATION_WARNING=1
 export BREW_PREFIX=/usr/local/opt
 export BROWSER=open
 export CLICOLOR=true
