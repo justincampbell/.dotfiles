@@ -41,6 +41,7 @@ git config --global init.templatedir '~/.git_templates'
 git config --global pull.ff only
 git config --global push.default current
 git config --global rebase.autosquash true
+git config --global rebase.autostash true
 git config --global user.email "justin@justincampbell.me"
 git config --global user.name "Justin Campbell"
 git config --global user.signingkey $(gpg --list-keys | grep ^pub | sed -n 's/.*\/\(.*\) .*/\1/p')
