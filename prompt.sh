@@ -78,7 +78,7 @@ in_git_repo() {
   dir=${1:-.}
   count=`expr 0$2 + 1`
 
-  if [[ $count == "10" ]]; then return 1; fi
+  if [[ $count == "4" ]]; then return 1; fi
   if [[ -d $dir/.git ]]; then return 0; fi
 
   in_git_repo $dir/.. $count
