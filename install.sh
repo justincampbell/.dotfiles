@@ -34,6 +34,7 @@ git config --global commit.gpgsign true
 git config --global commit.verbose true
 git config --global core.excludesfile ~/.gitignore
 git config --global credential.helper osxkeychain
+git config --global diff.noprefix true
 git config --global github.user "justincampbell"
 git config --global help.autocorrect 25
 git config --global init.templatedir '~/.git_templates'
