@@ -17,12 +17,14 @@ Plug 'mattn/gist-vim'
 Plug 'mattn/webapi-vim'
 Plug 'michaeljsmith/vim-indent-object'
 Plug 'nathanaelkane/vim-indent-guides'
+Plug 'neoclide/coc.nvim', { 'branch': 'release' }
 Plug 'rking/ag.vim'
 Plug 'scrooloose/nerdcommenter'
-Plug 'shougo/deoplete.nvim', { 'do': ':UpdateRemotePlugins' }
+" Plug 'shougo/deoplete.nvim', { 'do': ':UpdateRemotePlugins' }
 Plug 'shougo/unite.vim'
 Plug 'shougo/vimfiler.vim'
 Plug 'terryma/vim-multiple-cursors'
+Plug 'tpope/vim-abolish'
 Plug 'tpope/vim-db'
 Plug 'tpope/vim-dispatch'
 Plug 'tpope/vim-endwise'
@@ -67,11 +69,14 @@ Plug 'powerman/vim-plugin-AnsiEsc'
 Plug 'sanmiguel/helpex.vim'
 Plug 'slashmili/alchemist.vim'
 
+" Elm
+Plug 'elmcast/elm-vim'
+
 " Go
-Plug 'benmills/vim-golang-alternate'
-Plug 'fatih/vim-go', { 'do': ':GoInstallBinaries' }
-Plug 'nsf/gocode', { 'rtp': 'vim', 'do': '~/.vim/plugged/gocode/nvim/symlink.sh' }
-Plug 'zchee/deoplete-go', { 'do': 'make'}
+" Plug 'benmills/vim-golang-alternate'
+Plug 'fatih/vim-go', { 'do': ':GoUpdateBinaries' }
+" Plug 'nsf/gocode', { 'rtp': 'vim', 'do': '~/.vim/plugged/gocode/nvim/symlink.sh' }
+" Plug 'zchee/deoplete-go', { 'do': 'make'}
 
 " HCL
 Plug 'fatih/vim-hclfmt'
@@ -97,7 +102,7 @@ Plug 'raichoo/purescript-vim'
 " Ruby
 Plug 'alexbel/vim-rubygems'
 Plug 'ecomba/vim-ruby-refactoring'
-Plug 'fishbullet/deoplete-ruby'
+" Plug 'fishbullet/deoplete-ruby'
 Plug 'hwartig/vim-seeing-is-believing'
 Plug 'jgdavey/vim-blockle'
 Plug 'tpope/vim-rails'
@@ -147,6 +152,11 @@ highlight! link Conceal SpecialKey
 highlight! link Search IncSearch
 highlight! link qfLineNr WarningMsg
 
+" GitGutter
+highlight GitGutterAdd ctermfg=2
+highlight GitGutterChange ctermfg=3
+highlight GitGutterDelete ctermfg=1
+
 " Hide search results automatically
 autocmd BufWinLeave,BufWrite,InsertEnter * let @/ = ""
 
@@ -185,12 +195,13 @@ let g:ale_sign_warning = '?'
 
 let g:ale_fixers = {}
 let g:ale_fixers['javascript'] = ['prettier', 'importjs']
+let g:ale_fixers['scss'] = ['prettier']
 
 let g:ale_linters = {}
 let g:ale_linters['go'] = ['go build', 'golint']
 let g:ale_linters['handlebars'] = ['ember-template-lint']
 let g:ale_linters['html'] = []
-let g:ale_linters['ruby'] = ['ruby', 'rubocop']
+let g:ale_linters['ruby'] = ['ruby']
 let g:ale_linters['sh'] = ['shellcheck']
 let g:ale_linters['sql'] = ['sqlint']
 let g:ale_linters['vim'] = ['vint']
@@ -225,6 +236,7 @@ autocmd FileType elixir nnoremap gd :Ag '^\s*def\w+\s.*[\s\.]<cword>[\s$]'<cr><c
 autocmd FileType gitcommit,markdown set nonumber
 autocmd FileType gitcommit,markdown set spell
 autocmd FileType go nnoremap <Leader>gc :GoCoverageToggle<cr>
+autocmd FileType go nnoremap <Leader>gc :GoCoverageToggle<cr>
 autocmd FileType markdown,"" set linebreak
 autocmd FileType markdown,"" set wrap
 autocmd FileType haskell set shiftwidth=4
@@ -241,6 +253,28 @@ autocmd FileType terraform inoremap do<cr> {<cr><cr>}<Up><Tab>
 autocmd FileType terraform inoremap {<cr> {<cr><cr>}<Up><Tab>
 autocmd BufEnter *.es6 set filetype=javascript
 autocmd BufEnter *.job set filetype=nomad
+
+" vim-projectionist + vim-go
+let s:projections = {
+      \ '*.go': {'type': 'go', 'alternate': '{}_test.go'},
+      \ '*_test.go': {'type': 'go', 'alternate': '{}.go'},
+      \ }
+
+function! s:ProjectionistDetect() abort
+  if &filetype ==# 'go'
+    let l:projections = deepcopy(s:projections)
+    call projectionist#append(getcwd(), l:projections)
+  endif
+endfunction
+
+augroup go
+  autocmd!
+  autocmd User ProjectionistDetect call s:ProjectionistDetect()
+  autocmd Filetype go command! -bang A call go#alternate#Switch(<bang>0, 'edit')
+  autocmd Filetype go command! -bang AV call go#alternate#Switch(<bang>0, 'vsplit')
+  autocmd Filetype go command! -bang AS call go#alternate#Switch(<bang>0, 'split')
+  autocmd FileType go compiler go
+augroup END
 
 " 80-column line
 set colorcolumn=81
@@ -369,19 +403,47 @@ autocmd FileType qf execute min([line("$"), &lines * 2/5]) . "wincmd _"
 " Remove color column in quickfix
 autocmd FileType qf set colorcolumn=0
 
-" vim-go
+" Go
 highlight! link goSameId SpellRare
-let g:go_fmt_command = "goimports"
+let g:go_def_mapping_enabled = 0 " Use coc instead
+autocmd BufWritePre *.go :call CocAction('runCommand', 'editor.action.organizeImport')
+
+" coc
+nmap <silent> [c <Plug>(coc-diagnostic-prev)
+nmap <silent> ]c <Plug>(coc-diagnostic-next)
+nmap <silent> gd <Plug>(coc-definition)
+nmap <silent> gy <Plug>(coc-type-definition)
+nmap <silent> gi <Plug>(coc-implementation)
+nmap <silent> gr <Plug>(coc-references)
+nmap <leader>rn <Plug>(coc-rename)
+vmap <leader>f <Plug>(coc-format-selected)
+nmap <leader>f <Plug>(coc-format-selected)
+set updatetime=300
+
+" Use tab for trigger completion with characters ahead and navigate.
+inoremap <silent><expr> <TAB>
+      \ pumvisible() ? "\<C-n>" :
+      \ <SID>check_back_space() ? "\<TAB>" :
+      \ coc#refresh()
+inoremap <expr><S-TAB> pumvisible() ? "\<C-p>" : "\<C-h>"
+
+function! s:check_back_space() abort
+  let col = col('.') - 1
+  return !col || getline('.')[col - 1]  =~# '\s'
+endfunction
 
 " Deoplete
-let g:deoplete#enable_at_startup = 1
+" let g:deoplete#enable_at_startup = 1
+" let g:deoplete#sources#go#package_dot = 1
+" let g:deoplete#sources#go#sort_class = ['package', 'func', 'type', 'var', 'const']
 set completeopt+=noinsert
+set completeopt+=noselect
 set completeopt-=preview
 
 " UltiSnips
 let g:UltiSnipsExpandTrigger="<Tab>"
 let g:UltiSnipsJumpForwardTrigger="<Tab>"
-call deoplete#custom#source('ultisnips', 'rank', 1000)
+" call deoplete#custom#source('ultisnips', 'rank', 1000)
 
 " Goyo/Limelight
 let g:goyo_height = '100%'
@@ -402,17 +464,36 @@ autocmd! User GoyoLeave nested call <SID>goyo_leave()
 
 " vim-test
 autocmd WinEnter,VimResized * call SetTestStrategy()
-function! SetTestStrategy()
-  if (winheight('%') > 40)
-    let g:test#strategy = "tslime"
-  else
-    let g:test#strategy = "dispatch"
-  endif
-endfunction
 let g:tslime_always_current_session = 1
 let g:tslime_always_current_window = 1
-nnoremap <silent> <Leader>t :wa<CR>:TestFile<CR>
-nnoremap <silent> <Leader>T :wa<cr>:TestNearest<CR>
+nnoremap <silent> <Leader>t :call DetectTest()<CR>
+nnoremap <silent> <Leader>T :wall<CR>:TestSuite<CR>
+nnoremap <silent> gt :TestVisit<CR>
+let test#go#gotest#options = '-cover'
+
+function! SetTestStrategy()
+  " Check if we're in tmux and if there are sibling tmux panes
+  " if exists('$TMUX') && len(split(system('tmux list-panes'), '\n')) > 1
+    " let g:test#strategy = "tslime"
+
+    " " Display pane hints if we think tslime will ask us for a pane number
+    " " if !exists("g:tslime")
+      " " call system('tmux display-panes')
+    " " endif
+  " else
+    let g:test#strategy = "dispatch"
+  " endif
+endfunction
+
+function! DetectTest()
+  silent wall
+
+  if test#test_file(expand('%'))
+    call test#run('nearest', [])
+  else
+    call test#run_last([])
+  endif
+endfunction
 
 " Dispatch
 nnoremap <Leader>f :FocusDispatch<space>''<left>
@@ -437,6 +518,7 @@ autocmd BufEnter *_test.js let b:dispatch = 'npm test'
 autocmd BufEnter *_test.rb let b:dispatch = 'bundle exec testrb %'
 autocmd BufEnter Gemfile let b:dispatch = 'bundle'
 autocmd BufEnter db/migrate/*.rb let b:dispatch = 'bundle exec rake db:migrate'
+autocmd BufEnter go.mod let b:dispatch = 'go mod tidy'
 autocmd BufEnter mix.exs let b:dispatch = 'mix deps.get'
 
 " JavaScript comments
