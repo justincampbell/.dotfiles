@@ -99,7 +99,8 @@ git_status() {
     local changed_files=$(expr $(echo "$status" | wc -l) - 1)
     echo $red"$changed_files files changed"
   else
-    echo "$status" | tr '\n' '|' | sed -e 's/\|/\'$'\n/' | tr '|' ' ' | tr -s '\n '
+    echo -n "$status" | tr '\n' '|' | sed -e 's/\|/\'$'\n/' | tr '|' ' ' | tr -s '\n '
+    echo
   fi
 }
 
