@@ -1,5 +1,6 @@
 #!/bin/bash -ex
 
+ln -fs ~/.dotfiles/.gemrc ~/.gemrc
 ln -fs ~/.dotfiles/.git_commit_template ~/.git_commit_template
 ln -fs ~/.dotfiles/.git_templates ~/.git_templates
 ln -fs ~/.dotfiles/.hushlogin ~/.hushlogin
