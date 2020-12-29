@@ -60,6 +60,9 @@ alias vim=nvim
 # use
 source /usr/local/share/use/use.sh
 
+# Fuzzy finders
+# [ -f ~/.fzf.bash ] && source ~/.fzf.bash
+
 # remove Dropbox when opening new terminal tabs
 [[ -d ${PWD/Dropbox\//} ]] && cd ${PWD/Dropbox\//}
 
