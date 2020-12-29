@@ -43,21 +43,26 @@ function display_duration () {
 }
 
 node_status() {
-  if ! [[ -f .nvmrc ]]; then
+  if ! [[ -f .nvmrc || -f .node-version ]]; then
     return
   fi
 
   NODE_VERSION=$(node -v)
-  NVMRC_VERSION=$(cat .nvmrc)
-
-  if [[ "$NVMRC_VERSION" == lts/* ]]; then
-    NVMRC_VERSION=$(nvm alias --no-colors $NVMRC_VERSION | cut -f 3 -d " ")
-  else
-    NVMRC_VERSION="v$NVMRC_VERSION"
+  if [[ -f .nvmrc ]]; then
+    DESIRED_NODE_VERSION=$(cat .nvmrc)
+  fi
+  if [[ -f .node-version ]]; then
+    DESIRED_NODE_VERSION=$(cat .node-version)
   fi
 
-  if [ "$NODE_VERSION" != "$NVMRC_VERSION" ]; then
-    echo "${red}${bold}Node${reset}${red} using $NODE_VERSION, but should be $NVMRC_VERSION"
+  if [[ "$DESIRED_NODE_VERSION" == lts/* ]]; then
+    DESIRED_NODE_VERSION=$(nvm alias --no-colors $DESIRED_NODE_VERSION | cut -f 3 -d " ")
+  else
+    DESIRED_NODE_VERSION="v$DESIRED_NODE_VERSION"
+  fi
+
+  if [ "$NODE_VERSION" != "$DESIRED_NODE_VERSION" ]; then
+    echo "${red}${bold}Node${reset}${red} using $NODE_VERSION, but should be $DESIRED_NODE_VERSION"
   fi
 }
 
