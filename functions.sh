@@ -52,6 +52,11 @@ staging() {
   heroku $@ --remote staging
 }
 
+acceptance() {
+  echo $ heroku $@ --remote acceptance
+  heroku $@ --remote acceptance
+}
+
 pr() {
   pr=$1
   if [[ $pr =~ ^[0-9]+$ ]]; then
