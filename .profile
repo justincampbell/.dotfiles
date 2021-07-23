@@ -1,5 +1,5 @@
 export BASH_SILENCE_DEPRECATION_WARNING=1
-export BREW_PREFIX=/usr/local/opt
+export BREW_PREFIX=/opt/homebrew/opt
 export BROWSER=open
 export CLICOLOR=true
 export EC2_HOME=$([ -d /usr/local/Cellar/ec2-api-tools ] && find /usr/local/Cellar/ec2-api-tools -type d -name libexec | head -n 1)
@@ -15,7 +15,7 @@ export SLACK_TOKEN="$(cat ~/.slack)"
 
 export PATH=$GOPATH/bin:$PATH # Go
 export PATH=$HOME/.dotfiles/bin:$PATH # Dotfiles
-export PATH=/usr/local/bin:/usr/local/sbin:$PATH # Homebrew
+export PATH=/usr/local/bin:/usr/local/sbin:/opt/homebrew/bin:$PATH # Homebrew
 export PATH=node_modules/.bin:/usr/local/share/npm/bin:$PATH # Node/NPM
 export PATH=bin:$PATH
 
