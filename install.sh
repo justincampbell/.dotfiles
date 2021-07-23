@@ -38,6 +38,7 @@ git config --global credential.helper osxkeychain
 git config --global diff.noprefix true
 git config --global github.user "justincampbell"
 git config --global help.autocorrect 25
+git config --global init.defaultBranch "main"
 git config --global init.templatedir '~/.git_templates'
 git config --global pull.ff only
 git config --global push.default current
