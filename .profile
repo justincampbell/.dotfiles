@@ -82,6 +82,9 @@ source /usr/local/share/use/use.sh
 # remove Dropbox when opening new terminal tabs
 [[ -d ${PWD/Dropbox\//} ]] && cd ${PWD/Dropbox\//}
 
+# Beep
+beep() { osascript -e "beep $@"; }
+
 # vim-brained
 alias :q=exit
 
