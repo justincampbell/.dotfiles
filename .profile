@@ -16,6 +16,7 @@ export GOBIN=$GOPATH/bin
 
 export PATH=/usr/local/opt/go/bin:$GOPATH/bin:$PATH # Go
 export PATH=$HOME/.dotfiles/bin:$PATH # Dotfiles
+export PATH=$HOME/.gcloud/bin:$PATH # Google Cloud
 export PATH=/usr/local/bin:/usr/local/sbin:/opt/homebrew/bin:$PATH # Homebrew
 export PATH=node_modules/.bin:/usr/local/share/npm/bin:$PATH # Node/NPM
 export PATH=bin:$PATH
@@ -53,6 +54,9 @@ source ~/.dotfiles/prompt.sh
 git_changed() {
   echo "$(git changed) $(git status --short | sed -e 's/^ //' | cut -f 2 -d " ")" | sort | uniq
 }
+
+# Google Cloud
+if [ -f '~/.gcloud/completion.bash.inc' ]; then . '~/.gcloud/completion.bash.inc'; fi
 
 # neovim
 alias vi=nvim
