@@ -7,13 +7,14 @@ export EDITOR=nvim
 export FORECAST_IO_API_KEY="$(cat ~/.forecast)"
 export FZF_DEFAULT_COMMAND='fd --type f'
 export GO111MODULE=on
-export GOBIN=$GOPATH/bin
-export GOPATH=$(stat -f ~/Code/go)
 export HISTCONTROL=ignoreboth
 export HISTSIZE=10000
 export SLACK_TOKEN="$(cat ~/.slack)"
 
-export PATH=$GOPATH/bin:$PATH # Go
+export GOPATH=$(stat -f ~/Code/go)
+export GOBIN=$GOPATH/bin
+
+export PATH=/usr/local/opt/go/bin:$GOPATH/bin:$PATH # Go
 export PATH=$HOME/.dotfiles/bin:$PATH # Dotfiles
 export PATH=/usr/local/bin:/usr/local/sbin:/opt/homebrew/bin:$PATH # Homebrew
 export PATH=node_modules/.bin:/usr/local/share/npm/bin:$PATH # Node/NPM
