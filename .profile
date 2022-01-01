@@ -28,12 +28,10 @@ source ~/.dotfiles/functions.sh
 source $BREW_PREFIX/chruby/share/chruby/chruby.sh
 print_ruby() { basename $RUBY_ROOT ;}
 detect_chruby() { chruby $(cat .ruby-version) && print_ruby ;}
-[ -f .ruby-version ] && detect_chruby || chruby 2.7
-alias 23='chruby ruby-2.3 && print_ruby'
-alias 24='chruby ruby-2.4 && print_ruby'
-alias 25='chruby ruby-2.5 && print_ruby'
-alias 26='chruby ruby-2.6 && print_ruby'
+[ -f .ruby-version ] && detect_chruby || chruby ruby-3.1
 alias 27='chruby ruby-2.7 && print_ruby'
+alias 30='chruby ruby-3.0 && print_ruby'
+alias 31='chruby ruby-3.1 && print_ruby'
 
 # node
 export NVM_DIR=~/.nvm
