@@ -11,6 +11,9 @@ ln -fs ~/.dotfiles/.tmux.conf ~/.tmux.conf
 ln -fs ~/.dotfiles/.vimrc ~/.vimrc
 ln -fs ~/.dotfiles/gitignore ~/.gitignore
 
+mkdir -p ~/.config/nvim
+ln -fs ~/.vimrc ~/.config/nvim/init.vim
+
 ln -fs ~/Dropbox/Notes ~/Notes
 
 mkdir -p ~/Code
