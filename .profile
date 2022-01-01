@@ -34,7 +34,8 @@ alias 31='chruby ruby-3.1 && print_ruby'
 
 # node
 export NVM_DIR=~/.nvm
-[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh" --no-use
+. $BREW_PREFIX/nvm/nvm.sh
+. $BREW_PREFIX/nvm/etc/bash_completion.d/nvm
 
 # git + prompt
 alias git=hub # Git ♥ 's GitHub
