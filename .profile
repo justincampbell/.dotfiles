@@ -9,7 +9,6 @@ export FZF_DEFAULT_COMMAND='fd --type f'
 export GO111MODULE=on
 export HISTCONTROL=ignoreboth
 export HISTSIZE=10000
-export SLACK_TOKEN="$(cat ~/.slack)"
 
 export GOPATH=$(stat -f ~/Code/go)
 export GOBIN=$GOPATH/bin
