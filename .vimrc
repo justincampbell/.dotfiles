@@ -17,9 +17,9 @@ Plug 'mattn/gist-vim'
 Plug 'mattn/webapi-vim'
 Plug 'michaeljsmith/vim-indent-object'
 Plug 'nathanaelkane/vim-indent-guides'
+Plug 'prettier/vim-prettier', { 'do': 'yarn install' }
 Plug 'rking/ag.vim'
 Plug 'scrooloose/nerdcommenter'
-Plug 'shougo/deoplete.nvim', { 'do': ':UpdateRemotePlugins' }
 Plug 'shougo/unite.vim'
 Plug 'shougo/vimfiler.vim'
 Plug 'terryma/vim-multiple-cursors'
@@ -42,16 +42,18 @@ Plug 'w0rp/ale'
 Plug 'wikitopian/hardmode'
 Plug 'zerowidth/vim-copy-as-rtf'
 
+" Coc
+Plug 'neoclide/coc.nvim', {
+      \ 'branch': 'release',
+      \ 'do': ':CocInstall coc-json coc-solargraph coc-tsserver' }
+
 " UltiSnips
 Plug 'honza/vim-snippets'
 Plug 'sirver/ultisnips'
 
 " fzf
-Plug '/usr/local/opt/fzf'
+Plug 'junegunn/fzf', { 'do': { -> fzf#install() } }
 Plug 'junegunn/fzf.vim'
-
-" CoffeeScript
-Plug 'kchmck/vim-coffee-script'
 
 " CSS
 Plug 'ap/vim-css-color'
@@ -59,19 +61,8 @@ Plug 'ap/vim-css-color'
 " Docker
 Plug 'ekalinin/Dockerfile.vim'
 
-" Elixir
-Plug 'elixir-lang/vim-elixir'
-Plug 'lucidstack/hex.vim'
-Plug 'mattreduce/vim-mix'
-Plug 'powerman/vim-plugin-AnsiEsc'
-Plug 'sanmiguel/helpex.vim'
-Plug 'slashmili/alchemist.vim'
-
 " Go
-Plug 'benmills/vim-golang-alternate'
-Plug 'fatih/vim-go', { 'do': ':GoInstallBinaries' }
-Plug 'nsf/gocode', { 'rtp': 'vim', 'do': '~/.vim/plugged/gocode/nvim/symlink.sh' }
-Plug 'zchee/deoplete-go', { 'do': 'make'}
+Plug 'fatih/vim-go'
 
 " HCL
 Plug 'fatih/vim-hclfmt'
@@ -91,28 +82,20 @@ Plug 'elzr/vim-json'
 Plug 'nelstrom/vim-markdown-folding'
 Plug 'tpope/vim-markdown'
 
-" PureScript
-Plug 'raichoo/purescript-vim'
+" Python
+Plug 'jupyter-vim/jupyter-vim'
 
 " Ruby
 Plug 'alexbel/vim-rubygems'
 Plug 'ecomba/vim-ruby-refactoring'
-Plug 'fishbullet/deoplete-ruby'
 Plug 'hwartig/vim-seeing-is-believing'
 Plug 'jgdavey/vim-blockle'
-Plug 'tpope/vim-rails'
 Plug 'tpope/vim-rake'
 Plug 'vim-ruby/vim-ruby'
 
 " Shell
 Plug 'markcornick/vim-bats'
 Plug 'rosstimson/bats.vim'
-
-" Slim
-Plug 'slim-template/vim-slim'
-
-" Swift
-Plug 'keith/swift.vim'
 
 " Terraform
 Plug 'bkad/vim-terraform'
@@ -137,6 +120,7 @@ set lazyredraw
 " Set swap/backup location
 set backupdir=/tmp
 set directory=/tmp
+set updatetime=250
 
 " Colors
 autocmd ColorScheme * highlight Visual ctermbg=236
@@ -185,15 +169,22 @@ let g:ale_sign_warning = '?'
 
 let g:ale_fixers = {}
 let g:ale_fixers['javascript'] = ['prettier', 'importjs']
+let g:ale_fixers['ruby'] = ['rubocop']
 
 let g:ale_linters = {}
 let g:ale_linters['go'] = ['go build', 'golint']
 let g:ale_linters['handlebars'] = ['ember-template-lint']
 let g:ale_linters['html'] = []
-let g:ale_linters['ruby'] = ['ruby', 'rubocop']
+let g:ale_linters['ruby'] = ['ruby']
 let g:ale_linters['sh'] = ['shellcheck']
 let g:ale_linters['sql'] = ['sqlint']
 let g:ale_linters['vim'] = ['vint']
+
+" Prettier
+autocmd BufWritePre *.js Prettier
+autocmd BufWritePre *.jsx Prettier
+autocmd BufWritePre *.ts Prettier
+autocmd BufWritePre *.tsx Prettier
 
 " Soft tabs
 set expandtab
@@ -213,6 +204,7 @@ autocmd InsertEnter * match ExtraWhitespace /\s\+\%#\@<!$/
 autocmd BufWinLeave * call clearmatches()
 
 " Filetype mappings
+autocmd BufNewFile,BufRead *.avsc set filetype=json
 autocmd BufNewFile,BufRead *.crl set filetype=ruby
 autocmd BufNewFile,BufRead *.jbuilder set filetype=ruby
 autocmd BufNewFile,BufRead *.md,*.markdown set filetype=markdown
@@ -232,10 +224,7 @@ autocmd FileType haskell nnoremap <Leader>hc :GhcModCheckAsync<cr>
 autocmd FileType haskell nnoremap <Leader>ht :GhcModType<cr>
 autocmd FileType javascript inoremap #{ ${
 autocmd FileType ocaml nnoremap <Leader>ot :MerlinTypeOf<cr>
-autocmd FileType ruby nnoremap gd :Ag '^\s*(def\|class\|module)\s.*(self\.)?<cword>[\s\($]'<cr>
-autocmd FileType ruby nnoremap <Leader>d Orequire 'debugger'; debugger<Esc>
-autocmd FileType ruby nnoremap <Leader>p Orequire 'irb'; binding.irb<Esc>
-autocmd FileType ruby nnoremap <Leader>p Orequire 'pry'; binding.pry<Esc>
+" autocmd FileType ruby nnoremap gd :Ag '^\s*(def\|class\|module)\s.*(self\.)?<cword>[\s\($]'<cr>
 autocmd FileType terraform inoremap #{ ${
 autocmd FileType terraform inoremap do<cr> {<cr><cr>}<Up><Tab>
 autocmd FileType terraform inoremap {<cr> {<cr><cr>}<Up><Tab>
@@ -355,7 +344,9 @@ command! DeleteComments :g/^\s*#\|\/\//d
 command! RemoveTrailingWhitespace :%s/ \+$//g
 
 " fzf
-nnoremap <C-P> :FZF<CR>
+nnoremap <C-P> :FzfFiles<CR>
+command! -bang -nargs=? -complete=dir FzfFiles
+  \ call fzf#vim#files(<q-args>, fzf#vim#with_preview({'options': ['--layout=reverse', '--padding=0', '--margin=0']}), <bang>0)
 
 " Switch
 nnoremap <leader>- :Switch<CR>
@@ -372,16 +363,20 @@ autocmd FileType qf set colorcolumn=0
 " vim-go
 highlight! link goSameId SpellRare
 let g:go_fmt_command = "goimports"
+let g:go_gocode_propose_source = 1
 
-" Deoplete
-let g:deoplete#enable_at_startup = 1
+" coc
+nmap <silent> gd <Plug>(coc-definition)
+nmap <silent> gy <Plug>(coc-type-definition)
+nnoremap <silent> K :call <SID>show_documentation()<CR>
+
+" Completion
 set completeopt+=noinsert
 set completeopt-=preview
 
 " UltiSnips
 let g:UltiSnipsExpandTrigger="<Tab>"
 let g:UltiSnipsJumpForwardTrigger="<Tab>"
-call deoplete#custom#source('ultisnips', 'rank', 1000)
 
 " Goyo/Limelight
 let g:goyo_height = '100%'
@@ -401,6 +396,7 @@ autocmd! User GoyoEnter nested call <SID>goyo_enter()
 autocmd! User GoyoLeave nested call <SID>goyo_leave()
 
 " vim-test
+let g:test#javascript#jest#options = '--no-color'
 autocmd WinEnter,VimResized * call SetTestStrategy()
 function! SetTestStrategy()
   if (winheight('%') > 40)
@@ -414,6 +410,20 @@ let g:tslime_always_current_window = 1
 nnoremap <silent> <Leader>t :wa<CR>:TestFile<CR>
 nnoremap <silent> <Leader>T :wa<cr>:TestNearest<CR>
 
+" Projectionist
+let g:projectionist_heuristics =
+      \ {
+      \   "package.json": {
+      \     '*.js':      { 'alternate': '{}.test.js'},
+      \     '*.test.js': { 'alternate': '{}.js'},
+      \     '*.ts':      { 'alternate': '{}.test.ts'},
+      \     '*.test.ts': { 'alternate': '{}.ts'},
+      \   },
+      \   "Gemfile": {
+      \     'app/*.rb':  { 'alternate': 'spec/{}_spec.rb'},
+      \   },
+      \ }
+
 " Dispatch
 nnoremap <Leader>f :FocusDispatch<space>''<left>
 nnoremap <Leader>F :FocusDispatch!<CR>
@@ -422,22 +432,17 @@ nnoremap <Leader>L :Copen!<CR>
 nnoremap <Leader>m :wa<CR>:Dispatch<CR>
 nnoremap <Leader>M :wa<CR>:Dispatch!<CR>
 autocmd FileType go let b:dispatch = 'go test'
-autocmd FileType haskell let b:dispatch = 'cabal test --show-details=always'
 autocmd FileType make let b:dispatch = 'make'
 autocmd FileType sh let b:dispatch = 'make'
 autocmd FileType terraform let b:dispatch = 'terraform plan -input=false'
 autocmd BufEnter *.bats compiler bats
 autocmd BufEnter *.bats let b:dispatch = 'bats --tap %'
-autocmd BufEnter *.ex let b:dispatch = 'mix test'
-autocmd BufEnter *.exs let b:dispatch = 'mix test %'
 autocmd BufEnter *.gemspec let b:dispatch = 'bundle'
 autocmd BufEnter *_spec.rb let b:dispatch = 'bundle exec rspec --format progress %'
-autocmd BufEnter *_test.coffee let b:dispatch = 'npm test'
 autocmd BufEnter *_test.js let b:dispatch = 'npm test'
 autocmd BufEnter *_test.rb let b:dispatch = 'bundle exec testrb %'
 autocmd BufEnter Gemfile let b:dispatch = 'bundle'
 autocmd BufEnter db/migrate/*.rb let b:dispatch = 'bundle exec rake db:migrate'
-autocmd BufEnter mix.exs let b:dispatch = 'mix deps.get'
 
 " JavaScript comments
 inoremap /**<Tab> /**<CR><CR>/<Up><Space>
