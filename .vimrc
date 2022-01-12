@@ -142,7 +142,7 @@ highlight Vertsplit ctermbg=233 ctermfg=233 guibg=#111111
 " Tabs
 highlight! link TabLineFill CursorColumn
 highlight TabLine ctermfg=7 ctermbg=234 cterm=none
-highlight TabLineSel ctermfg=166 ctermbg=234
+highlight TabLineSel ctermfg=203 ctermbg=234
 map <Tab> :tabn<cr>
 map <S-Tab> :tabp<cr>
 
