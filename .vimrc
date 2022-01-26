@@ -409,6 +409,10 @@ nnoremap <silent> <Leader>T :wa<cr>:TestNearest<CR>
 " Projectionist
 let g:projectionist_heuristics =
       \ {
+      \   "go.mod": {
+      \     '*.go':      { 'alternate': '{}_test.go'},
+      \     '*_test.go': { 'alternate': '{}.go'},
+      \   },
       \   "package.json": {
       \     '*.js':      { 'alternate': '{}.test.js'},
       \     '*.test.js': { 'alternate': '{}.js'},
