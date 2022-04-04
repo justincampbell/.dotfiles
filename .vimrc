@@ -170,7 +170,7 @@ let g:ale_sign_warning = '?'
 
 let g:ale_fixers = {}
 let g:ale_fixers['javascript'] = ['prettier', 'importjs']
-let g:ale_fixers['ruby'] = ['rubocop']
+let g:ale_fixers['ruby'] = ['rubocop', 'standardrb']
 
 let g:ale_linters = {}
 let g:ale_linters['go'] = ['go build', 'golint']
