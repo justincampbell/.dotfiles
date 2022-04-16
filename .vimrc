@@ -307,14 +307,18 @@ map <F5> <Plug>(seeing-is-believing-run)
 imap <F5> <Plug>(seeing-is-believing-run)
 
 " vim-airline
-let g:airline#extensions#ale#error_symbol = '❗️'
-let g:airline#extensions#ale#warning_symbol = '🙄'
-let g:airline_left_alt_sep=''
-let g:airline_right_alt_sep=''
-let g:airline_section_a='' " mode
-let g:airline_section_b='' " branch
-let g:airline_section_z='' " ruler
-let g:airline_theme='monochrome'
+function ConfigureAirline()
+  let g:airline#extensions#ale#error_symbol = '❗️'
+  let g:airline#extensions#ale#warning_symbol = '🙄'
+  let g:airline_left_alt_sep=''
+  let g:airline_right_alt_sep=''
+  let g:airline_section_a='' " mode
+  let g:airline_section_b='' " branch
+  let g:airline_section_y='' " encoding
+  let g:airline_section_z = airline#section#create(['%2l/%L']) " ruler
+  let g:airline_theme='monochrome'
+endfunction
+autocmd User AirlineAfterInit call ConfigureAirline()
 
 " Sort
 vnoremap <Leader>s :sort<cr>
