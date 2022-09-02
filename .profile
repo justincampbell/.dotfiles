@@ -38,13 +38,12 @@ export NVM_DIR=~/.nvm
 . $BREW_PREFIX/nvm/etc/bash_completion.d/nvm
 
 # git + prompt
-alias git=hub # Git ♥ 's GitHub
 clone() {
   org=$(echo $1 | cut -f 1 -d /)
   repo=$(echo $1 | cut -f 2 -d /)
   mkdir -p ~/Code/$org
   cd ~/Code/$org
-  git clone $org/$repo
+  gh repo clone $org/$repo
   cd $repo
 }
 source $BREW_PREFIX/git/etc/bash_completion.d/git-completion.bash
