@@ -90,7 +90,7 @@ in_git_repo() {
 }
 
 git_status() {
-  if !(in_git_repo && [[ `history 1` != *'git status'* ]]); then
+  if ! (in_git_repo && [[ `history 1` != *'git status'* ]]); then
     return
   fi
 
@@ -104,7 +104,7 @@ git_status() {
     local changed_files=$(expr $(echo "$status" | wc -l) - 1)
     echo $red"$changed_files files changed"
   else
-    echo -n "$status" | tr '\n' '|' | sed -e 's/\|/\'$'\n/' | tr '|' ' ' | tr -s '\n '
+    echo -n "$status" | tr '\n' '|' | sed -E 's/\|/\'$'\n/' | tr '|' ' ' | tr -s '\n '
     echo
   fi
 }

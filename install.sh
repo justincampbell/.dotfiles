@@ -1,5 +1,10 @@
 #!/bin/bash -ex
 
+if [[ "$PWD" != "$HOME/.dotfiles" ]]; then
+  ln -fs $PWD ~/.dotfiles
+fi
+
+# Config files
 ln -fs ~/.dotfiles/.gemrc ~/.gemrc
 ln -fs ~/.dotfiles/.git_commit_template ~/.git_commit_template
 ln -fs ~/.dotfiles/.git_templates ~/.git_templates
@@ -8,17 +13,20 @@ ln -fs ~/.dotfiles/.irbrc ~/.irbrc
 ln -fs ~/.dotfiles/.profile ~/.profile
 ln -fs ~/.dotfiles/.rdebugrc ~/.rdebugrc
 ln -fs ~/.dotfiles/.tmux.conf ~/.tmux.conf
-ln -fs ~/.dotfiles/.vimrc ~/.vimrc
 ln -fs ~/.dotfiles/gitignore ~/.gitignore
+touch ~/.forecast
 
+# Vim
 mkdir -p ~/.config/nvim
-ln -fs ~/.vimrc ~/.config/nvim/init.vim
+ln -fs ~/.dotfiles/.vimrc ~/.config/nvim/init.vim
+ln -fs ~/.dotfiles/.vimrc ~/.vimrc
 
-ln -fs ~/Dropbox/Notes ~/Notes
+# Install software
+if [[ "$CODESPACES" != "" ]]; then
+  ./install-codespaces.sh
+fi
 
-mkdir -p ~/Code
-
-# git
+# Git
 git config --global alias.amend 'commit --amend --reuse-message HEAD'
 git config --global alias.changed 'diff --name-only origin/master..HEAD'
 git config --global alias.changelog 'log --no-merges --pretty=format:"%s (%an)"'
@@ -47,7 +55,13 @@ git config --global pull.ff only
 git config --global push.default current
 git config --global rebase.autosquash true
 git config --global rebase.autostash true
-git config --global user.email "justin@justincampbell.me"
 git config --global user.name "Justin Campbell"
-git config --global user.signingkey $(gpg --list-keys | grep ^pub | sed -n 's/.*\/\(.*\) .*/\1/p')
 git config --global web.browser open
+
+if [[ "$(git config --global --get user.email)" == "" ]]; then
+  git config --global user.email "justin@justincampbell.me"
+fi
+
+if [[ "$(git config --global --get user.signingkey)" == "" ]]; then
+  git config --global user.signingkey $(gpg --list-keys | grep ^pub | sed -n 's/.*\/\(.*\) .*/\1/p')
+fi

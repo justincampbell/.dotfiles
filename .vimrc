@@ -41,7 +41,6 @@ Plug 'vim-scripts/multvals.vim'
 Plug 'vim-scripts/syntaxattr.vim'
 Plug 'w0rp/ale'
 Plug 'wikitopian/hardmode'
-Plug 'zerowidth/vim-copy-as-rtf'
 
 " Coc
 Plug 'neoclide/coc.nvim', {
