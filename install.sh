@@ -45,7 +45,6 @@ git config --global commit.cleanup scissors
 git config --global commit.gpgsign true
 git config --global commit.verbose true
 git config --global core.excludesfile ~/.gitignore
-git config --global credential.helper osxkeychain
 git config --global diff.noprefix true
 git config --global github.user "justincampbell"
 git config --global help.autocorrect 25
@@ -57,6 +56,10 @@ git config --global rebase.autosquash true
 git config --global rebase.autostash true
 git config --global user.name "Justin Campbell"
 git config --global web.browser open
+
+if [[ "$(uname)" == "Darwin" ]]; then
+  git config --global credential.helper osxkeychain
+fi
 
 if [[ "$(git config --global --get user.email)" == "" ]]; then
   git config --global user.email "justin@justincampbell.me"

@@ -17,6 +17,13 @@ export PATH=bin:$PATH
 # Functions
 source ~/.dotfiles/functions.sh
 
+# Go
+if [[ -z "$GOPATH" ]]; then
+  export GOPATH=$(stat -f ~/Code/go)
+  export GOBIN=$GOPATH/bin
+  export PATH=/usr/local/opt/go/bin:$GOPATH/bin:$PATH
+fi
+
 # Ruby
 if [ -x "$(command -v chruby)" ]; then
   source $BREW_PREFIX/chruby/share/chruby/chruby.sh
