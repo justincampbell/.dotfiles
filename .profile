@@ -77,8 +77,18 @@ alias :q=exit
 # Lock the screen
 alias lock="/System/Library/CoreServices/Menu\ Extras/User.menu/Contents/Resources/CGSession -suspend"
 
-# Start Tmux if not running
-[ -z "$TMUX" ] && (tmux attach || tmux)
+# tmux
+if [ -z "$TMUX" ]; then # Only do any of this if we're not inside a tmux session.
+  if tmux has-session; then
+    if ! tmux list-clients | grep attached > /dev/null; then
+      # If there is a session, only attach to it if no other clients are attached.
+      tmux attach
+    fi
+  else
+    # If there are no tmux sessions, start one.
+    tmux
+  fi
+fi
 
 # Show q-queue status
 if [ -x "$(command -v q-queue)" ]; then
