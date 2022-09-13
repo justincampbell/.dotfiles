@@ -139,8 +139,22 @@ prompt_command() {
   set_ps1
 }
 
+conditionally_display_exit_code() {
+  exit_code="$?"
+  if [ "${exit_code}" != "0" ]; then
+    echo -n "${bold}${red}${exit_code}${reset} "
+  fi
+}
+
 set_ps1() {
-  PS1='\[\033]0;\W\]\n\[${red}\]${?##0} \[${cyan}\]\W\[$(random_color)\]$ \[${reset}\]'
+  # If exit code is nonzero, output it in red with a space.
+  PS1='$(conditionally_display_exit_code)'
+
+  # Tilde and prompt symbol with random color.
+  PS1+='\[${cyan}\]\W\[$(random_color)\]$ '
+
+  # Reset colors.
+  PS1+='\[${reset}\]'
 }
 
 set_ps1
