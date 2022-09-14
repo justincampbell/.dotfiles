@@ -8,6 +8,7 @@ sudo apt -o DPkg::Lock::Timeout=600 install \
   python-dev \
   python3-dev \
   python3-pip \
+  silversearcher-ag \
   software-properties-common \
   tmux \
   tree \
