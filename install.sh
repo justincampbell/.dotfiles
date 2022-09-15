@@ -21,9 +21,12 @@ mkdir -p ~/.config/nvim
 ln -fs ~/.dotfiles/.vimrc ~/.config/nvim/init.vim
 ln -fs ~/.dotfiles/.vimrc ~/.vimrc
 
-# Install software
+# Codespaces
 if [[ "$CODESPACES" != "" ]]; then
   ./install-codespaces.sh
+
+  git config --global credential.helper /.codespaces/bin/gitcredential_github.sh
+  git config --global gpg.program /.codespaces/bin/gh-gpgsign
 fi
 
 # Git
