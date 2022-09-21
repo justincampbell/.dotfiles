@@ -7,13 +7,17 @@ fi
 # Config files
 ln -fs ~/.dotfiles/.gemrc ~/.gemrc
 ln -fs ~/.dotfiles/.git_commit_template ~/.git_commit_template
-ln -fs ~/.dotfiles/.git_templates ~/.git_templates
 ln -fs ~/.dotfiles/.hushlogin ~/.hushlogin
 ln -fs ~/.dotfiles/.irbrc ~/.irbrc
 ln -fs ~/.dotfiles/.profile ~/.profile
 ln -fs ~/.dotfiles/.rdebugrc ~/.rdebugrc
 ln -fs ~/.dotfiles/.tmux.conf ~/.tmux.conf
 ln -fs ~/.dotfiles/gitignore ~/.gitignore
+
+if [ ! -d ~/.dotfiles/.git_templates ]; then
+  ln -fs ~/.dotfiles/.git_templates ~/.git_templates
+fi
+
 touch ~/.forecast
 
 # Vim
