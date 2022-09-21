@@ -72,3 +72,4 @@ if [[ "$(git config --global --get user.email)" == "" ]]; then
   git config --global user.email "justin@justincampbell.me"
 fi
 
+true
