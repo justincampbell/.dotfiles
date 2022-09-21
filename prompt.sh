@@ -150,6 +150,10 @@ set_ps1() {
   # If exit code is nonzero, output it in red with a space.
   PS1='$(conditionally_display_exit_code)'
 
+  if [[ -z "$TMUX" && "$CODESPACES" ]]; then
+    PS1+='\[${dark_gray}\]${GITHUB_REPOSITORY} '
+  fi
+
   # Tilde and prompt symbol with random color.
   PS1+='\[${cyan}\]\W\[$(random_color)\]$ '
 
