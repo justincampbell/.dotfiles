@@ -26,6 +26,13 @@ curl -fLo "$(bat --config-dir)/themes/railscasts/railscasts.tmTheme" --create-di
   https://raw.githubusercontent.com/tdm00/sublime-theme-railscasts/master/RailsCastsColorScheme.tmTheme
 bat cache --build
 
+# Node
+curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.1/install.sh | bash
+{ set +x; } 2> /dev/null
+\. ~/.nvm/nvm.sh
+nvm install stable
+set -x
+
 # Neovim
 cd $(mktemp -d) && \
   curl -fLo nvim-linux64.deb https://github.com/neovim/neovim/releases/download/stable/nvim-linux64.deb && \

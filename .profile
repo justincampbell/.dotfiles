@@ -38,8 +38,8 @@ fi
 # Node
 if [[ "$NVM_DIR" == "" ]]; then
   export NVM_DIR=~/.nvm
-  . $BREW_PREFIX/nvm/nvm.sh
-  . $BREW_PREFIX/nvm/etc/bash_completion.d/nvm
+  [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+  [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"
 fi
 
 # Git + Prompt
