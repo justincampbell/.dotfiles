@@ -14,9 +14,11 @@ sudo apt -o DPkg::Lock::Timeout=600 install \
   tree \
   -y
 
-sudo ln -s $(which fdfind) /usr/bin/fd
 if ! [[ -x /usr/bin/bat ]]; then
   sudo ln -s $(which batcat) /usr/bin/bat
+fi
+if ! [[ -x /usr/bin/fd ]]; then
+  sudo ln -s $(which fdfind) /usr/bin/fd
 fi
 
 # Bat Theme
