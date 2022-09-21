@@ -72,6 +72,3 @@ if [[ "$(git config --global --get user.email)" == "" ]]; then
   git config --global user.email "justin@justincampbell.me"
 fi
 
-if [[ "$(git config --global --get user.signingkey)" == "" ]]; then
-  git config --global user.signingkey $(gpg --list-keys | grep ^pub | sed -n 's/.*\/\(.*\) .*/\1/p')
-fi
