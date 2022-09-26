@@ -2,7 +2,6 @@ call plug#begin('~/.vim/plugged')
 
 Plug 'airblade/vim-gitgutter'
 Plug 'andrewradev/switch.vim'
-Plug 'beloglazov/vim-online-thesaurus'
 Plug 'dockyard/vim-easydir'
 Plug 'github/copilot.vim'
 Plug 'godlygeek/tabular'
@@ -18,7 +17,6 @@ Plug 'mattn/gist-vim'
 Plug 'mattn/webapi-vim'
 Plug 'michaeljsmith/vim-indent-object'
 Plug 'nathanaelkane/vim-indent-guides'
-Plug 'prettier/vim-prettier', { 'do': 'yarn install' }
 Plug 'rking/ag.vim'
 Plug 'scrooloose/nerdcommenter'
 Plug 'shougo/unite.vim'
@@ -40,16 +38,11 @@ Plug 'vim-scripts/matchit.zip'
 Plug 'vim-scripts/multvals.vim'
 Plug 'vim-scripts/syntaxattr.vim'
 Plug 'w0rp/ale'
-Plug 'wikitopian/hardmode'
 
 " Coc
 Plug 'neoclide/coc.nvim', {
       \ 'branch': 'release',
       \ 'do': ':CocInstall coc-json coc-solargraph coc-tsserver' }
-
-" UltiSnips
-Plug 'honza/vim-snippets'
-Plug 'sirver/ultisnips'
 
 " fzf
 Plug 'junegunn/fzf', { 'do': { -> fzf#install() } }
@@ -81,9 +74,6 @@ Plug 'elzr/vim-json'
 " Markdown
 Plug 'nelstrom/vim-markdown-folding'
 Plug 'tpope/vim-markdown'
-
-" Python
-Plug 'jupyter-vim/jupyter-vim'
 
 " Ruby
 Plug 'alexbel/vim-rubygems'
@@ -211,25 +201,16 @@ autocmd BufNewFile,BufRead *.md,*.markdown set filetype=markdown
 autocmd BufNewFile,BufRead *.skim set filetype=slim
 
 " Filetype-specific settings
-autocmd FileType elixir inoremap \|> \|><Esc>==la
-autocmd FileType elixir let g:SuperTabDefaultCompletionType = "<C-X><C-O>"
-autocmd FileType elixir nnoremap gd :Ag '^\s*def\w+\s.*[\s\.]<cword>[\s$]'<cr><cr>
 autocmd FileType gitcommit,markdown set nonumber
 autocmd FileType gitcommit,markdown set spell
 autocmd FileType go nnoremap <Leader>gc :GoCoverageToggle<cr>
 autocmd FileType markdown,"" set linebreak
 autocmd FileType markdown,"" set wrap
-autocmd FileType haskell set shiftwidth=4
-autocmd FileType haskell nnoremap <Leader>hc :GhcModCheckAsync<cr>
-autocmd FileType haskell nnoremap <Leader>ht :GhcModType<cr>
 autocmd FileType javascript inoremap #{ ${
-autocmd FileType ocaml nnoremap <Leader>ot :MerlinTypeOf<cr>
 " autocmd FileType ruby nnoremap gd :Ag '^\s*(def\|class\|module)\s.*(self\.)?<cword>[\s\($]'<cr>
 autocmd FileType terraform inoremap #{ ${
 autocmd FileType terraform inoremap do<cr> {<cr><cr>}<Up><Tab>
 autocmd FileType terraform inoremap {<cr> {<cr><cr>}<Up><Tab>
-autocmd BufEnter *.es6 set filetype=javascript
-autocmd BufEnter *.job set filetype=nomad
 
 " 80-column line
 set colorcolumn=81
@@ -447,7 +428,3 @@ autocmd BufEnter *_test.js let b:dispatch = 'npm test'
 autocmd BufEnter *_test.rb let b:dispatch = 'bundle exec testrb %'
 autocmd BufEnter Gemfile let b:dispatch = 'bundle'
 autocmd BufEnter db/migrate/*.rb let b:dispatch = 'bundle exec rake db:migrate'
-
-" JavaScript comments
-inoremap /**<Tab> /**<CR><CR>/<Up><Space>
-nnoremap <Leader>jsd yiwO/**<CR><CR>/<Up><Space><Esc>pA<Space>.<Left>
