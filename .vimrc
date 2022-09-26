@@ -347,17 +347,31 @@ let g:go_fmt_command = "goimports"
 let g:go_gocode_propose_source = 1
 
 " coc
+autocmd CursorHold * silent call CocActionAsync('highlight')
+nmap <leader>f  <Plug>(coc-format-selected)
+nmap <leader>rn <Plug>(coc-rename)
 nmap <silent> gd <Plug>(coc-definition)
+nmap <silent> gi <Plug>(coc-implementation)
+nmap <silent> gr <Plug>(coc-references)
 nmap <silent> gy <Plug>(coc-type-definition)
-nnoremap <silent> K :call <SID>show_documentation()<CR>
+xmap <leader>f  <Plug>(coc-format-selected)
+
+nnoremap <silent> K :call ShowDocumentation()<CR>
+function! ShowDocumentation()
+  if CocAction('hasProvider', 'hover')
+    call CocActionAsync('doHover')
+  else
+    call feedkeys('K', 'in')
+  endif
+endfunction
+
+" Accept with tab or return, close with esc
+inoremap <silent><expr> <CR> coc#pum#visible() ? coc#pum#confirm() : "\<CR>"
+inoremap <silent><expr> <Esc> coc#pum#visible() ? coc#pum#cancel() : "\<Esc>"
+inoremap <silent><expr> <Tab> coc#pum#visible() ? coc#pum#confirm() : "\<Tab>"
 
 " Completion
-set completeopt+=noinsert
-set completeopt-=preview
-
-" UltiSnips
-let g:UltiSnipsExpandTrigger="<Tab>"
-let g:UltiSnipsJumpForwardTrigger="<Tab>"
+set completeopt=
 
 " Goyo/Limelight
 let g:goyo_height = '100%'

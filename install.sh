@@ -24,6 +24,7 @@ touch ~/.forecast
 mkdir -p ~/.config/nvim
 ln -fs ~/.dotfiles/.vimrc ~/.config/nvim/init.vim
 ln -fs ~/.dotfiles/.vimrc ~/.vimrc
+ln -fs ~/.dotfiles/coc-settings.json ~/.config/nvim/coc-settings.json
 
 # Codespaces
 if [[ "$CODESPACES" != "" ]]; then
