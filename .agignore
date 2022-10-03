@@ -1,0 +1,5 @@
+node_modules/
+npm-workspaces/
+sorbet/
+tmp/
+vendor/
