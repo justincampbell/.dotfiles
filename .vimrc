@@ -117,6 +117,7 @@ autocmd ColorScheme * highlight Visual ctermbg=236
 colorscheme railscasts
 set background=dark
 syntax on
+highlight GitGutterAdd ctermfg=28
 highlight! link Conceal SpecialKey
 highlight! link Search IncSearch
 highlight! link qfLineNr WarningMsg
