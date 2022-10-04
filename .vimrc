@@ -348,6 +348,9 @@ let g:go_fmt_command = "goimports"
 let g:go_gocode_propose_source = 1
 
 " coc
+highlight! Pmenu ctermfg=7 ctermbg=235
+highlight! CocSearch ctermfg=15
+
 autocmd CursorHold * silent call CocActionAsync('highlight')
 nmap <leader>f  <Plug>(coc-format-selected)
 nmap <leader>rn <Plug>(coc-rename)
