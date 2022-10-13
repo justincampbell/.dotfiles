@@ -9,7 +9,7 @@ ln -fs ~/.dotfiles/.agignore ~/.agignore
 ln -fs ~/.dotfiles/.gemrc ~/.gemrc
 ln -fs ~/.dotfiles/.git_commit_template ~/.git_commit_template
 ln -fs ~/.dotfiles/.hushlogin ~/.hushlogin
-ln -fs ~/.dotfiles/.irbrc ~/.irbrc
+# ln -fs ~/.dotfiles/.irbrc ~/.irbrc
 ln -fs ~/.dotfiles/.profile ~/.profile
 ln -fs ~/.dotfiles/.rdebugrc ~/.rdebugrc
 ln -fs ~/.dotfiles/.tmux.conf ~/.tmux.conf
