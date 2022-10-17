@@ -116,6 +116,15 @@ use_status() {
 }
 
 timer_start() {
+  if [[ $BASH_COMMAND != "prompt_command" ]]; then
+    timer_hash=$(echo "$BASH_COMMAND" | md5sum | cut -f 1 -d " ")
+
+    if [[ -f /tmp/timer.$timer_hash ]]; then
+      last_timer=$(cat /tmp/timer.$timer_hash)
+      echo "${yellow}Estimated completion time: $(display_duration ${last_timer})${reset}"
+    fi
+  fi
+
   timer=${timer:-$SECONDS}
 }
 trap 'timer_start' DEBUG
@@ -124,6 +133,8 @@ timer_status() {
   timer_seconds=$(($SECONDS - $timer))
   unset timer
   if [[ $timer_seconds -ge 5 ]]; then
+    echo $timer_seconds > /tmp/timer.$timer_hash
+
     echo -n $yellow
     display_duration $timer_seconds
   fi
