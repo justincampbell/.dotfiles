@@ -137,6 +137,8 @@ timer_status() {
 
     echo -n $yellow
     display_duration $timer_seconds
+  else
+    rm -f /tmp/timer.$timer_hash
   fi
 }
 
