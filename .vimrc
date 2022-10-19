@@ -332,6 +332,11 @@ command! -bang -nargs=? -complete=dir FzfFiles
 
 " Switch
 nnoremap <leader>- :Switch<CR>
+let g:switch_custom_definitions =
+    \ [
+    \   ['assert', 'refute'],
+    \   ['enable', 'disable'],
+    \ ]
 
 " Wrap quickfix text
 autocmd FileType qf setlocal wrap linebreak
