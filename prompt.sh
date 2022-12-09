@@ -36,10 +36,25 @@ random_color() {
 }
 
 function display_duration () {
-  ((h=${1}/3600))
-  ((m=(${1}%3600)/60))
-  ((s=${1}%60))
-  printf "%02d:%02d:%02d\n" $h $m $s
+  s=$(printf "%.0f" $1)
+
+  ((h=${s}/3600))
+  ((m=(${s}%3600)/60))
+  ((s=${s}%60))
+
+  buffer=""
+  if [ "$h" != "0" ]; then
+    buffer="${h}h"
+  fi
+  if [ "$m" != "0" ]; then
+    buffer="${buffer}${m}m"
+  fi
+  if [[ "$1" == *"."* ]]; then
+    buffer="${buffer}$(printf "%.01f" $1)s"
+  else
+    buffer="${buffer}${s}s"
+  fi
+  printf "%s\n" "$buffer"
 }
 
 node_status() {
@@ -120,8 +135,13 @@ timer_start() {
     timer_hash=$(echo "$BASH_COMMAND" | md5sum | cut -f 1 -d " ")
 
     if [[ -f /tmp/timer.$timer_hash ]]; then
-      last_timer=$(cat /tmp/timer.$timer_hash)
-      echo "${yellow}Estimated completion time: $(display_duration ${last_timer})${reset}"
+      average=$(awk '{x+=$0}END{print x/NR}' /tmp/timer.$timer_hash)
+      stddev=$(awk '{delta=$1-avg;avg+=delta/NR;mean2+=delta*($1-avg);}END{print sqrt(mean2/NR);}' /tmp/timer.$timer_hash)
+      echo -n "℮ ${yellow}$(display_duration ${average})"
+      if [[ "$stddev" != "0" ]]; then
+        echo -n " (σ=$(display_duration ${stddev}))"
+      fi
+      echo "${reset}"
     fi
   fi
 
@@ -133,9 +153,9 @@ timer_status() {
   timer_seconds=$(($SECONDS - $timer))
   unset timer
   if [[ $timer_seconds -ge 5 ]]; then
-    echo $timer_seconds > /tmp/timer.$timer_hash
+    echo $timer_seconds >> /tmp/timer.$timer_hash
 
-    echo -n $yellow
+    echo -n "⏱️ ${yellow}"
     display_duration $timer_seconds
   else
     rm -f /tmp/timer.$timer_hash
