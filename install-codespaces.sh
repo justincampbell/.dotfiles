@@ -31,7 +31,9 @@ curl -fLo "$(bat --config-dir)/themes/railscasts/railscasts.tmTheme" --create-di
 bat cache --build
 
 # Node
-curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.1/install.sh | bash
+sudo rm -rf /usr/local/share/nvm
+unset NVM_DIR
+curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.2/install.sh | bash
 { set +x; } 2> /dev/null
 \. ~/.nvm/nvm.sh
 nvm install stable
