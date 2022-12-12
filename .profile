@@ -36,7 +36,7 @@ if [ -x "$(command -v chruby)" ]; then
 fi
 
 # Node
-if [[ "$NVM_DIR" == "" ]]; then
+if [ "$NVM_DIR" != ~/.nvm ]; then
   export NVM_DIR=~/.nvm
   [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
   [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"
