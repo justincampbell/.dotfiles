@@ -1,5 +1,9 @@
 #!/bin/bash -ex
 
+echo "deb http://deb.debian.org/debian bullseye-backports main contrib non-free" \
+  | sudo tee -a /etc/apt/sources.list
+sudo apt-get update && sudo apt-get upgrade -y
+
 # Packages
 sudo apt -o DPkg::Lock::Timeout=600 install \
   athena-jot \
