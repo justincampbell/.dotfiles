@@ -16,6 +16,7 @@ sudo apt -o DPkg::Lock::Timeout=600 install \
   software-properties-common \
   tmux \
   tree \
+  -t bullseye-backports \
   -y
 
 if ! [[ -x /usr/bin/bat ]]; then
