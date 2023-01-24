@@ -148,15 +148,23 @@ set nowrap
 set backspace=eol,indent,start
 
 " ALE
+highlight! ALEVirtualTextError cterm=underline,bold ctermfg=1
+highlight! ALEVirtualTextWarning cterm=underline,bold ctermfg=3
+
+let g:ale_cursor_detail = 1
 let g:ale_echo_msg_error_str = '❗️'
-let g:ale_echo_msg_warning_str = '🙄'
 let g:ale_echo_msg_format = '[%linter%] %severity% %s'
+let g:ale_echo_msg_warning_str = '🙄'
 let g:ale_fix_on_save = 1
+let g:ale_floating_preview = 1
+let g:ale_floating_window_border = ['│', '─', '╭', '╮', '╯', '╰', '│', '─']
 let g:ale_javascript_prettier_use_local_config = 1
 let g:ale_lint_on_text_changed = 'never'
 let g:ale_open_list = 1
+let g:ale_set_highlights = 1
 let g:ale_sign_error = '!'
 let g:ale_sign_warning = '?'
+let g:ale_virtualtext_prefix = '%severity%%linter%% code%: '
 
 let g:ale_fixers = {}
 let g:ale_fixers['javascript'] = ['prettier', 'importjs']
