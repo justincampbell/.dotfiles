@@ -16,8 +16,11 @@ sudo apt -o DPkg::Lock::Timeout=600 install \
   python3-pip \
   silversearcher-ag \
   software-properties-common \
-  tmux \
   tree \
+  -y
+
+sudo apt -o DPkg::Lock::Timeout=600 install \
+  tmux \
   -t bullseye-backports \
   -y
 
