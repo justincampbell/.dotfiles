@@ -344,8 +344,10 @@ command! -bang -nargs=? -complete=dir FzfFiles
 nnoremap <leader>- :Switch<CR>
 let g:switch_custom_definitions =
     \ [
+    \   ['==', '!='],
     \   ['assert', 'refute'],
     \   ['enable', 'disable'],
+    \   ['if' , 'unless'],
     \ ]
 
 " Wrap quickfix text
