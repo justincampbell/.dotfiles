@@ -148,6 +148,8 @@ set nowrap
 set backspace=eol,indent,start
 
 " ALE
+highlight! ALEErrorLine cterm=underline ctermfg=1
+highlight! ALEWarningLine cterm=underline ctermfg=3
 highlight! ALEVirtualTextError cterm=underline,bold ctermfg=1
 highlight! ALEVirtualTextWarning cterm=underline,bold ctermfg=3
 
