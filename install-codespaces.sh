@@ -9,6 +9,7 @@ sudo apt -o DPkg::Lock::Timeout=600 install \
   athena-jot \
   bat \
   fd-find \
+  fuse \
   python-dev \
   python3-dev \
   python3-pip \
@@ -42,8 +43,10 @@ set -x
 
 # Neovim
 cd $(mktemp -d) && \
-  curl -fLo nvim-linux64.deb https://github.com/neovim/neovim/releases/download/stable/nvim-linux64.deb && \
-  sudo apt install ./nvim-linux64.deb -y
+  curl -fLO https://github.com/neovim/neovim/releases/latest/download/nvim.appimage && \
+  sudo chmod u+x nvim.appimage && \
+  sudo mv nvim.appimage /usr/local/bin/nvim
+
 sudo apt install python3-neovim -y
 curl -fLo "${XDG_DATA_HOME:-$HOME/.local/share}"/nvim/site/autoload/plug.vim --create-dirs \
   https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
