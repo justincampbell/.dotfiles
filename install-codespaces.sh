@@ -10,6 +10,7 @@ sudo apt -o DPkg::Lock::Timeout=600 install \
   bat \
   fd-find \
   fuse \
+  fzf \
   python-dev \
   python3-dev \
   python3-pip \
