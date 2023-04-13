@@ -3,7 +3,6 @@ export BREW_PREFIX=/opt/homebrew/opt
 export BROWSER=open
 export CLICOLOR=true
 export EDITOR=nvim
-export FORECAST_IO_API_KEY="$(cat ~/.forecast)"
 export FZF_DEFAULT_COMMAND='fd --type f'
 export GPG_TTY=$(tty)
 export HISTCONTROL=ignoreboth
