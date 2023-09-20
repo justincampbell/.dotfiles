@@ -1,6 +1,6 @@
 #!/bin/bash -ex
 
-echo "deb http://deb.debian.org/debian bullseye-backports main contrib non-free" \
+echo "deb http://deb.debian.org/debian main contrib non-free" \
   | sudo tee -a /etc/apt/sources.list
 sudo apt-get update && sudo apt-get upgrade -y
 
@@ -16,12 +16,8 @@ sudo apt -o DPkg::Lock::Timeout=600 install \
   python3-pip \
   silversearcher-ag \
   software-properties-common \
-  tree \
-  -y
-
-sudo apt -o DPkg::Lock::Timeout=600 install \
   tmux \
-  -t bullseye-backports \
+  tree \
   -y
 
 if ! [[ -x /usr/bin/bat ]]; then
