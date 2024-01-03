@@ -1,7 +1,5 @@
 #!/bin/bash -ex
 
-echo "deb http://deb.debian.org/debian main contrib non-free" \
-  | sudo tee -a /etc/apt/sources.list
 sudo apt-get update && sudo apt-get upgrade -y
 
 # Packages
