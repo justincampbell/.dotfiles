@@ -2,6 +2,7 @@ google() { open "https://www.google.com/search?q=$@" ;}
 
 # Fuzzy finders
 [ -f ~/.fzf.bash ] && source ~/.fzf.bash
+
 branch() {
   git checkout ${1:-$(
   git for-each-ref \
@@ -11,13 +12,22 @@ branch() {
     | fzf
   )}
 }
+
 code() {
-  cd ~/Code/${1:-$(
-  find ~/Code -type d -maxdepth 2 | \
-    grep ".*/.*$" | \
-    cut -f 5-6 -d "/" | \
-    fzf
-  )}
+  if [ ! -z "$CODESPACES" ]; then
+    cd /workspaces/${1:-$(
+      find /workspaces -maxdepth 1 -type d | \
+        cut -f 3 -d "/" | \
+        fzf
+    )}
+  else
+    cd ~/Code/${1:-$(
+      find ~/Code -maxdepth 2 -type d | \
+        grep ".*/.*$" | \
+        cut -f 5-6 -d "/" | \
+        fzf
+      )}
+  fi
 }
 
 # Directory jumping
