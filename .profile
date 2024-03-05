@@ -85,6 +85,12 @@ if [ -z "$TMUX" ]; then # Only do any of this if we're not inside a tmux session
       tmux attach
     fi
   else
+    # If we're in a codespace, wait until it's done building.
+    if [[ "$CODESPACES" != "" ]]; then
+      tail -f /workspaces/.codespaces/.persistedshare/creation.log | \
+        sed '/Finished configuring codespace/ q'
+    fi
+
     # If there are no tmux sessions, start one.
     tmux
   fi
