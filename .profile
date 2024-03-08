@@ -1,3 +1,9 @@
+# If we're in a codespace, wait until it's done building.
+if [[ "$CODESPACES" != "" ]]; then
+  tail -f /workspaces/.codespaces/.persistedshare/creation.log | \
+    sed '/Finished configuring codespace/ q'
+fi
+
 export BASH_SILENCE_DEPRECATION_WARNING=1
 export BREW_PREFIX=/opt/homebrew/opt
 export BROWSER=open
@@ -85,12 +91,6 @@ if [ -z "$TMUX" ]; then # Only do any of this if we're not inside a tmux session
       tmux attach
     fi
   else
-    # If we're in a codespace, wait until it's done building.
-    if [[ "$CODESPACES" != "" ]]; then
-      tail -f /workspaces/.codespaces/.persistedshare/creation.log | \
-        sed '/Finished configuring codespace/ q'
-    fi
-
     # If there are no tmux sessions, start one.
     tmux
   fi
