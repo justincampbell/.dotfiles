@@ -1,7 +1,10 @@
 # If we're in a codespace, wait until it's done building.
 if [[ "$CODESPACES" != "" ]]; then
-  tail -f /workspaces/.codespaces/.persistedshare/creation.log | \
-    sed '/Finished configuring codespace/ q'
+  message="Finished configuring codespace"
+  log="/workspaces/.codespaces/.persistedshare/creation.log"
+  if ! grep -q "${message}" "${log}"; then
+    tail -f "${log}" | sed "/${message}/ q"
+  fi
 fi
 
 export BASH_SILENCE_DEPRECATION_WARNING=1
