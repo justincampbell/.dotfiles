@@ -38,22 +38,45 @@ random_color() {
 function display_duration () {
   s=$(printf "%.0f" $1)
 
+  # Check if the number has a decimal, and if so, round it
+  decimal=""
+  decimal_rounded=""
+  if [[ $1 == *"."* ]]; then
+    parts=(${1//./ })
+    decimal=${parts[1]}
+    if [ "$decimal" != "" ]; then
+      decimal_rounded=${decimal:0:1}
+      if [ "${#decimal}" -gt 1 ]; then
+        if [ "${decimal:1:1}" -ge 5 ]; then
+          decimal_rounded=$((decimal_rounded+1))
+        fi
+      fi
+    fi
+  fi
+
   ((h=${s}/3600))
   ((m=(${s}%3600)/60))
   ((s=${s}%60))
 
   buffer=""
+
+  # Hours
   if [ "$h" != "0" ]; then
     buffer="${h}h"
   fi
+
+  # Minutes
   if [ "$m" != "0" ]; then
     buffer="${buffer}${m}m"
   fi
-  if [[ "$1" == *"."* ]]; then
-    buffer="${buffer}$(printf "%.01f" $1)s"
-  else
-    buffer="${buffer}${s}s"
+
+  # Seconds
+  buffer="${buffer}${s}"
+  if [ "$decimal_rounded" != "" ]; then
+    buffer="${buffer}.${decimal_rounded}"
   fi
+  buffer="${buffer}s"
+
   printf "%s\n" "$buffer"
 }
 
