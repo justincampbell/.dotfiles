@@ -205,18 +205,18 @@ autocmd InsertEnter * match ExtraWhitespace /\s\+\%#\@<!$/
 autocmd BufWinLeave * call clearmatches()
 
 " Filetype mappings
-autocmd BufNewFile,BufRead *.avsc set filetype=json
-autocmd BufNewFile,BufRead *.crl set filetype=ruby
-autocmd BufNewFile,BufRead *.jbuilder set filetype=ruby
-autocmd BufNewFile,BufRead *.md,*.markdown set filetype=markdown
-autocmd BufNewFile,BufRead *.skim set filetype=slim
+autocmd BufNewFile,BufRead *.avsc setlocal filetype=json
+autocmd BufNewFile,BufRead *.crl setlocal filetype=ruby
+autocmd BufNewFile,BufRead *.jbuilder setlocal filetype=ruby
+autocmd BufNewFile,BufRead *.md,*.markdown setlocal filetype=markdown
+autocmd BufNewFile,BufRead *.skim setlocal filetype=slim
 
 " Filetype-specific settings
-autocmd FileType gitcommit,markdown set nonumber
-autocmd FileType gitcommit,markdown set spell
+autocmd FileType gitcommit,markdown setlocal nonumber
+autocmd FileType gitcommit,markdown setlocal spell
 autocmd FileType go nnoremap <Leader>gc :GoCoverageToggle<cr>
-autocmd FileType markdown,"" set linebreak
-autocmd FileType markdown,"" set wrap
+autocmd FileType markdown,"" setlocal linebreak
+autocmd FileType markdown,"" setlocal wrap
 autocmd FileType javascript inoremap #{ ${
 " autocmd FileType ruby nnoremap gd :Ag '^\s*(def\|class\|module)\s.*(self\.)?<cword>[\s\($]'<cr>
 autocmd FileType terraform inoremap #{ ${
