@@ -39,6 +39,7 @@ vim.opt.tabstop = 4
 vim.opt.shiftwidth = 4
 vim.opt.expandtab = true
 vim.opt.fixeol = true
+vim.opt.autoread = true
 
 -- Diagnostics
 -- vim.diagnostic.config({
@@ -55,6 +56,18 @@ vim.keymap.set('n', '<Esc>', '<cmd>nohlsearch<CR>')
 vim.schedule(function()
     vim.opt.clipboard = 'unnamedplus'
 end)
+
+-- Auto-reload files when changed on disk
+vim.opt.autoread = true
+vim.opt.updatetime = 1000
+vim.api.nvim_create_autocmd({ "FocusGained", "BufEnter", "CursorHold", "ModeChanged" }, {
+    pattern = "*",
+    callback = function()
+        if vim.fn.mode() ~= "c" then
+            vim.cmd("checktime")
+        end
+    end,
+})
 
 -- TODO move keymaps to another file
 
