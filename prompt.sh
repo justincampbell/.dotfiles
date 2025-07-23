@@ -111,7 +111,7 @@ ruby_status() {
 
   RUBY_VERSION=${RUBY_VERSION:-system}
 
-  if ! echo $RUBY_VERSION | grep $(cat .ruby-version) > /dev/null; then
+  if ! echo "ruby-${RUBY_VERSION}" | grep $(cat .ruby-version) > /dev/null; then
     echo -n "${red}${bold}Ruby${reset}${red} using $RUBY_VERSION, but should be " &&
     cat .ruby-version
   fi
