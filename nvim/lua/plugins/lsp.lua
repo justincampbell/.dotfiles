@@ -18,19 +18,40 @@ return {
                     },
                 },
             })
+
+            lspconfig.ruby_lsp.setup({
+                init_options = {
+                    formatter = 'standard',
+                    linters = { 'standard' },
+                },
+            })
+
+            lspconfig.standardrb.setup({})
+
+            lspconfig.vtsls.setup({})
         end,
 
         dependencies = {
-            { 'williamboman/mason.nvim', opts = {} },
-            'williamboman/mason-lspconfig.nvim',
             {
-                'WhoIsSethDaniel/mason-tool-installer.nvim',
-                ensure_installed = { "gopls" },
+                'williamboman/mason.nvim',
+                opts = {}
             },
 
-            { 'j-hui/fidget.nvim',       opts = {} },
+            'williamboman/mason-lspconfig.nvim',
 
-            'hrsh7th/cmp-nvim-lsp',
+            {
+                'WhoIsSethDaniel/mason-tool-installer.nvim',
+                ensure_installed = {
+                    "gopls",
+                    "ruby_lsp",
+                    "vtsls",
+                },
+            },
+
+            {
+                'j-hui/fidget.nvim',
+                opts = {}
+            },
         },
     }
 }

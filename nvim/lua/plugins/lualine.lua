@@ -1,46 +1,54 @@
 return {
-	"nvim-lualine/lualine.nvim",
-	opts = {
-		options = {
-			theme = "16color",
+    "nvim-lualine/lualine.nvim",
 
-			section_separators = {
-				left = "",
-				right = "",
-			},
+    config = function()
+        local theme = require('lualine.themes.16color')
+        theme.normal.a.bg = 'black'
+        theme.normal.b.bg = 'black'
+        theme.normal.c.bg = 'black'
 
-			component_separators = {
-				left = "",
-				right = "",
-			},
-		},
+        require('lualine').setup({
+            options = {
+                theme = theme,
 
-		sections = {
-			lualine_a = {
-				"lsp_status",
-				use_mode_colors = false,
-			},
+                section_separators = {
+                    left = "",
+                    right = "",
+                },
 
-			lualine_b = {
-				{
-					"diagnostics",
-					sources = { "nvim_diagnostic" },
-					colored = false,
-				},
-			},
+                component_separators = {
+                    left = "",
+                    right = "",
+                },
+            },
 
-			lualine_c = {
-				"filename",
-			},
+            sections = {
+                lualine_a = {
+                    "lsp_status",
+                    -- use_mode_colors = false,
+                },
 
-			lualine_x = {},
+                lualine_b = {
+                    {
+                        "diagnostics",
+                        sources = { "nvim_diagnostic" },
+                        -- colored = false,
+                    },
+                },
 
-			lualine_y = {},
+                lualine_c = {
+                    "filename",
+                },
 
-			lualine_z = {
-				"%2l/%L",
-				use_mode_colors = false,
-			},
-		},
-	},
+                lualine_x = {},
+
+                lualine_y = {},
+
+                lualine_z = {
+                    "%2l/%L",
+                    -- use_mode_colors = false,
+                },
+            },
+        })
+    end,
 }

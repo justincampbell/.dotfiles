@@ -16,7 +16,7 @@ end
 vim.opt.rtp:prepend(lazypath)
 
 -- Leader
-vim.g.mapleader = " "
+vim.g.mapleader = "\\"
 vim.g.maplocalleader = "\\"
 
 -- Initialize lazy.nvim and all plugins
@@ -38,6 +38,13 @@ vim.opt.wrap = false
 vim.opt.tabstop = 4
 vim.opt.shiftwidth = 4
 vim.opt.expandtab = true
+vim.opt.fixeol = true
+
+-- Diagnostics
+-- vim.diagnostic.config({
+--     signs = true,
+--     virtual_text = false,
+-- })
 
 -- Search/replace
 vim.opt.ignorecase = true
@@ -58,9 +65,32 @@ end, { silent = true })
 
 vim.keymap.set("n", "gs", ":Switch<CR>", { desc = "Toggle switch" })
 vim.keymap.set("n", "<Tab>", ":tabnext<CR>", { desc = "Next tab", silent = true })
-vim.keymap.set("n", "<Shift><Tab>", ":tabprev<CR>", { desc = "Next tab", silent = true })
+vim.keymap.set("n", "<S-Tab>", ":tabprev<CR>", { desc = "Prev tab", silent = true })
 vim.keymap.set("v", "<Leader>s", ":sort<CR>", { noremap = true, silent = true })
 
 -- Comments
 vim.keymap.set("n", "<Leader>/", "gcc<CR>", { noremap = true, silent = true })
 vim.keymap.set("v", "<Leader>/", "gc<CR>", { noremap = true, silent = true })
+
+vim.api.nvim_create_autocmd({ "BufWritePre" }, {
+    group = vim.api.nvim_create_augroup("ts_imports", { clear = true }),
+    pattern = { "*.tsx,*.ts" },
+    callback = function()
+        -- vim.lsp.buf.code_action({ apply = true, context = { only = { "source.removeUnusedImports" }, diagnostics = {} } })
+        vim.lsp.buf.code_action({ apply = true, context = { only = { "source.addMissingImports.ts" }, diagnostics = {} } })
+        -- vim.lsp.buf.code_action({ apply = true, context = { only = { "source.sortImports" }, diagnostics = {} } })
+        -- vim.lsp.buf.code_action({ apply = true, context = { only = { "source.removeUnusedImports" }, diagnostics = {} } })
+        -- vim.lsp.buf.code_action({ apply = true, context = { only = { "source.fixAll.ts" }, diagnostics = {} } })
+        -- local actions = {
+        --     "source.removeUnusedImports",
+        --     "source.addMissingImports.ts",
+        --     "source.sortImports",
+        --     "source.fixAll.ts",
+        -- }
+        -- for i = 1, #actions do
+        --     vim.defer_fn(function()
+        --         vim.lsp.buf.code_action { apply = true, context = { only = { actions[i] } } }
+        --     end, i * 60)
+        -- end
+    end,
+})

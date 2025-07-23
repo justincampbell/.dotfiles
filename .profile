@@ -8,6 +8,7 @@ if [[ "$CODESPACES" != "" ]]; then
 fi
 
 export BASH_SILENCE_DEPRECATION_WARNING=1
+export BAT_THEME=railscasts
 export BREW_PREFIX=/opt/homebrew/opt
 export BROWSER=open
 export CLICOLOR=true
