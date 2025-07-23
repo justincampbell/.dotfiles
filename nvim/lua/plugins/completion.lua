@@ -1,57 +1,47 @@
 return {
     {
-        "hrsh7th/nvim-cmp",
-
-        opts = function(_, opts)
-            local cmp = require("cmp")
-
-            opts.completion = { completeopt = 'menu,menuone,noinsert' }
-
-            -- TODO: have not seen this work yet
-            opts.expand = function(args)
-                vim.snippet.expand(args.body)
-            end
-
-            opts.sources = cmp.config.sources({
-                { name = "copilot" },
-                { name = "buffer" },
-                { name = "nvim_lsp" },
-                { name = "path" },
-            })
-
-            opts.mapping = cmp.mapping.preset.insert({
-                ['<Tab>'] = function(fallback)
-                    if cmp.visible() then
-                        cmp.confirm()
-                    else
-                        fallback()
-                    end
-                end,
-
-                ['<CR>'] = cmp.mapping.confirm({ select = true }),
-
-                ['<Up>'] = function(fallback)
-                    if cmp.visible() then
-                        cmp.select_prev_item()
-                    else
-                        fallback()
-                    end
-                end,
-
-                ['<Down>'] = function(fallback)
-                    if cmp.visible() then
-                        cmp.select_next_item()
-                    else
-                        fallback()
-                    end
-                end,
-            })
-        end,
+        "saghen/blink.cmp",
+        version = "*",
 
         dependencies = {
-            'hrsh7th/cmp-buffer',
-            'hrsh7th/cmp-nvim-lsp',
-            'hrsh7th/cmp-path',
-        }
+            "fang2hou/blink-copilot",
+        },
+
+        opts = {
+            completion = {
+                documentation = { auto_show = true },
+                ghost_text = { enabled = true },
+                trigger = { show_on_blocked_trigger_characters = {} },
+            },
+
+            fuzzy = {
+                implementation = "prefer_rust"
+            },
+
+            keymap = {
+                ["<CR>"] = { "select_and_accept", "fallback" },
+                ["<Tab>"] = { "select_and_accept", "fallback" }
+            },
+
+            sources = {
+                default = {
+                    "copilot",
+                    "lsp",
+                    "buffer",
+                    "path"
+                },
+
+                providers = {
+                    copilot = {
+                        name = "copilot",
+                        module = "blink-copilot",
+                        async = true,
+                        score_offset = 100,
+                    },
+                },
+            },
+
+            signature = { enabled = true },
+        },
     }
 }
