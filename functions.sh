@@ -70,3 +70,14 @@ hue_temperature() {
     echo "2700k"
   fi
 }
+
+meeting() {
+  slack_dnd 25
+  slack_status :zoom: 25 Meeting
+  hueadm group "Justin's Office" reset > /dev/null
+  hueadm group "Justin's Office" "$(hue_temperature)" bri=$(hue_brightness) > /dev/null
+}
+
+tadam() {
+  open "tadam://start?time=25min"
+}

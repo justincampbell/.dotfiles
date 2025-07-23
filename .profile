@@ -8,6 +8,7 @@ if [[ "$CODESPACES" != "" ]]; then
 fi
 
 export BASH_SILENCE_DEPRECATION_WARNING=1
+export BAT_THEME=railscasts
 export BREW_PREFIX=/opt/homebrew/opt
 export BROWSER=open
 export CLICOLOR=true
@@ -37,10 +38,7 @@ if [ -x "$(command -v chruby)" ]; then
   source $BREW_PREFIX/chruby/share/chruby/chruby.sh
   print_ruby() { basename $RUBY_ROOT ;}
   detect_chruby() { chruby $(cat .ruby-version) && print_ruby ;}
-  [ -f .ruby-version ] && detect_chruby || chruby ruby-3.1
-  alias 27='chruby ruby-2.7 && print_ruby'
-  alias 30='chruby ruby-3.0 && print_ruby'
-  alias 31='chruby ruby-3.1 && print_ruby'
+  [ -f .ruby-version ] && detect_chruby || chruby ruby-3.4
 fi
 
 # Node

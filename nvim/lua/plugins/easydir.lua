@@ -1,0 +1,3 @@
+return {
+    "duggiefresh/vim-easydir"
+}

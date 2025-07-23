@@ -22,10 +22,7 @@ fi
 touch ~/.forecast
 
 # Vim
-mkdir -p ~/.config/nvim
-ln -fs ~/.dotfiles/.vimrc ~/.config/nvim/init.vim
-ln -fs ~/.dotfiles/.vimrc ~/.vimrc
-ln -fs ~/.dotfiles/coc-settings.json ~/.config/nvim/coc-settings.json
+ln -fs ~/.dotfiles/nvim ~/.config/nvim
 
 # Codespaces
 if [[ "$CODESPACES" != "" ]]; then
