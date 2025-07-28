@@ -60,6 +60,7 @@ git config --global pull.ff only
 git config --global push.default current
 git config --global rebase.autosquash true
 git config --global rebase.autostash true
+git config --global status.showUntrackedFiles all
 git config --global user.name "Justin Campbell"
 git config --global web.browser open
 
