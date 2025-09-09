@@ -26,6 +26,11 @@ export PATH=bin:$PATH
 # Functions
 source ~/.dotfiles/functions.sh
 
+# Mise
+if command -v mise > /dev/null 2>&1; then
+  eval "$(mise activate bash)"
+fi
+
 # Go
 if [[ -z "$GOPATH" ]]; then
   export GOPATH=$(stat -f ~/Code/go)
