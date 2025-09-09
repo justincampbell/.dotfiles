@@ -3,6 +3,9 @@ google() { open "https://www.google.com/search?q=$@" ;}
 # Fuzzy finders
 [ -f ~/.fzf.bash ] && source ~/.fzf.bash
 
+# Aliases
+alias p=pomodoro
+
 branch() {
   git checkout ${1:-$(
   git for-each-ref \
