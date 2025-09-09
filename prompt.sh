@@ -185,12 +185,23 @@ timer_status() {
   fi
 }
 
+tmux_window_title() {
+  if [ -n "$TMUX" ]; then
+    if [ "$PWD" = "$HOME" ]; then
+      tmux rename-window "🏠"
+    else
+      tmux set-window-option -t "$(tmux display-message -p '#I')" automatic-rename on
+    fi
+  fi
+}
+
 prompt_command() {
   timer_status
   node_status
   ruby_status
   use_status
   git_status
+  tmux_window_title
 
   set_ps1
 }
