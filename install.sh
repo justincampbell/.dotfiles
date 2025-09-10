@@ -27,7 +27,7 @@ fi
 touch ~/.forecast
 
 # Vim
-ln -fs ~/.dotfiles/nvim ~/.config/nvim
+ln -sfn ~/.dotfiles/nvim ~/.config/nvim
 
 # Codespaces
 if [[ "$CODESPACES" != "" ]]; then
