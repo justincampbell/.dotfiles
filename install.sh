@@ -1,5 +1,10 @@
 #!/bin/bash -ex
 
+# Homebrew
+if [ -x "$(command -v brew)" ]; then
+  brew bundle
+fi
+
 if [[ "$PWD" != "$HOME/.dotfiles" ]]; then
   ln -fs $PWD ~/.dotfiles
 fi
