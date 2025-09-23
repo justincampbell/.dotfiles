@@ -86,9 +86,6 @@ beep() { osascript -e "beep $@"; }
 # vim-brained
 alias :q=exit
 
-# Lock the screen
-alias lock="/System/Library/CoreServices/Menu\ Extras/User.menu/Contents/Resources/CGSession -suspend"
-
 # tmux
 if [ -z "$TMUX" ]; then # Only do any of this if we're not inside a tmux session.
   if tmux has-session; then
