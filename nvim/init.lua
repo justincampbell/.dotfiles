@@ -72,10 +72,6 @@ vim.api.nvim_create_autocmd({ "FocusGained", "BufEnter", "CursorHold", "ModeChan
 -- TODO move keymaps to another file
 
 -- Keymaps
-vim.keymap.set("n", "<c-P>", function()
-    require("fzf-lua").files()
-end, { silent = true })
-
 vim.keymap.set("n", "gs", ":Switch<CR>", { desc = "Toggle switch" })
 vim.keymap.set("n", "<Tab>", ":tabnext<CR>", { desc = "Next tab", silent = true })
 vim.keymap.set("n", "<S-Tab>", ":tabprev<CR>", { desc = "Prev tab", silent = true })

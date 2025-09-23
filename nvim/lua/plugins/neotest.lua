@@ -12,6 +12,7 @@ return {
             "fredrikaverpil/neotest-golang",
             "marilari88/neotest-vitest",
             "nvim-neotest/neotest-jest",
+            "olimorris/neotest-rspec",
             "zidhuss/neotest-minitest",
         },
 
@@ -22,6 +23,7 @@ return {
                 adapters = {
                     require("neotest-golang"),
                     require("neotest-jest"),
+                    require("neotest-rspec"),
                     require("neotest-minitest"),
                     require("neotest-vitest"),
                 },

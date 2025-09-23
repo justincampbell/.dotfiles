@@ -1,5 +1,10 @@
 #!/bin/bash -ex
 
+# Homebrew
+if [ -x "$(command -v brew)" ]; then
+  brew bundle
+fi
+
 if [[ "$PWD" != "$HOME/.dotfiles" ]]; then
   ln -fs $PWD ~/.dotfiles
 fi
@@ -22,7 +27,7 @@ fi
 touch ~/.forecast
 
 # Vim
-ln -fs ~/.dotfiles/nvim ~/.config/nvim
+ln -sfn ~/.dotfiles/nvim ~/.config/nvim
 
 # Codespaces
 if [[ "$CODESPACES" != "" ]]; then

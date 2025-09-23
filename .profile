@@ -19,12 +19,17 @@ export HISTCONTROL=ignoreboth
 export HISTSIZE=10000
 
 export PATH=$HOME/.dotfiles/bin:$PATH # Dotfiles
-export PATH=/usr/local/bin:/usr/local/sbin:/opt/homebrew/bin:$PATH # Homebrew
+export PATH=/usr/local/bin:/usr/local/sbin:/opt/homebrew/bin:/opt/homebrew/sbin:$PATH # Homebrew
 export PATH=node_modules/.bin:/usr/local/share/npm/bin:$PATH # Node/NPM
 export PATH=bin:$PATH
 
 # Functions
 source ~/.dotfiles/functions.sh
+
+# Mise
+if command -v mise > /dev/null 2>&1; then
+  eval "$(mise activate bash)"
+fi
 
 # Go
 if [[ -z "$GOPATH" ]]; then
@@ -80,9 +85,6 @@ beep() { osascript -e "beep $@"; }
 
 # vim-brained
 alias :q=exit
-
-# Lock the screen
-alias lock="/System/Library/CoreServices/Menu\ Extras/User.menu/Contents/Resources/CGSession -suspend"
 
 # tmux
 if [ -z "$TMUX" ]; then # Only do any of this if we're not inside a tmux session.
