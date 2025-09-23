@@ -19,14 +19,23 @@ return {
                 },
             })
 
-            lspconfig.ruby_lsp.setup({
-                init_options = {
-                    formatter = 'standard',
-                    linters = { 'standard' },
-                },
-            })
+            local ruby_lsp_config = {
+                init_options = {}
+            }
 
-            lspconfig.standardrb.setup({})
+            if vim.fn.executable('rubocop') == 1 then
+                ruby_lsp_config.init_options.formatter = 'rubocop'
+                ruby_lsp_config.init_options.linters = { 'rubocop' }
+            elseif vim.fn.executable('standardrb') == 1 then
+                ruby_lsp_config.init_options.formatter = 'standard'
+                ruby_lsp_config.init_options.linters = { 'standard' }
+            end
+
+            lspconfig.ruby_lsp.setup(ruby_lsp_config)
+
+            if vim.fn.executable('standardrb') == 1 then
+                lspconfig.standardrb.setup({})
+            end
 
             lspconfig.vtsls.setup({})
         end,
