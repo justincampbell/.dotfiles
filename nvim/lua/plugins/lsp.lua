@@ -43,7 +43,13 @@ return {
         end,
 
         keys = {
-            { "gd", vim.lsp.buf.definition, desc = "Go to definition" },
+            { "gd", function()
+                if #vim.lsp.get_clients({ bufnr = 0 }) > 0 then
+                    vim.lsp.buf.definition()
+                else
+                    require("fzf-lua").grep_cword()
+                end
+            end, desc = "Go to definition" },
             { "K",  vim.lsp.buf.hover,      desc = "Show documentation" },
         },
 
