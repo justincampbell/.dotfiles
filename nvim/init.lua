@@ -42,10 +42,36 @@ vim.opt.fixeol = true
 vim.opt.autoread = true
 
 -- Diagnostics
--- vim.diagnostic.config({
---     signs = true,
---     virtual_text = false,
--- })
+vim.diagnostic.config({
+    virtual_text = false,
+    float = {
+        border = 'rounded',
+        format = function(diagnostic)
+            -- Strip ANSI color codes
+            return diagnostic.message:gsub('\27%[[0-9;]*m', '')
+        end,
+    },
+})
+
+vim.api.nvim_create_autocmd('CursorMoved', {
+    pattern = '*',
+    callback = function()
+        vim.diagnostic.open_float(nil, { focus = false, scope = 'line', border = 'rounded', header = '' })
+    end,
+})
+
+-- Quickfix
+vim.keymap.set('n', '<Leader>q', function()
+    if vim.fn.getqflist({ winid = 0 }).winid ~= 0 then
+        vim.cmd('cclose')
+    else
+        vim.diagnostic.setqflist()
+        vim.cmd('copen')
+    end
+end, { desc = 'Toggle quickfix' })
+
+vim.keymap.set('n', ']q', ':cnext<CR>', { desc = 'Next quickfix item' })
+vim.keymap.set('n', '[q', ':cprev<CR>', { desc = 'Previous quickfix item' })
 
 -- Search/replace
 vim.opt.ignorecase = true

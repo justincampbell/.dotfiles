@@ -4,7 +4,6 @@ return {
 
         dependencies = {
             "antoinemadec/FixCursorHold.nvim",
-            "folke/trouble.nvim",
             "nvim-lua/plenary.nvim",
             "nvim-neotest/nvim-nio",
             "nvim-treesitter/nvim-treesitter",
@@ -28,21 +27,18 @@ return {
                     require("neotest-vitest"),
                 },
 
-                -- discovery = { enabled = false },
-                -- output = { open_on_run = true },
-                status = { virtual_text = true },
+                discovery = {
+                    enabled = false
+                },
 
-                -- quickfix = {
-                -- enable = true,
+                status = {
+                    virtual_text = true,
+                    signs = true,
+                },
 
-                --     open = function()
-                --         require("trouble").open({
-                --             mode = "quickfix",
-                --             focus = false
-                --         })
-                --     end,
-                -- },
-                --
+                output = {
+                    open_on_run = false,
+                },
             })
 
             -- Create an autocommand to save files before neotest runs tests
@@ -114,17 +110,6 @@ return {
 
             {
                 "<leader>to",
-                function()
-                    require("neotest").output.open({
-                        enter = true,
-                        auto_close = true
-                    })
-                end,
-                desc = "Show Output (Neotest)"
-            },
-
-            {
-                "<leader>tO",
                 function() require("neotest").output_panel.toggle() end,
                 desc = "Toggle Output Panel (Neotest)"
             },
