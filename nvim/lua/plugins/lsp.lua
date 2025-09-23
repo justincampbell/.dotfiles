@@ -50,10 +50,13 @@ return {
 
             {
                 'WhoIsSethDaniel/mason-tool-installer.nvim',
-                ensure_installed = {
-                    "gopls",
-                    "ruby_lsp",
-                    "vtsls",
+                opts = {
+                    ensure_installed = {
+                        "gopls",
+                        "lua_ls",
+                        "ruby_lsp",
+                        "vtsls",
+                    },
                 },
             },
 
