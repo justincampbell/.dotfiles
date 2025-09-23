@@ -19,7 +19,7 @@ export HISTCONTROL=ignoreboth
 export HISTSIZE=10000
 
 export PATH=$HOME/.dotfiles/bin:$PATH # Dotfiles
-export PATH=/usr/local/bin:/usr/local/sbin:/opt/homebrew/bin:$PATH # Homebrew
+export PATH=/usr/local/bin:/usr/local/sbin:/opt/homebrew/bin:/opt/homebrew/sbin:$PATH # Homebrew
 export PATH=node_modules/.bin:/usr/local/share/npm/bin:$PATH # Node/NPM
 export PATH=bin:$PATH
 
