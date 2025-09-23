@@ -17,6 +17,7 @@ return {
             { "<Leader>os", "<Cmd>OtherSplit<CR>",  "Open alternate file in horizontal split" },
             { "<Leader>ov", "<Cmd>OtherVSplit<CR>", "Open alternate file in vertical split" },
             { "<Leader>ot", "<Cmd>OtherTabNew<CR>", "Open alternate file in new tab" },
+            { "<Leader>oc", "<Cmd>OtherClear<CR>",  "Clear alternate file cache" },
         }
     }
 }
