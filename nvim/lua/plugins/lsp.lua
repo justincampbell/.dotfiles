@@ -2,6 +2,8 @@ return {
     {
         'neovim/nvim-lspconfig',
 
+        event = { "BufReadPre", "BufNewFile" },
+
         config = function()
             local lspconfig = require('lspconfig')
 
@@ -39,6 +41,11 @@ return {
 
             lspconfig.vtsls.setup({})
         end,
+
+        keys = {
+            { "gd", vim.lsp.buf.definition, desc = "Go to definition" },
+            { "K",  vim.lsp.buf.hover,      desc = "Show documentation" },
+        },
 
         dependencies = {
             {
