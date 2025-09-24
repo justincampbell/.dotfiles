@@ -1,0 +1,4 @@
+return {
+    "justincampbell/eighties.nvim",
+}
+
