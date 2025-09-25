@@ -56,7 +56,7 @@ vim.diagnostic.config({
 vim.api.nvim_create_autocmd('CursorMoved', {
     pattern = '*',
     callback = function()
-        vim.diagnostic.open_float(nil, { focus = false, scope = 'line', border = 'rounded', header = '' })
+        vim.diagnostic.open_float(nil, { focus = false, scope = 'line', border = 'rounded', header = '', source = 'always' })
     end,
 })
 
