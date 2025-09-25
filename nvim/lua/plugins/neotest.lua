@@ -41,6 +41,13 @@ return {
                 },
             })
 
+            -- Strip ANSI codes from neotest diagnostics
+            vim.diagnostic.config({
+                format = function(diagnostic)
+                    return diagnostic.message:gsub('\27%[[0-9;]*m', '')
+                end,
+            }, vim.api.nvim_create_namespace("neotest"))
+
             -- Create an autocommand to save files before neotest runs tests
             vim.api.nvim_create_autocmd("User", {
                 pattern = "NeotestPre*",

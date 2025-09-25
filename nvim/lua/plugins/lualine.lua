@@ -40,7 +40,26 @@ return {
                     "filename",
                 },
 
-                lualine_x = {},
+                lualine_x = {
+                    {
+                        function()
+                            -- Check all buffers for running test signs
+                            for _, bufnr in ipairs(vim.api.nvim_list_bufs()) do
+                                if vim.api.nvim_buf_is_loaded(bufnr) then
+                                    local signs = vim.fn.sign_getplaced(bufnr, { group = "neotest-status" })
+                                    for _, sign_list in ipairs(signs) do
+                                        for _, sign in ipairs(sign_list.signs or {}) do
+                                            if sign.name == "neotest_running" then
+                                                return "Testing 🔄"
+                                            end
+                                        end
+                                    end
+                                end
+                            end
+                            return ""
+                        end,
+                    },
+                },
 
                 lualine_y = {},
 
