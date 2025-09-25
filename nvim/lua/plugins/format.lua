@@ -20,13 +20,13 @@ return {
             return {
                 formatters_by_ft = formatters_by_ft,
 
-            default_format_opts = {
-                lsp_format = "fallback",
-            },
+                default_format_opts = {
+                    lsp_format = "fallback",
+                },
 
-            format_on_save = {
-                timeout_ms = 2000,
-            },
+                format_on_save = {
+                    timeout_ms = 2000,
+                },
 
                 notify_on_error = true,
 
