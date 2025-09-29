@@ -29,6 +29,11 @@ touch ~/.forecast
 # Vim
 ln -sfn ~/.dotfiles/nvim ~/.config/nvim
 
+# Tmux plugins
+if [ -d "/opt/homebrew/opt/tpm/share/tpm" ]; then
+  /opt/homebrew/opt/tpm/share/tpm/bindings/install_plugins
+fi
+
 # Codespaces
 if [[ "$CODESPACES" != "" ]]; then
   ./install-codespaces.sh
