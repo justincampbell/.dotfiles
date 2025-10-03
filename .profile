@@ -14,6 +14,7 @@ export BROWSER=open
 export CLICOLOR=true
 export EDITOR=nvim
 export FZF_DEFAULT_COMMAND='fd --type f'
+export FZF_DEFAULT_OPTS_FILE=~/.fzf.conf
 export GPG_TTY=$(tty)
 export HISTCONTROL=ignoreboth
 export HISTSIZE=10000

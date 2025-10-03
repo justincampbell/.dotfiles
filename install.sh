@@ -11,6 +11,7 @@ fi
 
 # Config files
 ln -fs ~/.dotfiles/.agignore ~/.agignore
+ln -fs ~/.dotfiles/.fzf.conf ~/.fzf.conf
 ln -fs ~/.dotfiles/.gemrc ~/.gemrc
 ln -fs ~/.dotfiles/.git_commit_template ~/.git_commit_template
 ln -fs ~/.dotfiles/.hushlogin ~/.hushlogin
