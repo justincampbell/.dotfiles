@@ -15,10 +15,12 @@ ln -fs ~/.dotfiles/.fzf.conf ~/.fzf.conf
 ln -fs ~/.dotfiles/.gemrc ~/.gemrc
 ln -fs ~/.dotfiles/.git_commit_template ~/.git_commit_template
 ln -fs ~/.dotfiles/.hushlogin ~/.hushlogin
-# ln -fs ~/.dotfiles/.irbrc ~/.irbrc
+ln -fs ~/.dotfiles/.irbrc ~/.irbrc
 ln -fs ~/.dotfiles/.profile ~/.profile
 ln -fs ~/.dotfiles/.rdebugrc ~/.rdebugrc
 ln -fs ~/.dotfiles/.tmux.conf ~/.tmux.conf
+ln -fs ~/.dotfiles/AGENTS.md ~/AGENTS.md
+ln -fs ~/.dotfiles/CLAUDE.md ~/CLAUDE.md
 ln -fs ~/.dotfiles/gitignore ~/.gitignore
 
 if [ ! -d ~/.dotfiles/.git_templates ]; then
