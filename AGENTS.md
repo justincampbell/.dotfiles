@@ -12,10 +12,11 @@
 - Homebrew for package management, always use Brewfile for reproducibility
 - Automated installation via `install.sh`
 
-## Commit Conventions
-- Prefix with tool/category: `vim:`, `shell:`, `git:`, etc.
+## Git Conventions
+- Prefix commits with tool/category: `vim:`, `shell:`, `git:`, etc.
 - Use plain English, no other formatting
 - Examples: `vim: Add new plugin`, `shell: Update prompt colors`
+- Don't make branches with slashes
 
 ## Testing/Validation
 - Use `nvim --headless` to check config syntax
