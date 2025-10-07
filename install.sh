@@ -27,8 +27,6 @@ if [ ! -d ~/.dotfiles/.git_templates ]; then
   ln -fs ~/.dotfiles/.git_templates ~/.git_templates
 fi
 
-touch ~/.forecast
-
 # Vim
 ln -sfn ~/.dotfiles/nvim ~/.config/nvim
 
