@@ -24,6 +24,7 @@ require("lazy").setup({
     spec = { { import = "plugins" } },
     install = { colorscheme = { "railscasts" } },
     checker = { enabled = true, notify = false },
+    change_detection = { enabled = true, notify = false },
 })
 
 -- UI
