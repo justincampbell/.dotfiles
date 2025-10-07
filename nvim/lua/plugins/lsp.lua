@@ -5,11 +5,9 @@ return {
         event = { "BufReadPre", "BufNewFile" },
 
         config = function()
-            local lspconfig = require('lspconfig')
+            vim.lsp.enable('gopls')
 
-            lspconfig.gopls.setup({})
-
-            lspconfig.lua_ls.setup({
+            vim.lsp.config('lua_ls', {
                 settings = {
                     Lua = {
                         diagnostics = {
@@ -20,37 +18,43 @@ return {
                     },
                 },
             })
+            vim.lsp.enable('lua_ls')
 
-            local ruby_lsp_config = {
-                init_options = {}
-            }
+            local ruby_lsp_init_options = {}
 
             if vim.fn.executable('rubocop') == 1 then
-                ruby_lsp_config.init_options.formatter = 'rubocop'
-                ruby_lsp_config.init_options.linters = { 'rubocop' }
+                ruby_lsp_init_options.formatter = 'rubocop'
+                ruby_lsp_init_options.linters = { 'rubocop' }
             elseif vim.fn.executable('standardrb') == 1 then
-                ruby_lsp_config.init_options.formatter = 'standard'
-                ruby_lsp_config.init_options.linters = { 'standard' }
+                ruby_lsp_init_options.formatter = 'standard'
+                ruby_lsp_init_options.linters = { 'standard' }
             end
 
-            lspconfig.ruby_lsp.setup(ruby_lsp_config)
+            vim.lsp.config('ruby_lsp', {
+                init_options = ruby_lsp_init_options
+            })
+            vim.lsp.enable('ruby_lsp')
 
             if vim.fn.executable('standardrb') == 1 then
-                lspconfig.standardrb.setup({})
+                vim.lsp.enable('standardrb')
             end
 
-            lspconfig.vtsls.setup({})
+            vim.lsp.enable('vtsls')
         end,
 
         keys = {
-            { "gd", function()
-                if #vim.lsp.get_clients({ bufnr = 0 }) > 0 then
-                    vim.lsp.buf.definition()
-                else
-                    require("fzf-lua").grep_cword()
-                end
-            end, desc = "Go to definition" },
-            { "K",  vim.lsp.buf.hover,      desc = "Show documentation" },
+            {
+                "gd",
+                function()
+                    if #vim.lsp.get_clients({ bufnr = 0 }) > 0 then
+                        vim.lsp.buf.definition()
+                    else
+                        require("fzf-lua").grep_cword()
+                    end
+                end,
+                desc = "Go to definition"
+            },
+            { "K", vim.lsp.buf.hover, desc = "Show documentation" },
         },
 
         dependencies = {
