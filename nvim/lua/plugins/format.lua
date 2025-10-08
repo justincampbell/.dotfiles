@@ -7,6 +7,7 @@ return {
                 eruby = { "htmlbeautifier" },
                 go = { "goimports" },
                 html = { "htmlbeautifier" },
+                yaml = { "yamlfmt" },
             }
 
             if vim.fn.executable('rubocop') == 1 then

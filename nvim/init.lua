@@ -130,8 +130,8 @@ vim.api.nvim_create_autocmd({ "BufWritePre" }, {
     end,
 })
 
--- Show trailing whitespace as dots
-vim.opt.listchars = { trail = '·' }
+-- Show trailing whitespace as dots and tabs as arrows
+vim.opt.listchars = { trail = '·', tab = '→ ' }
 vim.opt.list = true
 
 -- Remove trailing whitespace on save

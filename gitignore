@@ -2,4 +2,5 @@
 .claude/
 .importjs.js
 .nvmrc
+CLAUDE.md
 yarn_cache/

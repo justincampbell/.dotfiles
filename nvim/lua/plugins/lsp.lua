@@ -5,11 +5,9 @@ return {
         event = { "BufReadPre", "BufNewFile" },
 
         config = function()
-            local lspconfig = require('lspconfig')
+            vim.lsp.config('gopls', {})
 
-            lspconfig.gopls.setup({})
-
-            lspconfig.lua_ls.setup({
+            vim.lsp.config('lua_ls', {
                 settings = {
                     Lua = {
                         diagnostics = {
@@ -33,13 +31,13 @@ return {
                 ruby_lsp_config.init_options.linters = { 'standard' }
             end
 
-            lspconfig.ruby_lsp.setup(ruby_lsp_config)
+            vim.lsp.config('ruby_lsp', ruby_lsp_config)
 
             if vim.fn.executable('standardrb') == 1 then
-                lspconfig.standardrb.setup({})
+                vim.lsp.config('standardrb', {})
             end
 
-            lspconfig.vtsls.setup({})
+            vim.lsp.config('vtsls', {})
         end,
 
         keys = {
