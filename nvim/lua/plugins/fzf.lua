@@ -3,7 +3,16 @@ return {
         "ibhagwan/fzf-lua",
         config = function()
             fzf = require('fzf-lua')
-            fzf.setup({})
+            fzf.setup({
+                actions = {
+                    files = {
+                        ["default"] = fzf.actions.file_edit,
+                        ["ctrl-t"] = fzf.actions.file_tabedit,
+                        ["ctrl-s"] = fzf.actions.file_split,
+                        ["ctrl-v"] = fzf.actions.file_vsplit,
+                    },
+                },
+            })
             fzf.register_ui_select()
         end,
         keys = {
