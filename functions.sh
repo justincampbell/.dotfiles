@@ -84,3 +84,30 @@ meeting() {
 tadam() {
   open "tadam://start?time=25min"
 }
+
+rspec-changes() {
+  local default_branch=$(git symbolic-ref refs/remotes/origin/HEAD 2>/dev/null | sed 's@^refs/remotes/@@')
+
+  if [ -z "$default_branch" ]; then
+    default_branch="origin/main"
+  fi
+
+  local changed_specs=$(
+    (git diff --name-only --relative "$default_branch"...HEAD; git diff --name-only --relative) \
+      | grep '_spec\.rb$' \
+      | sort -u
+  )
+
+  if [ -z "$changed_specs" ]; then
+    echo "No changed spec files found"
+    return 1
+  fi
+
+  echo rspec $changed_specs "$@"
+
+  if [ -f Gemfile ]; then
+    bundle exec rspec $changed_specs "$@"
+  else
+    rspec $changed_specs "$@"
+  fi
+}
