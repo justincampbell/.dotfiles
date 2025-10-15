@@ -20,7 +20,15 @@ return {
 
             keymap = {
                 ["<CR>"] = { "select_and_accept", "fallback" },
-                ["<Tab>"] = { "select_and_accept", "fallback" }
+                ["<Tab>"] = {
+                    function()
+                        if require("sidekick").nes_jump_or_apply() then
+                            return
+                        end
+                    end,
+                    "select_and_accept",
+                    "fallback"
+                }
             },
 
             sources = {
