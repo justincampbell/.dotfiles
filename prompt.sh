@@ -122,9 +122,16 @@ in_git_repo() {
   count=`expr 0$2 + 1`
 
   if [[ $count == "4" ]]; then return 1; fi
-  if [[ -d $dir/.git ]]; then return 0; fi
+  if [[ -d $dir/.git ]] || [[ -f $dir/.git ]]; then return 0; fi
 
   in_git_repo $dir/.. $count
+}
+
+is_git_worktree() {
+  if [[ -f .git ]]; then
+    return 0
+  fi
+  return 1
 }
 
 git_status() {
@@ -136,6 +143,12 @@ git_status() {
   local status_size=$(expr $(echo "$status" | grep -v "^\#\#" | wc -c))
 
   echo -n ${dark_gray}
+
+  if is_git_worktree; then
+    echo -n "${yellow}${dark_gray} "
+  else
+    echo -n "${yellow}${dark_gray} "
+  fi
 
   if [[ $status_size -gt $(tput cols) ]]; then
     echo "$status" | head -n 1
