@@ -102,6 +102,7 @@ vim.api.nvim_create_autocmd({ "FocusGained", "BufEnter", "CursorHold", "ModeChan
 vim.keymap.set("n", "gs", ":Switch<CR>", { desc = "Toggle switch" })
 vim.keymap.set("n", "<Tab>", ":tabnext<CR>", { desc = "Next tab", silent = true })
 vim.keymap.set("n", "<S-Tab>", ":tabprev<CR>", { desc = "Prev tab", silent = true })
+vim.keymap.set("n", "<Leader>td", ":tab split<CR>", { desc = "Duplicate tab", silent = true })
 vim.keymap.set("v", "<Leader>s", ":sort<CR>", { noremap = true, silent = true })
 
 -- Comments
