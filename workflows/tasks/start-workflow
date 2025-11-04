@@ -1,0 +1,290 @@
+#!/bin/bash
+# Start a workflow with its tmux layout
+
+set -euo pipefail
+
+# Source shared utilities
+source "$(dirname "$0")/../shared.sh"
+
+# Parse --detached flag
+detached=false
+if [[ "${1:-}" == "--detached" ]]; then
+    detached=true
+    shift
+fi
+
+workflow_name="$1"
+shift
+
+if [ -z "$workflow_name" ]; then
+    echo "Usage: start-workflow [--detached] <workflow-name> [args...]" >&2
+    exit 1
+fi
+
+# Get the prompt file
+prompt_file="$(dirname "$0")/../prompts/${workflow_name}.md"
+
+if [ ! -f "$prompt_file" ]; then
+    echo "Error: Workflow prompt not found: $prompt_file" >&2
+    exit 1
+fi
+
+# Set default target directory
+target_dir="${PWD}"
+
+# Execute setup tasks if defined in frontmatter and capture output
+setup_tasks=$(parse_frontmatter "$prompt_file" "setup_tasks")
+if [ -n "$setup_tasks" ]; then
+    echo "Running setup tasks..." >&2
+
+    # Process each setup task and capture directory output
+    while IFS= read -r task_command; do
+        # Replace template variables with workflow arguments
+        if [ $# -gt 0 ]; then
+            for i in $(seq 1 $#); do
+                arg_var="arg$i"
+                task_command=$(echo "$task_command" | sed "s|{{$arg_var}}|${!i}|g")
+            done
+        fi
+
+        # Make relative paths absolute
+        if [[ "$task_command" == "./workflows/tasks/"* ]]; then
+            task_command="${task_command#./workflows/tasks/}"
+            task_command="$(dirname "$0")/$task_command"
+        fi
+
+        echo "Executing: $task_command" >&2
+        result=$(eval "$task_command")
+
+        # Debug: show what we captured
+        echo "Task output: $result" >&2
+
+        # If task outputs a directory path, use it as target_dir
+        # Use the last line if there are multiple lines
+        last_line=$(echo "$result" | tail -1)
+        if [ -n "$last_line" ] && [ -d "$last_line" ] 2>/dev/null; then
+            target_dir="$last_line"
+            echo "Updated target directory to: $target_dir" >&2
+        fi
+    done < <(echo "$setup_tasks" | yq -r '.[]')
+fi
+
+# Parse tmux configuration from frontmatter
+windows_yaml=$(parse_frontmatter "$prompt_file" "tmux_windows")
+custom_session_name=$(parse_frontmatter "$prompt_file" "tmux_session_name")
+
+# Get configured AI CLI and available tasks
+ai_cli=$(get_workflow_ai_cli)
+available_tasks=$(list_available_tasks)
+
+# Create a processed prompt file with system prompt prepended and template variables replaced
+system_prompt="$(dirname "$0")/../prompts/_system.md"
+processed_prompt="/tmp/workflow-prompt-$$"
+
+# Create temp file for available tasks to handle multiline content
+tasks_file="/tmp/workflow-tasks-$$"
+echo "$available_tasks" > "$tasks_file"
+
+# Combine system prompt with workflow prompt content (excluding frontmatter), replacing template variables
+{
+    # Replace {{available_tasks}} with file content using a different approach
+    while IFS= read -r line; do
+        if [[ "$line" == *"{{available_tasks}}"* ]]; then
+            cat "$tasks_file"
+        else
+            echo "$line"
+        fi
+    done < "$system_prompt"
+    echo ""
+    # Extract only the content after the frontmatter (after second ---)
+    awk '/^---$/{if(++c==2) f=1; next} f' "$prompt_file"
+} | {
+    # Replace argument template variables ({{arg1}}, {{arg2}}, etc.)
+    if [ $# -gt 0 ]; then
+        content=$(cat)
+        for i in $(seq 1 $#); do
+            arg_var="{{arg$i}}"
+            content=$(echo "$content" | sed "s|$arg_var|${!i}|g")
+        done
+        echo "$content"
+    else
+        cat
+    fi
+} > "$processed_prompt"
+
+# For testing: allow preserving the processed prompt file
+if [ -n "${TEST_PROMPT_OUTPUT:-}" ]; then
+    cp "$processed_prompt" "$TEST_PROMPT_OUTPUT"
+fi
+
+trap "rm -f '$processed_prompt' '$tasks_file'" EXIT
+
+# Create session with custom layout if windows are defined
+if [ -n "$windows_yaml" ]; then
+    # Parse windows and create session
+    # Use custom session name if provided, otherwise use directory basename
+    if [ -n "$custom_session_name" ]; then
+        session_name="$custom_session_name"
+    else
+        session_name=$(basename "$target_dir")
+    fi
+
+    # Check if session already exists
+    if tmux has-session -t "$session_name" 2>/dev/null; then
+        echo "Session $session_name already exists" >&2
+        if [ "$detached" = false ]; then
+            echo "Switching to it" >&2
+            if [ -n "${TMUX:-}" ]; then
+                tmux switch-client -t "$session_name"
+            else
+                tmux attach-session -t "$session_name"
+            fi
+        fi
+    else
+        # Create session starting in target directory
+        tmux new-session -d -s "$session_name" -c "$target_dir"
+
+        # Give tmux a moment to fully create the session
+        sleep 0.1
+
+        # Parse windows and create them
+        window_index=0
+
+        # Get window count first
+        window_count=$(echo "$windows_yaml" | yq -r 'length')
+
+        for ((i=0; i<window_count; i++)); do
+            name=$(echo "$windows_yaml" | yq -r ".[$i].name")
+            command=$(echo "$windows_yaml" | yq -r ".[$i].command // \"\"")
+
+            # Replace template variables
+            command=$(echo "$command" | sed "s|{{ai_cli}}|$ai_cli|g")
+
+            # For AI window, handle prompts appropriately for each CLI
+            if [ "$name" = "ai" ] && [ -f "$processed_prompt" ]; then
+                if [[ "$ai_cli" == *"claude"* ]]; then
+                    # Claude CLI: Use --system-prompt flag with arguments
+                    system_prompt_file="/tmp/workflow-system-$$"
+                    user_prompt_file="/tmp/workflow-user-$$"
+
+                    # Extract system prompt content (from _system.md)
+                    while IFS= read -r line; do
+                        if [[ "$line" == *"{{available_tasks}}"* ]]; then
+                            cat "$tasks_file"
+                        else
+                            echo "$line"
+                        fi
+                    done < "$system_prompt" > "$system_prompt_file"
+
+                    # Extract user prompt content (workflow-specific)
+                    awk '/^---$/{if(++c==2) f=1; next} f' "$prompt_file" > "$user_prompt_file"
+
+                    # Build command with system prompt and user prompt as arguments
+                    command="$ai_cli --system-prompt \"\$(cat '$system_prompt_file')\" \"\$(cat '$user_prompt_file')\""
+
+                    # Add cleanup for new temp files
+                    trap "rm -f '$processed_prompt' '$tasks_file' '$system_prompt_file' '$user_prompt_file'" EXIT
+                else
+                    # For other AI CLIs (copilot, etc): Start interactively, then send prompt
+                    # The command is already replaced with {{ai_cli}} -> actual CLI + any extra commands
+                    # Don't override it, just mark that we need to send a prompt after
+
+                    # We'll send the prompt content via tmux send-keys after the CLI starts
+                    # Mark that we need to send a prompt
+                    send_prompt_after="$processed_prompt"
+                fi
+            fi
+
+            if [ $i -eq 0 ]; then
+                # First window already exists, just rename it
+                tmux rename-window -t "$session_name" "$name"
+                window_target="$session_name:1"  # Use number instead of name
+            else
+                # Create new window with explicit start directory
+                tmux new-window -t "$session_name" -n "$name" -c "$target_dir"
+                window_target="$session_name:$((i+1))"  # Use window number
+            fi
+
+            # Small delay to ensure window is fully created
+            sleep 0.1
+
+            # Execute command if specified
+            if [ -n "$command" ] && [ "$command" != "null" ] && [ "$command" != '""' ]; then
+                sleep 0.3
+                tmux send-keys -t "$window_target" "$command" C-m
+            fi
+
+            # Store prompt info for later (after session switch)
+            if [ -n "${send_prompt_after:-}" ]; then
+                pending_prompt_file="$send_prompt_after"
+                pending_prompt_target="$window_target"
+                send_prompt_after=""
+            fi
+        done
+
+        # Switch to first window
+        tmux select-window -t "$session_name:1"
+
+        # Switch to the session (unless detached)
+        if [ "$detached" = false ]; then
+            if [ -n "${TMUX:-}" ]; then
+                tmux switch-client -t "$session_name"
+            else
+                tmux attach-session -t "$session_name"
+            fi
+        fi
+
+        # Send pending prompt after session switch (for non-Claude CLIs)
+        if [ -n "${pending_prompt_file:-}" ]; then
+            # Wait for CLI to start and session to stabilize
+            sleep 3
+
+            # Send Enter first to clear any prompts/banners
+            tmux send-keys -t "$pending_prompt_target" C-m
+            sleep 0.5
+
+            # Send the prompt content
+            prompt_content=$(cat "$pending_prompt_file")
+            tmux send-keys -t "$pending_prompt_target" "$prompt_content"
+            sleep 0.5
+
+            # Send Enter to submit the prompt
+            tmux send-keys -t "$pending_prompt_target" C-m
+        fi
+    fi
+else
+    # Fall back to basic session creation with just shell window
+    # Use custom session name if provided, otherwise use directory basename
+    if [ -n "$custom_session_name" ]; then
+        session_name="$custom_session_name"
+    else
+        session_name=$(basename "$target_dir")
+    fi
+
+    if tmux has-session -t "$session_name" 2>/dev/null; then
+        echo "Session $session_name already exists" >&2
+        if [ "$detached" = false ]; then
+            echo "Switching to it" >&2
+            if [ -n "${TMUX:-}" ]; then
+                tmux switch-client -t "$session_name"
+            else
+                tmux attach-session -t "$session_name"
+            fi
+        fi
+    else
+        # Create basic session with shell window
+        tmux new-session -d -s "$session_name" -c "$target_dir"
+        tmux rename-window -t "$session_name:1" "shell"
+
+        # Switch to the session (unless detached)
+        if [ "$detached" = false ]; then
+            if [ -n "${TMUX:-}" ]; then
+                tmux switch-client -t "$session_name"
+            else
+                tmux attach-session -t "$session_name"
+            fi
+        fi
+    fi
+fi
+
+echo "Started $workflow_name workflow in $(basename "$target_dir")" >&2

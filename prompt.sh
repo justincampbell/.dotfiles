@@ -139,7 +139,11 @@ git_status() {
     return
   fi
 
-  local status=$(git -c color.status=always status --branch --no-ahead-behind --short --untracked=normal . | sed -E 's/\.{3}[^ ]*$//g')
+  local status=$(timeout 1 git -c color.status=always status --branch --no-ahead-behind --short --untracked=normal . 2>/dev/null | sed -E 's/\.{3}[^ ]*$//g')
+  if [ $? -ne 0 ]; then
+    return
+  fi
+
   local status_size=$(expr $(echo "$status" | grep -v "^\#\#" | wc -c))
 
   echo -n ${dark_gray}

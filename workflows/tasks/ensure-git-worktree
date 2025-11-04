@@ -1,0 +1,74 @@
+#!/bin/bash
+# Creates a git worktree for the given branch name
+
+set -euo pipefail
+
+# Source shared utilities
+source "$(dirname "$0")/../shared.sh"
+
+# Get branch name from argument
+branch_name="$1"
+
+if [ -z "$branch_name" ]; then
+    echo "Usage: create-git-worktree <branch-name>" >&2
+    exit 1
+fi
+
+# Get base repository from git root or current directory
+base_repo=$(git rev-parse --show-toplevel 2>/dev/null || echo "$PWD")
+org_repo=$(basename "$(dirname "$base_repo")")/$(basename "$base_repo")
+# Sanitize branch name for directory (replace / with -)
+safe_branch_name=$(echo "$branch_name" | sed 's|/|-|g')
+worktree_dir="$HOME/Code/${org_repo}-${safe_branch_name}"
+
+# Check if worktree directory already exists
+if [ -d "$worktree_dir" ]; then
+    echo "Worktree directory already exists at $worktree_dir" >&2
+    echo "$worktree_dir"
+    exit 0
+fi
+
+# Create worktree
+cd "$base_repo"
+
+# Fetch latest changes from origin
+git fetch origin
+
+# Get the default branch from origin
+default_branch=$(git symbolic-ref refs/remotes/origin/HEAD | sed 's@^refs/remotes/origin/@@')
+
+# Check if the branch already exists locally
+if git show-ref --verify --quiet "refs/heads/$branch_name"; then
+    echo "Branch $branch_name already exists, creating worktree from existing branch" >&2
+
+    # If branch is currently checked out, switch to default branch first
+    current_branch=$(git branch --show-current)
+    if [ "$current_branch" = "$branch_name" ]; then
+        echo "Branch $branch_name is currently checked out, switching to $default_branch..." >&2
+        git checkout "$default_branch"
+    fi
+
+    # Create worktree from existing branch
+    git worktree add "$worktree_dir" "$branch_name"
+else
+    echo "Creating new branch $branch_name from $default_branch" >&2
+    # Create worktree with new branch based on origin's default branch (but don't track it)
+    git worktree add "$worktree_dir" --no-track -b "$branch_name" "origin/$default_branch"
+fi
+
+if [ $? -ne 0 ]; then
+    echo "Error: Failed to create worktree" >&2
+    exit 1
+fi
+
+# Copy .env file if it exists in base repo
+if [ -f "$base_repo/.env" ]; then
+    cp "$base_repo/.env" "$worktree_dir/.env"
+    echo "Copied .env file to worktree" >&2
+fi
+
+# Give git a moment to settle and release locks
+sleep 0.5
+
+# Output the worktree directory path for consumption by other tasks
+echo "$worktree_dir"

@@ -1,0 +1,107 @@
+#!/bin/bash
+# Ensures a tmux session exists with standard layout for the given directory
+
+set -euo pipefail
+
+# Source shared utilities
+source "$(dirname "$0")/../shared.sh"
+
+# Parse arguments
+detached=false
+if [[ "${1:-}" == "--detached" ]]; then
+    detached=true
+    shift
+fi
+
+# Get directory path from argument
+target_dir="$1"
+windows="${2:-ai,vim,shell}"  # Default windows, can be overridden
+
+if [ -z "$target_dir" ]; then
+    echo "Usage: ensure-tmux-session [--detached] <directory-path> [window-list]" >&2
+    echo "  --detached: Don't attach/switch to the session (for testing)" >&2
+    echo "  window-list: comma-separated list (default: ai,vim,shell)" >&2
+    exit 1
+fi
+
+# Resolve to absolute path
+target_dir=$(cd "$target_dir" && pwd)
+
+# Generate session name from directory path (basename)
+session_name=$(basename "$target_dir")
+
+# Check if session already exists
+if tmux has-session -t "$session_name" 2>/dev/null; then
+    echo "Session $session_name already exists" >&2
+    if [ "$detached" = false ]; then
+        echo "Switching to it" >&2
+        if [ -n "${TMUX:-}" ]; then
+            tmux switch-client -t "$session_name"
+        else
+            tmux attach-session -t "$session_name"
+        fi
+    fi
+    echo "$session_name"
+    exit 0
+fi
+
+# Get configured AI CLI
+ai_cli=$(get_workflow_ai_cli)
+
+# Create tmux session starting in target directory
+tmux new-session -d -s "$session_name" -c "$target_dir"
+
+# Give tmux a moment to fully create the session
+sleep 0.1
+
+# Get the first window index (respects base-index setting)
+first_window_index=$(tmux list-windows -t "$session_name" -F '#{window_index}' | head -1)
+
+# Parse and create windows
+IFS=',' read -ra WINDOW_LIST <<< "$windows"
+window_count=0
+
+for window_name in "${WINDOW_LIST[@]}"; do
+    window_name=$(echo "$window_name" | xargs)  # trim whitespace
+
+    if [ $window_count -eq 0 ]; then
+        # First window already exists, just rename it
+        tmux rename-window -t "$session_name:$first_window_index" "$window_name"
+        window_target="$session_name:$first_window_index"
+    else
+        # Create new window with explicit start directory
+        tmux new-window -t "$session_name" -n "$window_name" -c "$target_dir"
+        # Get the index of the window we just created (it's the last one)
+        window_index=$(tmux list-windows -t "$session_name" -F '#{window_index}' | tail -1)
+        window_target="$session_name:$window_index"
+    fi
+
+    # Launch appropriate application based on window name
+    case "$window_name" in
+        "ai"|"copilot"|"claude")
+            sleep 0.3
+            tmux send-keys -t "$window_target" "$ai_cli" C-m
+            ;;
+        "vim"|"nvim"|"editor")
+            sleep 0.3
+            tmux send-keys -t "$window_target" "vim ." C-m
+            ;;
+        "shell"|"bash"|"zsh")
+            # No command needed for shell
+            ;;
+    esac
+
+    ((window_count++))
+done
+
+# Switch to the new session (unless detached mode)
+if [ "$detached" = false ]; then
+    if [ -n "${TMUX:-}" ]; then
+        tmux switch-client -t "$session_name"
+    else
+        tmux attach-session -t "$session_name"
+    fi
+fi
+
+# Output session name for consumption by other tasks
+echo "$session_name"

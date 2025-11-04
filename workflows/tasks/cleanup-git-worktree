@@ -1,0 +1,101 @@
+#!/bin/bash
+# Remove git worktree and associated tmux session
+
+set -euo pipefail
+
+# Source shared utilities
+source "$(dirname "$0")/../shared.sh"
+
+# Get worktree directory - default to current directory if not provided
+worktree_dir="${1:-$PWD}"
+
+# Resolve to absolute path
+if [ -d "$worktree_dir" ]; then
+  worktree_dir=$(cd "$worktree_dir" && pwd)
+else
+  echo "Error: Directory does not exist: $worktree_dir" >&2
+  exit 1
+fi
+
+# Verify this is a git directory (either .git file or .git directory)
+if [ ! -e "$worktree_dir/.git" ]; then
+  echo "Error: $worktree_dir is not a git directory" >&2
+  exit 1
+fi
+
+# Check if this is a worktree or the main repo
+# Worktrees have a .git file, main repos have a .git directory
+if [ -f "$worktree_dir/.git" ]; then
+  # This is a worktree - get the main repository
+  git_file_content=$(cat "$worktree_dir/.git")
+  # Extract gitdir path from "gitdir: /path/to/.git/worktrees/name"
+  base_repo_git_dir=$(echo "$git_file_content" | sed 's/^gitdir: //' | sed 's|/\.git/worktrees/.*||')
+  base_repo="$base_repo_git_dir"
+  is_worktree=true
+else
+  # This is the main repository - don't allow cleanup
+  echo "Error: Cannot cleanup main repository. This task is only for worktrees." >&2
+  exit 1
+fi
+
+# Get session name from worktree directory basename
+session_name=$(basename "$worktree_dir")
+
+# Verify base repo exists
+if [ ! -d "$base_repo" ]; then
+  echo "Error: Base repository not found at $base_repo" >&2
+  exit 1
+fi
+
+# Change to base repo for git operations
+cd "$base_repo"
+
+# STEP 1: Remove git worktree first (force removal)
+if [ -d "$worktree_dir" ]; then
+  echo "Removing worktree directory: $worktree_dir" >&2
+
+  # Always use force removal to avoid issues with locked files
+  if git worktree remove --force "$worktree_dir" 2>&1; then
+    echo "Successfully removed worktree: $worktree_dir" >&2
+  else
+    echo "Warning: Failed to remove worktree via git, removing directory manually" >&2
+    rm -rf "$worktree_dir"
+    echo "Manually removed directory: $worktree_dir" >&2
+  fi
+
+  # Clean up any dangling worktree references
+  git worktree prune
+else
+  echo "No worktree directory found at: $worktree_dir" >&2
+fi
+
+# STEP 2: Wait a moment for filesystem to settle
+sleep 0.5
+
+# STEP 3: Kill tmux session
+if tmux has-session -t "$session_name" 2>/dev/null; then
+  echo "Killing tmux session: $session_name" >&2
+
+  # If we're currently in the session we want to kill, switch to another session first
+  if [ -n "${TMUX:-}" ]; then
+    current_session=$(tmux display-message -p '#S')
+    if [ "$current_session" = "$session_name" ]; then
+      # Find another session to switch to
+      other_session=$(tmux list-sessions -F '#S' | grep -v "^$session_name$" | head -n 1)
+      if [ -n "$other_session" ]; then
+        echo "Switching to session: $other_session" >&2
+        tmux switch-client -t "$other_session"
+      else
+        echo "No other sessions available, creating new session" >&2
+        tmux new-session -d -s "main"
+        tmux switch-client -t "main"
+      fi
+    fi
+  fi
+
+  tmux kill-session -t "$session_name"
+else
+  echo "No tmux session found for: $session_name" >&2
+fi
+
+echo "Cleanup completed for: $worktree_dir" >&2

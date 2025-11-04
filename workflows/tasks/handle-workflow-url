@@ -1,0 +1,66 @@
+#!/bin/bash
+# Handle URLs by launching appropriate workflow
+# Usage: handle-workflow-url <url>
+
+set -euo pipefail
+
+# Source shared utilities
+source "$(dirname "$0")/../shared.sh"
+
+url="$1"
+
+if [ -z "$url" ]; then
+    echo "Usage: $0 <url>" >&2
+    exit 1
+fi
+
+# Determine which workflow to launch based on URL pattern
+workflow_name=""
+workflow_args=""
+
+case "$url" in
+    *app.shortcut.com/*/story/*)
+        workflow_name="start-shortcut-story"
+        workflow_args="$url"
+        ;;
+
+    *github.com/notifications*)
+        workflow_name="process-github-notifications"
+        workflow_args=""
+        ;;
+
+    *github.com/*/pull/*)
+        workflow_name="review-github-pr"
+        workflow_args="$url"
+        ;;
+
+    *github.com/pulls*)
+        workflow_name="review-github-prs"
+        workflow_args=""
+        ;;
+
+    *)
+        # Unknown URL type
+        echo "No workflow configured for URL: $url" >&2
+        exit 1
+        ;;
+esac
+
+# If we're not inside tmux, find an active session and run the workflow there
+if [ -z "${TMUX:-}" ]; then
+    # Get the first active tmux session
+    active_session=$(tmux list-sessions -F '#{session_name}' 2>/dev/null | head -n 1)
+
+    if [ -n "$active_session" ]; then
+        # Display a popup showing the workflow is starting
+        # Source .profile to get environment variables like WORKFLOW_AI_CLI
+        tmux display-popup -t "$active_session" -E -w 80% -h 80% \
+            "source ~/.profile 2>/dev/null || true; export WORKFLOW_AI_CLI; $(dirname "$0")/start-workflow '$workflow_name' '$workflow_args'"
+    else
+        # No tmux session found, run normally (will create new session but won't attach)
+        "$(dirname "$0")/start-workflow" "$workflow_name" $workflow_args
+    fi
+else
+    # We're already inside tmux, run normally
+    "$(dirname "$0")/start-workflow" "$workflow_name" $workflow_args
+fi
