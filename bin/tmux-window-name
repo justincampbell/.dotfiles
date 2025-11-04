@@ -1,0 +1,29 @@
+#!/bin/bash
+
+command="$1"
+window_name="$2"
+current_path="$3"
+
+# https://www.nerdfonts.com/cheat-sheet
+
+case "$command" in
+  node)
+    echo " " # nf-oct-copilot
+    ;;
+  make)
+    echo "󰖟 " # nf-md-web
+    ;;
+  ruby)
+    echo " " # nf-dev-ruby_rough
+    ;;
+  vim|nvim)
+    echo " " # nf-dev-vim
+    ;;
+  *)
+    if [ "$window_name" = "$command" ]; then
+      basename "$current_path"
+    else
+      echo "$window_name"
+    fi
+    ;;
+esac
