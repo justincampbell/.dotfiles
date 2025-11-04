@@ -1,0 +1,48 @@
+#!/bin/bash
+# Ensures a GitHub repository is cloned to ~/Code/[org]/[repo]
+
+set -euo pipefail
+
+# Source shared utilities
+source "$(dirname "$0")/../shared.sh"
+
+# Get GitHub URL from argument
+github_url="$1"
+
+if [ -z "$github_url" ]; then
+    echo "Usage: ensure-github-clone <github-url>" >&2
+    exit 1
+fi
+
+# Parse GitHub URL
+read -r org repo < <(parse_github_url "$github_url")
+if [ $? -ne 0 ]; then
+    exit 1
+fi
+
+# Construct target directory
+target_dir=$(get_github_repo_path "$org" "$repo")
+
+# Check if repository already exists
+if [ -d "$target_dir" ]; then
+    echo "Repository already exists at $target_dir" >&2
+    echo "$target_dir"
+    exit 0
+fi
+
+# Ensure parent directory exists
+mkdir -p "$(dirname "$target_dir")"
+
+# Clone the repository
+clone_url="https://github.com/$org/$repo.git"
+git clone "$clone_url" "$target_dir"
+
+if [ $? -ne 0 ]; then
+    echo "Error: Failed to clone repository" >&2
+    exit 1
+fi
+
+echo "Cloned $org/$repo to $target_dir" >&2
+
+# Output the directory path for consumption by other tasks
+echo "$target_dir"

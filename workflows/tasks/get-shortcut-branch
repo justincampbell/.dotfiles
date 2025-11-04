@@ -1,0 +1,38 @@
+#!/bin/bash
+# Get branch name from Shortcut story (without feature/ prefix)
+# Usage: get-shortcut-branch <story-url-or-id>
+
+set -euo pipefail
+
+# Source shared utilities
+source "$(dirname "$0")/../shared.sh"
+
+story_input="$1"
+
+if [ -z "$story_input" ]; then
+    echo "Usage: $0 <story-url-or-id>" >&2
+    exit 1
+fi
+
+# Extract story ID from URL if needed
+if [[ "$story_input" =~ /story/([0-9]+) ]]; then
+    story_id="${BASH_REMATCH[1]}"
+else
+    story_id="$story_input"
+fi
+
+# Get story details from Shortcut CLI (redirect stderr to hide loading spinner)
+story_json=$(short story "$story_id" --format "%j" 2>/dev/null)
+
+# Extract branch name
+branch_name=$(echo "$story_json" | jq -r '.formatted_vcs_branch_name // empty')
+
+if [ -z "$branch_name" ]; then
+    echo "Error: No branch name found for story $story_id" >&2
+    exit 1
+fi
+
+# Remove feature/ prefix (and any other prefix before /)
+branch_name="${branch_name#*/}"
+
+echo "$branch_name"
