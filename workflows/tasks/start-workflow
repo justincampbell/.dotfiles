@@ -132,6 +132,24 @@ if [ -n "$windows_yaml" ]; then
     # Check if session already exists
     if tmux has-session -t "$session_name" 2>/dev/null; then
         echo "Session $session_name already exists" >&2
+
+        # Find the AI window and clear it
+        ai_window=$(tmux list-windows -t "$session_name" -F "#{window_index}:#{window_name}" | grep ":ai$" | cut -d: -f1)
+        if [ -n "$ai_window" ]; then
+            echo "Clearing AI window context..." >&2
+            tmux send-keys -t "$session_name:$ai_window" "/clear" C-m
+            sleep 1
+
+            # Send the new prompt
+            if [ -f "$processed_prompt" ]; then
+                echo "Sending new prompt to AI window..." >&2
+                prompt_content=$(cat "$processed_prompt")
+                tmux send-keys -t "$session_name:$ai_window" "$prompt_content"
+                sleep 0.5
+                tmux send-keys -t "$session_name:$ai_window" C-m
+            fi
+        fi
+
         if [ "$detached" = false ]; then
             echo "Switching to it" >&2
             if [ -n "${TMUX:-}" ]; then

@@ -26,6 +26,20 @@ repo_path=$("$(dirname "$0")/ensure-github-clone" "$repo_url")
 # Change to repo directory
 cd "$repo_path"
 
+# Check for uncommitted changes
+if ! git diff-index --quiet HEAD --; then
+    current_branch=$(git branch --show-current)
+    echo "Uncommitted changes detected on $current_branch" >&2
+    echo "Creating WIP commit..." >&2
+    git add -A
+    git commit -m "WIP: Auto-saved before switching to story $story_url
+
+🤖 Generated with [Claude Code](https://claude.com/claude-code)
+
+Co-Authored-By: Claude <noreply@anthropic.com>"
+    echo "Created WIP commit on $current_branch" >&2
+fi
+
 # Fetch latest changes
 echo "Fetching latest changes..." >&2
 git fetch origin
