@@ -51,18 +51,27 @@ esac
 
 # Show mode selection menu if applicable (always required for PR/story workflows)
 if [ "$show_mode_menu" = true ]; then
+    # Determine which session to show menu in
     if [ -n "${TMUX:-}" ]; then
-        # We're in tmux, show menu for mode selection
-        tmux display-menu -T "Checkout Mode" \
-            "Main Repository" "r" "run-shell 'bash $(dirname "$0")/launch-workflow \"$workflow_name\" \"$url\"'" \
-            "Worktree (isolated)" "w" "run-shell 'bash $(dirname "$0")/launch-workflow \"${workflow_name}-worktree\" \"$url\"'" \
-            "" \
-            "Cancel" "q" ""
-        exit 0
+        # We're already in tmux, show menu in current session
+        menu_target=""
     else
-        echo "Error: This workflow requires tmux for mode selection" >&2
-        exit 1
+        # Not in tmux, find an active session
+        active_session=$(tmux list-sessions -F '#{session_name}' 2>/dev/null | head -n 1)
+        if [ -z "$active_session" ]; then
+            echo "Error: No active tmux session found" >&2
+            exit 1
+        fi
+        menu_target="-t $active_session"
     fi
+
+    # Show menu for mode selection
+    tmux display-menu $menu_target -T "Checkout Mode" \
+        "Main Repository" "r" "run-shell 'bash $(dirname "$0")/launch-workflow \"$workflow_name\" \"$url\"'" \
+        "Worktree (isolated)" "w" "run-shell 'bash $(dirname "$0")/launch-workflow \"${workflow_name}-worktree\" \"$url\"'" \
+        "" \
+        "Cancel" "q" ""
+    exit 0
 fi
 
 # If we're not inside tmux, find an active session and run the workflow there
