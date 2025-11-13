@@ -1,0 +1,27 @@
+#!/bin/bash
+# Internal helper for handle-workflow-url to launch workflow
+# Usage: launch-workflow <workflow-name> <url>
+
+set -euo pipefail
+
+workflow_name="$1"
+url="$2"
+
+# If we're not inside tmux, find an active session and run the workflow there
+if [ -z "${TMUX:-}" ]; then
+    # Get the first active tmux session
+    active_session=$(tmux list-sessions -F '#{session_name}' 2>/dev/null | head -n 1)
+
+    if [ -n "$active_session" ]; then
+        # Display a popup showing the workflow is starting
+        # Source .profile to get environment variables like WORKFLOW_AI_CLI
+        tmux display-popup -t "$active_session" -E -w 80% -h 80% \
+            "source ~/.profile 2>/dev/null || true; export WORKFLOW_AI_CLI; $(dirname "$0")/start-workflow '$workflow_name' '$url'"
+    else
+        # No tmux session found, run normally (will create new session but won't attach)
+        "$(dirname "$0")/start-workflow" "$workflow_name" "$url"
+    fi
+else
+    # We're already inside tmux, run normally
+    "$(dirname "$0")/start-workflow" "$workflow_name" "$url"
+fi

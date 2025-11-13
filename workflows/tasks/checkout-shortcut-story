@@ -1,0 +1,48 @@
+#!/bin/bash
+# Check out a Shortcut story branch in the main repository (not a worktree)
+# Usage: checkout-shortcut-story-main <story-url-or-id>
+
+set -euo pipefail
+
+# Source shared utilities
+source "$(dirname "$0")/../shared.sh"
+
+story_url="$1"
+
+if [ -z "$story_url" ]; then
+    echo "Usage: $0 <story-url-or-id>" >&2
+    exit 1
+fi
+
+# Always use huntresslabs/portal for Shortcut stories
+repo_url="https://github.com/huntresslabs/portal"
+
+# Get branch name (without feature/ prefix)
+branch_name=$("$(dirname "$0")/get-shortcut-branch" "$story_url")
+
+# Ensure repo is cloned
+repo_path=$("$(dirname "$0")/ensure-github-clone" "$repo_url")
+
+# Change to repo directory
+cd "$repo_path"
+
+# Fetch latest changes
+echo "Fetching latest changes..." >&2
+git fetch origin
+
+# Check if branch exists locally or remotely
+if git show-ref --verify --quiet "refs/heads/$branch_name"; then
+    echo "Checking out existing local branch: $branch_name" >&2
+    git checkout "$branch_name"
+elif git show-ref --verify --quiet "refs/remotes/origin/$branch_name"; then
+    echo "Checking out remote branch: $branch_name" >&2
+    git checkout -b "$branch_name" "origin/$branch_name"
+else
+    # Branch doesn't exist yet, create it from main
+    default_branch=$(git symbolic-ref refs/remotes/origin/HEAD | sed 's@^refs/remotes/origin/@@')
+    echo "Creating new branch $branch_name from $default_branch" >&2
+    git checkout -b "$branch_name" "origin/$default_branch"
+fi
+
+# Output the repo path (for start-workflow to use as target_dir)
+echo "$repo_path"

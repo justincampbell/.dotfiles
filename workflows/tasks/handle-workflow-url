@@ -17,11 +17,13 @@ fi
 # Determine which workflow to launch based on URL pattern
 workflow_name=""
 workflow_args=""
+show_mode_menu=false
 
 case "$url" in
     *app.shortcut.com/*/story/*)
         workflow_name="start-shortcut-story"
         workflow_args="$url"
+        show_mode_menu=true
         ;;
 
     *github.com/notifications*)
@@ -32,6 +34,7 @@ case "$url" in
     *github.com/*/pull/*)
         workflow_name="review-github-pr"
         workflow_args="$url"
+        show_mode_menu=true
         ;;
 
     *github.com/pulls*)
@@ -45,6 +48,22 @@ case "$url" in
         exit 1
         ;;
 esac
+
+# Show mode selection menu if applicable (always required for PR/story workflows)
+if [ "$show_mode_menu" = true ]; then
+    if [ -n "${TMUX:-}" ]; then
+        # We're in tmux, show menu for mode selection
+        tmux display-menu -T "Checkout Mode" \
+            "Main Repository" "r" "run-shell 'bash $(dirname "$0")/launch-workflow \"$workflow_name\" \"$url\"'" \
+            "Worktree (isolated)" "w" "run-shell 'bash $(dirname "$0")/launch-workflow \"${workflow_name}-worktree\" \"$url\"'" \
+            "" \
+            "Cancel" "q" ""
+        exit 0
+    else
+        echo "Error: This workflow requires tmux for mode selection" >&2
+        exit 1
+    fi
+fi
 
 # If we're not inside tmux, find an active session and run the workflow there
 if [ -z "${TMUX:-}" ]; then
