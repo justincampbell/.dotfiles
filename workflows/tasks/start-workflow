@@ -162,37 +162,13 @@ if [ -n "$windows_yaml" ]; then
 
             # For AI window, handle prompts appropriately for each CLI
             if [ "$name" = "ai" ] && [ -f "$processed_prompt" ]; then
-                if [[ "$ai_cli" == *"claude"* ]]; then
-                    # Claude CLI: Use --system-prompt flag with arguments
-                    system_prompt_file="/tmp/workflow-system-$$"
-                    user_prompt_file="/tmp/workflow-user-$$"
+                # For all AI CLIs: Start interactively, then send prompt
+                # The command is already replaced with {{ai_cli}} -> actual CLI + any extra commands
+                # Don't override it, just mark that we need to send a prompt after
 
-                    # Extract system prompt content (from _system.md)
-                    while IFS= read -r line; do
-                        if [[ "$line" == *"{{available_tasks}}"* ]]; then
-                            cat "$tasks_file"
-                        else
-                            echo "$line"
-                        fi
-                    done < "$system_prompt" > "$system_prompt_file"
-
-                    # Extract user prompt content (workflow-specific)
-                    awk '/^---$/{if(++c==2) f=1; next} f' "$prompt_file" > "$user_prompt_file"
-
-                    # Build command with system prompt and user prompt as arguments
-                    command="$ai_cli --system-prompt \"\$(cat '$system_prompt_file')\" \"\$(cat '$user_prompt_file')\""
-
-                    # Add cleanup for new temp files
-                    trap "rm -f '$processed_prompt' '$tasks_file' '$system_prompt_file' '$user_prompt_file'" EXIT
-                else
-                    # For other AI CLIs (copilot, etc): Start interactively, then send prompt
-                    # The command is already replaced with {{ai_cli}} -> actual CLI + any extra commands
-                    # Don't override it, just mark that we need to send a prompt after
-
-                    # We'll send the prompt content via tmux send-keys after the CLI starts
-                    # Mark that we need to send a prompt
-                    send_prompt_after="$processed_prompt"
-                fi
+                # We'll send the prompt content via tmux send-keys after the CLI starts
+                # Mark that we need to send a prompt
+                send_prompt_after="$processed_prompt"
             fi
 
             if [ $i -eq 0 ]; then
