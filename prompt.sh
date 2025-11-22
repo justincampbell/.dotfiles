@@ -109,11 +109,16 @@ ruby_status() {
     return
   fi
 
-  RUBY_VERSION=${RUBY_VERSION:-system}
+  DESIRED_RUBY_VERSION=$(cat .ruby-version)
 
-  if ! echo "ruby-${RUBY_VERSION}" | grep $(cat .ruby-version) > /dev/null; then
-    echo -n "${red}${bold}Ruby${reset}${red} using $RUBY_VERSION, but should be " &&
-    cat .ruby-version
+  if command -v mise &> /dev/null; then
+    RUBY_VERSION=$(mise current ruby 2>/dev/null || echo "not installed")
+  else
+    RUBY_VERSION=${RUBY_VERSION:-system}
+  fi
+
+  if [[ "$RUBY_VERSION" != "$DESIRED_RUBY_VERSION" ]] && [[ "ruby-$RUBY_VERSION" != "$DESIRED_RUBY_VERSION" ]]; then
+    echo "${red}${bold}Ruby${reset}${red} using $RUBY_VERSION, but should be $DESIRED_RUBY_VERSION"
   fi
 }
 
