@@ -111,3 +111,16 @@ rspec-changes() {
     rspec $changed_specs "$@"
   fi
 }
+
+marked() {
+  local file="$1"
+  if [[ -z "$file" ]]; then
+    echo "Usage: marked <markdown-file>"
+    return 1
+  fi
+  if [[ ! -f "$file" ]]; then
+    echo "Error: File not found: $file"
+    return 1
+  fi
+  open -a "Marked 2" "$file"
+}
