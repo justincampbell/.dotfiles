@@ -18,6 +18,7 @@ export FZF_DEFAULT_OPTS_FILE=~/.fzf.conf
 export GPG_TTY=$(tty)
 export HISTCONTROL=ignoreboth
 export HISTSIZE=10000
+export PAGER=less
 export WORKFLOW_AI_CLI="claude"
 
 export PATH=$HOME/.dotfiles/bin:$PATH # Dotfiles
@@ -25,6 +26,7 @@ export PATH=$HOME/.dotfiles/workflows/tasks:$PATH # Workflow tasks
 export PATH=/usr/local/bin:/usr/local/sbin:/opt/homebrew/bin:/opt/homebrew/sbin:$PATH # Homebrew
 export PATH=node_modules/.bin:/usr/local/share/npm/bin:$PATH # Node/NPM
 export PATH=bin:$PATH
+export PATH=$HOME/.local/bin:$PATH # uv
 
 # Functions
 source ~/.dotfiles/functions.sh
