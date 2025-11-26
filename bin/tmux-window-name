@@ -6,7 +6,12 @@ current_path="$3"
 
 # https://www.nerdfonts.com/cheat-sheet
 
+echo "$@" >> /tmp/windows.log
+
 case "$command" in
+  git|gitui)
+    echo " " # nf-dev-git
+    ;;
   node)
     echo " " # nf-oct-copilot
     ;;
