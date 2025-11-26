@@ -18,7 +18,7 @@ usage() {
     echo ""
     echo "Session file search order:"
     echo "  1. Exact path (if argument is .yml file)"
-    echo "  2. Current directory (.workflow.yml)"
+    echo "  2. ~/Code projects (.workflow.yml)"
     echo "  3. ~/.dotfiles/workflows/tmux/sessions/<name>.yml"
     echo ""
     echo "Available sessions in dotfiles:"
@@ -49,12 +49,15 @@ if [[ "$SESSION_CONFIG" == *.yml ]] || [[ "$SESSION_CONFIG" == *.yaml ]]; then
         # Relative path
         CONFIG_FILE="$PWD/$SESSION_CONFIG"
     fi
-elif [ -f "$PWD/.workflow.yml" ]; then
-    # Check current directory for .workflow.yml
-    CONFIG_FILE="$PWD/.workflow.yml"
 else
-    # Look in dotfiles sessions directory
-    CONFIG_FILE="${SESSIONS_DIR}/${SESSION_CONFIG}.yml"
+    # Search for .workflow.yml in ~/Code projects
+    workflow_file=$(find ~/Code -name ".workflow.yml" -maxdepth 3 2>/dev/null | grep "/${SESSION_CONFIG}/.workflow.yml$" | head -1)
+    if [ -n "$workflow_file" ]; then
+        CONFIG_FILE="$workflow_file"
+    else
+        # Look in dotfiles sessions directory
+        CONFIG_FILE="${SESSIONS_DIR}/${SESSION_CONFIG}.yml"
+    fi
 fi
 
 # Verify config file exists

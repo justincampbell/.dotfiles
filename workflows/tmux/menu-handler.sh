@@ -69,13 +69,27 @@ show_workflow_menu() {
             menu_items+=("$key")
             menu_items+=("run-shell 'bash $WORKFLOWS_DIR/tmux/menu-handler.sh session:$session_name'")
         done < <(find "$sessions_dir" -maxdepth 1 -name "*.yml" -type f 2>/dev/null | sort)
+    fi
 
-        # Add separator after sessions
-        if [ ${#menu_items[@]} -gt 0 ]; then
-            menu_items+=("")
-            menu_items+=("")
-            menu_items+=("")
-        fi
+    # Discover .workflow.yml files from ~/Code projects
+    while IFS= read -r workflow_file; do
+        local project_dir=$(dirname "$workflow_file")
+        local project_name=$(basename "$project_dir")
+
+        local display_name="[S] $(workflow_display_name "$project_name")"
+        local key=$(get_menu_key "$project_name" "$used_keys")
+        used_keys="${used_keys}${key}"
+
+        menu_items+=("$display_name")
+        menu_items+=("$key")
+        menu_items+=("run-shell 'bash $WORKFLOWS_DIR/tmux/menu-handler.sh session:$project_name'")
+    done < <(find ~/Code -name ".workflow.yml" -maxdepth 3 2>/dev/null | sort)
+
+    # Add separator after sessions
+    if [ ${#menu_items[@]} -gt 0 ]; then
+        menu_items+=("")
+        menu_items+=("")
+        menu_items+=("")
     fi
 
     # Discover workflows from prompts directory
