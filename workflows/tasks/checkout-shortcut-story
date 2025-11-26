@@ -1,21 +1,41 @@
 #!/bin/bash
-# Check out a Shortcut story branch in the main repository (not a worktree)
-# Usage: checkout-shortcut-story-main <story-url-or-id>
+# Check out a Shortcut story branch in the main repository or a worktree
+# Usage: checkout-shortcut-story [--worktree] <story-url-or-id>
 
 set -euo pipefail
 
 # Source shared utilities
 source "$(dirname "$0")/../shared.sh"
 
+# Parse arguments
+use_worktree=false
+if [ "$1" = "--worktree" ]; then
+    use_worktree=true
+    shift
+fi
+
 story_url="$1"
 
 if [ -z "$story_url" ]; then
-    echo "Usage: $0 <story-url-or-id>" >&2
+    echo "Usage: $0 [--worktree] <story-url-or-id>" >&2
     exit 1
 fi
 
-# Always use huntresslabs/portal for Shortcut stories
-repo_url="https://github.com/huntresslabs/portal"
+# Extract story ID from URL if needed
+if [[ "$story_url" =~ /story/([0-9]+) ]]; then
+    story_id="${BASH_REMATCH[1]}"
+else
+    story_id="$story_url"
+fi
+
+# Get repo URL from environment variable
+if [ -z "${SHORTCUT_REPO_URL:-}" ]; then
+    echo "Error: SHORTCUT_REPO_URL environment variable not set" >&2
+    echo "Set it in your shell config, e.g.:" >&2
+    echo "  export SHORTCUT_REPO_URL='https://github.com/org/repo'" >&2
+    exit 1
+fi
+repo_url="$SHORTCUT_REPO_URL"
 
 # Get branch name (without feature/ prefix)
 branch_name=$("$(dirname "$0")/get-shortcut-branch" "$story_url")
@@ -26,37 +46,103 @@ repo_path=$("$(dirname "$0")/ensure-github-clone" "$repo_url")
 # Change to repo directory
 cd "$repo_path"
 
-# Check for uncommitted changes
-if ! git diff-index --quiet HEAD --; then
-    current_branch=$(git branch --show-current)
-    echo "Uncommitted changes detected on $current_branch" >&2
-    echo "Creating WIP commit..." >&2
-    git add -A
-    git commit -m "WIP: Auto-saved before switching to story $story_url
+if [ "$use_worktree" = true ]; then
+    # Use worktree
+    worktree_path=$("$(dirname "$0")/ensure-git-worktree" "$branch_name")
+    output_path="$worktree_path"
+else
+    # Use main repository
+    # Check for uncommitted changes
+    if ! git diff-index --quiet HEAD --; then
+        current_branch=$(git branch --show-current)
+        echo "Uncommitted changes detected on $current_branch" >&2
+        echo "Creating WIP commit..." >&2
+        git add -A
+        git commit -m "WIP: Auto-saved before switching to story $story_url
 
 🤖 Generated with [Claude Code](https://claude.com/claude-code)
 
 Co-Authored-By: Claude <noreply@anthropic.com>"
-    echo "Created WIP commit on $current_branch" >&2
+        echo "Created WIP commit on $current_branch" >&2
+    fi
+
+    # Fetch latest changes
+    echo "Fetching latest changes..." >&2
+    git fetch origin
+
+    # Check if branch exists locally or remotely
+    if git show-ref --verify --quiet "refs/heads/$branch_name"; then
+        echo "Checking out existing local branch: $branch_name" >&2
+        git checkout "$branch_name"
+    elif git show-ref --verify --quiet "refs/remotes/origin/$branch_name"; then
+        echo "Checking out remote branch: $branch_name" >&2
+        git checkout -b "$branch_name" "origin/$branch_name"
+    else
+        # Branch doesn't exist yet, create it from main (without setting upstream)
+        default_branch=$(git symbolic-ref refs/remotes/origin/HEAD | sed 's@^refs/remotes/origin/@@')
+        echo "Creating new branch $branch_name from $default_branch" >&2
+        git checkout -b "$branch_name" --no-track "origin/$default_branch"
+    fi
+
+    output_path="$repo_path"
 fi
 
-# Fetch latest changes
-echo "Fetching latest changes..." >&2
-git fetch origin
+# Update story: add owner and set state based on workflow
+echo "Updating story state and owner..." >&2
 
-# Check if branch exists locally or remotely
-if git show-ref --verify --quiet "refs/heads/$branch_name"; then
-    echo "Checking out existing local branch: $branch_name" >&2
-    git checkout "$branch_name"
-elif git show-ref --verify --quiet "refs/remotes/origin/$branch_name"; then
-    echo "Checking out remote branch: $branch_name" >&2
-    git checkout -b "$branch_name" "origin/$branch_name"
+# Get story details to determine workflow
+story_json=$(short story "$story_id" --format "%j" 2>/dev/null)
+workflow_id=$(echo "$story_json" | jq -r '.workflow_id')
+current_state=$(echo "$story_json" | jq -r '.workflow_state_id')
+current_owners=$(echo "$story_json" | jq -r '.owner_ids | join(",")')
+
+# Determine target state based on workflow
+# Engineering workflow: "In Development"
+# Goalie workflow: "In Progress"
+if [ "$workflow_id" = "500000005" ]; then
+    target_state="500000006"  # Engineering: In Development
+    state_name="In Development"
+elif [ "$workflow_id" = "500043583" ]; then
+    target_state="500043585"  # Goalie: In Progress
+    state_name="In Progress"
 else
-    # Branch doesn't exist yet, create it from main
-    default_branch=$(git symbolic-ref refs/remotes/origin/HEAD | sed 's@^refs/remotes/origin/@@')
-    echo "Creating new branch $branch_name from $default_branch" >&2
-    git checkout -b "$branch_name" "origin/$default_branch"
+    echo "Warning: Unknown workflow $workflow_id, skipping state update" >&2
+    target_state=""
 fi
 
-# Output the repo path (for start-workflow to use as target_dir)
-echo "$repo_path"
+# Skip state update if already in correct state
+if [ -n "$target_state" ] && [ "$current_state" = "$target_state" ]; then
+    target_state=""  # Clear target to skip state update
+fi
+
+# Build owners list (add justincampbell if not already present)
+justincampbell_uuid="68baf758-d372-4091-a7ee-f3a958907979"
+
+# Check if justincampbell is already an owner
+if [[ "$current_owners" == *"$justincampbell_uuid"* ]]; then
+    # Already an owner, no need to update owners
+    if [ -n "$target_state" ]; then
+        short story "$story_id" --state "$target_state" --quiet 2>/dev/null >/dev/null
+        echo "Set story to '$state_name' (already owner)" >&2
+    else
+        echo "Already owner, no updates needed" >&2
+    fi
+else
+    # Not yet an owner, add justincampbell
+    if [ -n "$current_owners" ]; then
+        new_owners="$current_owners,justincampbell"
+    else
+        new_owners="justincampbell"
+    fi
+
+    if [ -n "$target_state" ]; then
+        short story "$story_id" --state "$target_state" --owners "$new_owners" --quiet 2>/dev/null >/dev/null
+        echo "Set story to '$state_name' and added justincampbell as owner" >&2
+    else
+        short story "$story_id" --owners "$new_owners" --quiet 2>/dev/null >/dev/null
+        echo "Added justincampbell as owner" >&2
+    fi
+fi
+
+# Output the path (for start-workflow to use as target_dir)
+echo "$output_path"

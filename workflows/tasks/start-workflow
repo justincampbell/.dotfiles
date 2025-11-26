@@ -56,9 +56,6 @@ if [ -n "$setup_tasks" ]; then
         echo "Executing: $task_command" >&2
         result=$(eval "$task_command")
 
-        # Debug: show what we captured
-        echo "Task output: $result" >&2
-
         # If task outputs a directory path, use it as target_dir
         # Use the last line if there are multiple lines
         last_line=$(echo "$result" | tail -1)
@@ -133,8 +130,9 @@ if [ -n "$windows_yaml" ]; then
     if tmux has-session -t "$session_name" 2>/dev/null; then
         echo "Session $session_name already exists" >&2
 
-        # Find the AI window and clear it
-        ai_window=$(tmux list-windows -t "$session_name" -F "#{window_index}:#{window_name}" | grep ":ai$" | cut -d: -f1)
+        # Find the AI window and clear it, or create one if it doesn't exist
+        ai_window=$(tmux list-windows -t "$session_name" -F "#{window_index}:#{window_name}" | grep ":ai$" | cut -d: -f1 || true)
+
         if [ -n "$ai_window" ]; then
             echo "Clearing AI window context..." >&2
             tmux send-keys -t "$session_name:$ai_window" "/clear" C-m
@@ -143,6 +141,33 @@ if [ -n "$windows_yaml" ]; then
             # Send the new prompt
             if [ -f "$processed_prompt" ]; then
                 echo "Sending new prompt to AI window..." >&2
+                prompt_content=$(cat "$processed_prompt")
+                tmux send-keys -t "$session_name:$ai_window" "$prompt_content"
+                sleep 0.5
+                tmux send-keys -t "$session_name:$ai_window" C-m
+            fi
+        else
+            echo "Creating AI window..." >&2
+            # Create new AI window in target directory
+            tmux new-window -t "$session_name" -n "ai" -c "$target_dir"
+            ai_window=$(tmux list-windows -t "$session_name" -F "#{window_index}:#{window_name}" | grep ":ai$" | cut -d: -f1)
+
+            # Swap AI window to first position
+            tmux swap-window -s "$session_name:$ai_window" -t "$session_name:1"
+            ai_window="1"
+
+            # Start AI CLI
+            command="$ai_cli"
+            sleep 0.3
+            tmux send-keys -t "$session_name:$ai_window" "$command" C-m
+
+            # Wait for CLI to start and send prompt
+            if [ -f "$processed_prompt" ]; then
+                sleep 3
+                echo "Sending prompt to new AI window..." >&2
+                # Send Enter first to clear any prompts/banners
+                tmux send-keys -t "$session_name:$ai_window" C-m
+                sleep 0.5
                 prompt_content=$(cat "$processed_prompt")
                 tmux send-keys -t "$session_name:$ai_window" "$prompt_content"
                 sleep 0.5

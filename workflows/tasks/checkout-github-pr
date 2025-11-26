@@ -43,7 +43,7 @@ fi
 
 # Use gh CLI to checkout the PR branch
 echo "Checking out PR #$pr_number in main repository..." >&2
-gh pr checkout "$pr_number"
+gh pr checkout "$pr_number" >&2
 
 # Output the main repo path (for task chaining)
 echo "$repo_path"

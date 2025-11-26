@@ -66,9 +66,10 @@ if [ "$show_mode_menu" = true ]; then
     fi
 
     # Show menu for mode selection
+    # Run workflow in a popup so user can see progress
     tmux display-menu $menu_target -T "Checkout Mode" \
-        "Main Repository" "r" "run-shell 'bash $(dirname "$0")/launch-workflow \"$workflow_name\" \"$url\"'" \
-        "Worktree (isolated)" "w" "run-shell 'bash $(dirname "$0")/launch-workflow \"${workflow_name}-worktree\" \"$url\"'" \
+        "Main Repository" "r" "display-popup -E -w 80% -h 80% 'bash $(dirname "$0")/launch-workflow \"$workflow_name\" \"$url\"'" \
+        "Worktree (isolated)" "w" "display-popup -E -w 80% -h 80% 'bash $(dirname "$0")/launch-workflow \"${workflow_name}-worktree\" \"$url\"'" \
         "" \
         "Cancel" "q" ""
     exit 0

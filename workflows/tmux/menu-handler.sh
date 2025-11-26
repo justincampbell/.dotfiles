@@ -55,6 +55,29 @@ show_workflow_menu() {
     local menu_items=()
     local used_keys=""
 
+    # Discover sessions from sessions directory
+    local sessions_dir="$WORKFLOWS_DIR/tmux/sessions"
+    if [ -d "$sessions_dir" ]; then
+        while IFS= read -r session_file; do
+            local session_name=$(basename "$session_file" .yml)
+
+            local display_name="[S] $(workflow_display_name "$session_name")"
+            local key=$(get_menu_key "$session_name" "$used_keys")
+            used_keys="${used_keys}${key}"
+
+            menu_items+=("$display_name")
+            menu_items+=("$key")
+            menu_items+=("run-shell 'bash $WORKFLOWS_DIR/tmux/menu-handler.sh session:$session_name'")
+        done < <(find "$sessions_dir" -maxdepth 1 -name "*.yml" -type f 2>/dev/null | sort)
+
+        # Add separator after sessions
+        if [ ${#menu_items[@]} -gt 0 ]; then
+            menu_items+=("")
+            menu_items+=("")
+            menu_items+=("")
+        fi
+    fi
+
     # Discover workflows from prompts directory
     while IFS= read -r prompt_file; do
         local workflow_name=$(basename "$prompt_file" .md)
@@ -106,7 +129,12 @@ show_workflow_menu() {
     menu_items+=("")
 
     # Display the menu
-    tmux display-menu -T "Workflows & Tasks" "${menu_items[@]}"
+    tmux display-menu -T "Sessions, Workflows & Tasks" "${menu_items[@]}"
+}
+
+launch_session() {
+    local session_name="$1"
+    "$WORKFLOWS_DIR/tasks/load-tmux-session" "$session_name"
 }
 
 launch_workflow() {
@@ -175,6 +203,10 @@ run_task_with_args() {
 case "${1:-menu}" in
     "menu")
         show_workflow_menu
+        ;;
+    session:*)
+        session_name="${1#session:}"
+        launch_session "$session_name"
         ;;
     workflow:*)
         workflow_name="${1#workflow:}"

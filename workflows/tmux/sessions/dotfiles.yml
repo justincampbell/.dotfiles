@@ -1,0 +1,8 @@
+name: dotfiles
+root: ~/.dotfiles
+
+windows:
+  - ai: $WORKFLOW_AI_CLI
+  - nvim: nvim
+  - gitui: gitui
+  - bash:

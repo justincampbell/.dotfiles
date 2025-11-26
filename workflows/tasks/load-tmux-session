@@ -1,0 +1,122 @@
+#!/usr/bin/env bash
+
+# Load Tmux Session
+# Creates or switches to a tmux session from a YAML config file
+
+set -euo pipefail
+
+DOTFILES_DIR="${HOME}/.dotfiles"
+SESSIONS_DIR="${DOTFILES_DIR}/workflows/tmux/sessions"
+
+usage() {
+    echo "Usage: $0 <session-config-name|path-to-yml>"
+    echo ""
+    echo "Examples:"
+    echo "  $0 dotfiles              # Loads ~/.dotfiles/workflows/tmux/sessions/dotfiles.yml"
+    echo "  $0 .workflow.yml         # Loads .workflow.yml from current dir"
+    echo "  $0 ~/project/.workflow.yml   # Loads specific file"
+    echo ""
+    echo "Session file search order:"
+    echo "  1. Exact path (if argument is .yml file)"
+    echo "  2. Current directory (.workflow.yml)"
+    echo "  3. ~/.dotfiles/workflows/tmux/sessions/<name>.yml"
+    echo ""
+    echo "Available sessions in dotfiles:"
+    if [ -d "$SESSIONS_DIR" ]; then
+        for file in "$SESSIONS_DIR"/*.yml; do
+            [ -f "$file" ] || continue
+            basename "$file" .yml | sed 's/^/  - /'
+        done 2>/dev/null
+    fi
+    exit 1
+}
+
+# Check for session config argument
+if [ $# -eq 0 ]; then
+    usage
+fi
+
+SESSION_CONFIG="$1"
+CONFIG_FILE=""
+
+# Find the config file in order of preference
+if [[ "$SESSION_CONFIG" == *.yml ]] || [[ "$SESSION_CONFIG" == *.yaml ]]; then
+    # Argument is a file path
+    if [[ "$SESSION_CONFIG" == /* ]]; then
+        # Absolute path
+        CONFIG_FILE="$SESSION_CONFIG"
+    else
+        # Relative path
+        CONFIG_FILE="$PWD/$SESSION_CONFIG"
+    fi
+elif [ -f "$PWD/.workflow.yml" ]; then
+    # Check current directory for .workflow.yml
+    CONFIG_FILE="$PWD/.workflow.yml"
+else
+    # Look in dotfiles sessions directory
+    CONFIG_FILE="${SESSIONS_DIR}/${SESSION_CONFIG}.yml"
+fi
+
+# Verify config file exists
+if [ ! -f "$CONFIG_FILE" ]; then
+    echo "Error: Session config not found: $CONFIG_FILE"
+    usage
+fi
+
+# Parse YAML config
+SESSION_NAME=$(yq eval '.name' "$CONFIG_FILE")
+SESSION_ROOT=$(yq eval '.root' "$CONFIG_FILE" | sed "s|^~|$HOME|")
+
+# Check if session already exists
+if tmux has-session -t "$SESSION_NAME" 2>/dev/null; then
+    if [ -n "${TMUX:-}" ]; then
+        tmux switch-client -t "$SESSION_NAME"
+    else
+        tmux attach-session -t "$SESSION_NAME"
+    fi
+    exit 0
+fi
+
+# Create session (detached)
+tmux new-session -d -s "$SESSION_NAME" -c "$SESSION_ROOT"
+
+# Get number of windows
+WINDOW_COUNT=$(yq eval '.windows | length' "$CONFIG_FILE")
+
+# Process each window
+for ((i=0; i<WINDOW_COUNT; i++)); do
+    # Get window name (key)
+    WINDOW_NAME=$(yq eval ".windows[$i] | keys | .[0]" "$CONFIG_FILE")
+
+    # Get window command (value)
+    WINDOW_CMD=$(yq eval ".windows[$i].$WINDOW_NAME" "$CONFIG_FILE")
+
+    # Handle null/empty commands
+    if [ "$WINDOW_CMD" = "null" ] || [ -z "$WINDOW_CMD" ]; then
+        WINDOW_CMD=""
+    fi
+
+    if [ $i -eq 0 ]; then
+        # First window already exists, rename it and optionally send command
+        tmux rename-window -t "$SESSION_NAME:1" "$WINDOW_NAME"
+        if [ -n "$WINDOW_CMD" ]; then
+            tmux send-keys -t "$SESSION_NAME:1" "$WINDOW_CMD" C-m
+        fi
+    else
+        # Create new window
+        tmux new-window -t "$SESSION_NAME" -n "$WINDOW_NAME" -c "$SESSION_ROOT"
+        if [ -n "$WINDOW_CMD" ]; then
+            tmux send-keys -t "$SESSION_NAME:$WINDOW_NAME" "$WINDOW_CMD" C-m
+        fi
+    fi
+done
+
+# Focus first window
+tmux select-window -t "$SESSION_NAME:1"
+
+# Switch to the new session
+if [ -n "${TMUX:-}" ]; then
+    tmux switch-client -t "$SESSION_NAME"
+else
+    tmux attach-session -t "$SESSION_NAME"
+fi

@@ -19,21 +19,28 @@ list_available_tasks() {
     done
 }
 
-# Parse GitHub URL to extract org, repo, and optionally PR number
+# Parse GitHub URL to extract org, repo, and optionally PR/issue number
 parse_github_url() {
     local github_url="$1"
-    local extract_pr="${2:-false}"
+    local extract_number="${2:-false}"
 
-    if [ "$extract_pr" = "true" ]; then
+    if [ "$extract_number" = "true" ]; then
         # Parse PR URL: https://github.com/org/repo/pull/123
         if [[ "$github_url" =~ github\.com[/:]([^/]+)/([^/\.]+)/pull/([0-9]+) ]]; then
             echo "${BASH_REMATCH[1]} ${BASH_REMATCH[2]} ${BASH_REMATCH[3]}"
-        else
-            echo "Error: Invalid GitHub PR URL format: $github_url" >&2
-            return 1
+            return 0
         fi
+
+        # Parse Issue URL: https://github.com/org/repo/issues/123
+        if [[ "$github_url" =~ github\.com[/:]([^/]+)/([^/\.]+)/issues/([0-9]+) ]]; then
+            echo "${BASH_REMATCH[1]} ${BASH_REMATCH[2]} ${BASH_REMATCH[3]}"
+            return 0
+        fi
+
+        echo "Error: Invalid GitHub PR/Issue URL format: $github_url" >&2
+        return 1
     else
-        # Parse repo URL: https://github.com/org/repo (with optional /pull/123 or .git)
+        # Parse repo URL: https://github.com/org/repo (with optional /pull/123, /issues/123, or .git)
         if [[ "$github_url" =~ github\.com[/:]([^/]+)/([^/\.]+) ]]; then
             echo "${BASH_REMATCH[1]} ${BASH_REMATCH[2]}"
         else

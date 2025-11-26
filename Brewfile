@@ -1,6 +1,7 @@
 brew "fzf"
 brew "gh"
 brew "git"
+brew "gitui"
 brew "jq"
 brew "neovim"
 brew "ripgrep"

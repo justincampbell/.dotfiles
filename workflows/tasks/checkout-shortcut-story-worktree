@@ -1,31 +1,5 @@
 #!/bin/bash
 # Check out a Shortcut story branch in a git worktree
-# Usage: checkout-shortcut-story <story-url-or-id>
+# Usage: checkout-shortcut-story-worktree <story-url-or-id>
 
-set -euo pipefail
-
-# Source shared utilities
-source "$(dirname "$0")/../shared.sh"
-
-story_url="$1"
-
-if [ -z "$story_url" ]; then
-    echo "Usage: $0 <story-url-or-id>" >&2
-    exit 1
-fi
-
-# Always use huntresslabs/portal for Shortcut stories
-repo_url="https://github.com/huntresslabs/portal"
-
-# Get branch name (without feature/ prefix)
-branch_name=$("$(dirname "$0")/get-shortcut-branch" "$story_url")
-
-# Ensure repo is cloned
-repo_path=$("$(dirname "$0")/ensure-github-clone" "$repo_url")
-
-# Change to repo directory and create/checkout worktree for the branch
-cd "$repo_path"
-worktree_path=$("$(dirname "$0")/ensure-git-worktree" "$branch_name")
-
-# Output the worktree path (for start-workflow to use as target_dir)
-echo "$worktree_path"
+exec "$(dirname "$0")/checkout-shortcut-story" --worktree "$@"
