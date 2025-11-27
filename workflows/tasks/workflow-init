@@ -17,9 +17,6 @@ fi
 
 # Create .workflow.yml with defaults
 cat > .workflow.yml <<EOF
-name: $dir_name
-root: $current_dir
-
 windows:
   - ai: \$WORKFLOW_AI_CLI
   - nvim: nvim

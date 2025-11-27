@@ -70,6 +70,16 @@ fi
 SESSION_NAME=$(yq eval '.name' "$CONFIG_FILE")
 SESSION_ROOT=$(yq eval '.root' "$CONFIG_FILE" | sed "s|^~|$HOME|")
 
+# Default name to directory name if not specified
+if [ "$SESSION_NAME" = "null" ] || [ -z "$SESSION_NAME" ]; then
+    SESSION_NAME=$(basename "$(dirname "$CONFIG_FILE")")
+fi
+
+# Default root to directory containing .workflow.yml if not specified
+if [ "$SESSION_ROOT" = "null" ] || [ -z "$SESSION_ROOT" ]; then
+    SESSION_ROOT=$(dirname "$CONFIG_FILE")
+fi
+
 # Check if session already exists
 if tmux has-session -t "$SESSION_NAME" 2>/dev/null; then
     if [ -n "${TMUX:-}" ]; then
