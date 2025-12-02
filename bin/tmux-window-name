@@ -7,13 +7,13 @@ current_path="$3"
 # https://www.nerdfonts.com/cheat-sheet
 
 case "$command" in
-  git|gitui)
+  git|gitui|lazygit)
     echo " " # nf-dev-git
     ;;
   node)
     echo " " # nf-oct-copilot
     ;;
-  make)
+  make|overmind)
     echo "󰖟 " # nf-md-web
     ;;
   ruby)
