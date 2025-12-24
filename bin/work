@@ -7,7 +7,7 @@
 #
 # TODO:
 # - [x] Show PR CI status (currently only shows review status)
-# - [ ] Show branch name instead of "yes" (for searchability)
+# - [x] Show branch name instead of "yes" (for searchability)
 # - [ ] Fetch titles for all stories, not just those with active sessions
 # - [ ] Combine Shortcut and non-Shortcut branches into one unified list
 # - [ ] Add fzf integration for interactive selection
@@ -198,8 +198,7 @@ main() {
         {
             story_id: $story_id,
             title: ($story_names[$story_id] // "-"),
-            branch: "yes",
-            branch_name: $branch,
+            branch: $branch,
             worktree: (if $worktree_map[$branch] then "yes" else "no" end),
             pr: (if $pr then ($pr | pr_display) else "-" end),
             session: (if $session then "*" else " " end),
@@ -233,8 +232,8 @@ main() {
 
     if [ "$story_count" -gt 0 ]; then
         {
-            printf "SESSION\tSTORY\tTITLE\tBRANCH\tWORKTREE\tPR\n"
-            echo "$output" | jq -r '.stories[] | [.session, .story_id, (if .title == "-" then "-" elif (.title | length) > 50 then (.title[:47] + "...") else .title end), .branch, .worktree, .pr] | @tsv'
+            printf "SESSION\tSTORY\tTITLE\tBRANCH\tWT\tPR\n"
+            echo "$output" | jq -r '.stories[] | [.session, .story_id, (if .title == "-" then "-" elif (.title | length) > 45 then (.title[:42] + "...") else .title end), .branch, .worktree, .pr] | @tsv'
         } | column -t -s $'\t'
     else
         echo "No Shortcut stories found (no sc-* branches)"
@@ -248,7 +247,7 @@ main() {
         echo ""
         echo "Other branches:"
         {
-            printf "SESSION\tBRANCH\tWORKTREE\tPR\n"
+            printf "SESSION\tBRANCH\tWT\tPR\n"
             echo "$output" | jq -r '.other[] | [.session, .branch_name, .worktree, .pr] | @tsv'
         } | column -t -s $'\t'
     fi
