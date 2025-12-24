@@ -3,12 +3,12 @@
 # Usage: work
 #
 # Lists current work items: Shortcut stories, git branches, worktrees, PRs, and tmux sessions
-# Only fetches Shortcut story details for active tmux sessions (fast)
+# Fetches Shortcut story details for all branches (parallel, ~30-40s for many branches)
 #
 # TODO:
 # - [x] Show PR CI status (currently only shows review status)
 # - [x] Show branch name instead of "yes" (for searchability)
-# - [ ] Fetch titles for all stories, not just those with active sessions
+# - [x] Fetch titles for all stories, not just those with active sessions
 # - [ ] Combine Shortcut and non-Shortcut branches into one unified list
 # - [ ] Add fzf integration for interactive selection
 # - [ ] Implement selection actions (switch session, create worktree, etc.)
@@ -78,69 +78,78 @@ main() {
     local repo_sessions
     repo_sessions=$(echo "$sessions" | grep "^${repo_name}" || true)
 
-    # Extract story IDs from active tmux sessions only (fast path - only fetch these)
-    local active_story_ids=""
-    while IFS= read -r session; do
-        [ -z "$session" ] && continue
+    # Extract unique story IDs from ALL branches
+    local all_story_ids=""
+    while IFS= read -r branch; do
+        [ -z "$branch" ] && continue
         local sid
-        sid=$(extract_story_id "$session")
+        sid=$(extract_story_id "$branch")
         if [ -n "$sid" ]; then
-            if [[ ! "$active_story_ids" =~ (^|$'\n')"$sid"($'\n'|$) ]]; then
-                active_story_ids="${active_story_ids}${active_story_ids:+$'\n'}${sid}"
+            if [[ ! "$all_story_ids" =~ (^|$'\n')"$sid"($'\n'|$) ]]; then
+                all_story_ids="${all_story_ids}${all_story_ids:+$'\n'}${sid}"
             fi
         fi
-    done <<< "$repo_sessions"
+    done <<< "$branches"
 
-    # Fetch story details only for active sessions (parallel, fast)
+    # Fetch story details for all stories (parallel, batched)
     local stories_json="[]"
-    if [ -n "$active_story_ids" ]; then
+    if [ -n "$all_story_ids" ]; then
         local tmpdir
         tmpdir=$(mktemp -d)
         trap "rm -rf $tmpdir" EXIT
 
+        # Fetch in parallel batches of 30
+        local count=0
         local pids=""
         while IFS= read -r sid; do
             [ -z "$sid" ] && continue
             (short story "$sid" --format "%j" 2>/dev/null > "$tmpdir/$sid.json" || echo "{}" > "$tmpdir/$sid.json") &
             pids="$pids $!"
-        done <<< "$active_story_ids"
+            count=$((count + 1))
+            if [ $count -ge 30 ]; then
+                wait $pids 2>/dev/null
+                pids=""
+                count=0
+            fi
+        done <<< "$all_story_ids"
 
         if [ -n "$pids" ]; then
-            wait $pids
+            wait $pids 2>/dev/null
         fi
 
-        stories_json=$(cat "$tmpdir"/*.json 2>/dev/null | jq -s '[.[] | select(. != {} and .id != null)]' || echo "[]")
+        find "$tmpdir" -name '*.json' -exec cat {} + 2>/dev/null | jq -s '[.[] | select(. != {} and .id != null)]' > "$tmpdir/stories.json" || echo "[]" > "$tmpdir/stories.json"
+    else
+        tmpdir=$(mktemp -d)
+        trap "rm -rf $tmpdir" EXIT
+        echo "[]" > "$tmpdir/stories.json"
     fi
 
-    # Convert branches to JSON array
-    local branches_json
-    branches_json=$(echo "$branches" | jq -R -s 'split("\n") | map(select(length > 0))')
+    # Write other JSON data to temp files (avoids "Argument list too long")
+    echo "$branches" | jq -R -s 'split("\n") | map(select(length > 0))' > "$tmpdir/branches.json"
 
-    # Parse worktrees into JSON array of {path, branch}
-    local worktrees_json
-    worktrees_json=$(echo "$worktrees" | awk '
+    echo "$worktrees" | awk '
         /^worktree / { path = substr($0, 10) }
         /^branch / {
             branch = substr($0, 8)
             gsub(/refs\/heads\//, "", branch)
             print path "\t" branch
         }
-    ' | jq -R -s 'split("\n") | map(select(length > 0) | split("\t") | {path: .[0], branch: .[1]})')
+    ' | jq -R -s 'split("\n") | map(select(length > 0) | split("\t") | {path: .[0], branch: .[1]})' > "$tmpdir/worktrees.json"
 
-    # Convert sessions to JSON array (only matching repo)
-    local sessions_json
-    sessions_json=$(echo "$repo_sessions" | jq -R -s 'split("\n") | map(select(length > 0))' 2>/dev/null || echo "[]")
+    echo "$repo_sessions" | jq -R -s 'split("\n") | map(select(length > 0))' > "$tmpdir/sessions.json" 2>/dev/null || echo "[]" > "$tmpdir/sessions.json"
 
-    # Build the correlated work items using jq
+    echo "$prs" > "$tmpdir/prs.json"
+
+    # Build the correlated work items using jq with slurpfile
     local output
     output=$(jq -n \
-        --argjson stories "$stories_json" \
-        --argjson branches "$branches_json" \
-        --argjson worktrees "$worktrees_json" \
-        --argjson prs "$prs" \
-        --argjson sessions "$sessions_json" \
+        --slurpfile stories "$tmpdir/stories.json" \
+        --slurpfile branches "$tmpdir/branches.json" \
+        --slurpfile worktrees "$tmpdir/worktrees.json" \
+        --slurpfile prs "$tmpdir/prs.json" \
+        --slurpfile sessions "$tmpdir/sessions.json" \
         --arg repo "$repo_name" \
-    '
+    '($stories[0]) as $stories | ($branches[0]) as $branches | ($worktrees[0]) as $worktrees | ($prs[0]) as $prs | ($sessions[0]) as $sessions |
     # Helper to extract story ID from string
     def extract_story_id:
         if test("sc-[0-9]+") then
