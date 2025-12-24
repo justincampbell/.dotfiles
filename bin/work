@@ -1,0 +1,225 @@
+#!/bin/bash
+# Interactive work item selector
+# Usage: work
+#
+# Lists current work items: Shortcut stories, git branches, worktrees, PRs, and tmux sessions
+# Only fetches Shortcut story details for active tmux sessions (fast)
+
+set -euo pipefail
+
+#######################################
+# Data Collection
+#######################################
+
+get_local_branches() {
+    git branch --format='%(refname:short)' 2>/dev/null || true
+}
+
+get_worktrees() {
+    git worktree list --porcelain 2>/dev/null || true
+}
+
+get_github_prs() {
+    gh pr list --author="@me" --state=open \
+        --json number,headRefName,isDraft,reviewDecision,statusCheckRollup \
+        2>/dev/null || echo "[]"
+}
+
+get_tmux_sessions() {
+    tmux list-sessions -F '#{session_name}' 2>/dev/null || true
+}
+
+#######################################
+# Helpers
+#######################################
+
+extract_story_id() {
+    local input="$1"
+    if [[ "$input" =~ sc-([0-9]+) ]]; then
+        echo "${BASH_REMATCH[1]}"
+    fi
+}
+
+# Get current repo name for matching tmux sessions
+get_repo_name() {
+    basename "$(git rev-parse --show-toplevel 2>/dev/null)" 2>/dev/null || echo ""
+}
+
+#######################################
+# Main
+#######################################
+
+main() {
+    # Verify we're in a git repo
+    if ! git rev-parse --show-toplevel >/dev/null 2>&1; then
+        echo "Error: Not in a git repository" >&2
+        exit 1
+    fi
+
+    local repo_name
+    repo_name=$(get_repo_name)
+
+    # Collect git and tmux data (fast)
+    local branches worktrees prs sessions
+    branches=$(get_local_branches)
+    worktrees=$(get_worktrees)
+    prs=$(get_github_prs)
+    sessions=$(get_tmux_sessions)
+
+    # Filter sessions for this repo
+    local repo_sessions
+    repo_sessions=$(echo "$sessions" | grep "^${repo_name}" || true)
+
+    # Extract story IDs from active tmux sessions only (fast path - only fetch these)
+    local active_story_ids=""
+    while IFS= read -r session; do
+        [ -z "$session" ] && continue
+        local sid
+        sid=$(extract_story_id "$session")
+        if [ -n "$sid" ]; then
+            if [[ ! "$active_story_ids" =~ (^|$'\n')"$sid"($'\n'|$) ]]; then
+                active_story_ids="${active_story_ids}${active_story_ids:+$'\n'}${sid}"
+            fi
+        fi
+    done <<< "$repo_sessions"
+
+    # Fetch story details only for active sessions (parallel, fast)
+    local stories_json="[]"
+    if [ -n "$active_story_ids" ]; then
+        local tmpdir
+        tmpdir=$(mktemp -d)
+        trap "rm -rf $tmpdir" EXIT
+
+        local pids=""
+        while IFS= read -r sid; do
+            [ -z "$sid" ] && continue
+            (short story "$sid" --format "%j" 2>/dev/null > "$tmpdir/$sid.json" || echo "{}" > "$tmpdir/$sid.json") &
+            pids="$pids $!"
+        done <<< "$active_story_ids"
+
+        if [ -n "$pids" ]; then
+            wait $pids
+        fi
+
+        stories_json=$(cat "$tmpdir"/*.json 2>/dev/null | jq -s '[.[] | select(. != {} and .id != null)]' || echo "[]")
+    fi
+
+    # Convert branches to JSON array
+    local branches_json
+    branches_json=$(echo "$branches" | jq -R -s 'split("\n") | map(select(length > 0))')
+
+    # Parse worktrees into JSON array of {path, branch}
+    local worktrees_json
+    worktrees_json=$(echo "$worktrees" | awk '
+        /^worktree / { path = substr($0, 10) }
+        /^branch / {
+            branch = substr($0, 8)
+            gsub(/refs\/heads\//, "", branch)
+            print path "\t" branch
+        }
+    ' | jq -R -s 'split("\n") | map(select(length > 0) | split("\t") | {path: .[0], branch: .[1]})')
+
+    # Convert sessions to JSON array (only matching repo)
+    local sessions_json
+    sessions_json=$(echo "$repo_sessions" | jq -R -s 'split("\n") | map(select(length > 0))' 2>/dev/null || echo "[]")
+
+    # Build the correlated work items using jq
+    local output
+    output=$(jq -n \
+        --argjson stories "$stories_json" \
+        --argjson branches "$branches_json" \
+        --argjson worktrees "$worktrees_json" \
+        --argjson prs "$prs" \
+        --argjson sessions "$sessions_json" \
+        --arg repo "$repo_name" \
+    '
+    # Helper to extract story ID from string
+    def extract_story_id:
+        if test("sc-[0-9]+") then
+            capture("sc-(?<id>[0-9]+)") | .id
+        else
+            null
+        end;
+
+    # Helper to derive PR status
+    def pr_status:
+        if .isDraft then "draft"
+        elif .reviewDecision == "APPROVED" then "approved"
+        elif .reviewDecision == "CHANGES_REQUESTED" then "changes"
+        elif (.statusCheckRollup // []) | any(.conclusion == "FAILURE" or .conclusion == "ERROR") then "failing"
+        elif (.statusCheckRollup // []) | any(.status != "COMPLETED") then "pending"
+        elif (.statusCheckRollup // []) | length > 0 then "passing"
+        else "-"
+        end;
+
+    # Build lookup maps
+    ($worktrees | map({(.branch): .path}) | add // {}) as $worktree_map |
+    ($prs | map({(.headRefName): .}) | add // {}) as $pr_map |
+    ($stories | map({(.id | tostring): .name}) | add // {}) as $story_names |
+
+    # Build items for branches with sc- pattern
+    ($branches | map(select(test("sc-[0-9]+"))) | map(
+        . as $branch |
+        ($branch | extract_story_id) as $story_id |
+        ($sessions | map(select(. as $s | ($s | extract_story_id) == $story_id)) | first // null) as $session |
+        {
+            story_id: $story_id,
+            title: ($story_names[$story_id] // "-"),
+            branch: "yes",
+            branch_name: $branch,
+            worktree: (if $worktree_map[$branch] then "yes" else "no" end),
+            pr: (if $pr_map[$branch] then "#\($pr_map[$branch].number)" else "-" end),
+            status: (if $pr_map[$branch] then ($pr_map[$branch] | pr_status) else "-" end),
+            session: (if $session then "*" else " " end),
+            session_name: $session
+        }
+    ) | unique_by(.story_id)) as $story_items |
+
+    # Find non-shortcut branches (those without sc- pattern)
+    ($branches | map(select(extract_story_id == null)) | map(
+        . as $branch |
+        ($sessions | map(select(. | contains($branch))) | first // null) as $session |
+        {
+            branch_name: $branch,
+            worktree: (if $worktree_map[$branch] then "yes" else "no" end),
+            pr: (if $pr_map[$branch] then "#\($pr_map[$branch].number)" else "-" end),
+            status: (if $pr_map[$branch] then ($pr_map[$branch] | pr_status) else "-" end),
+            session: (if $session then "*" else " " end),
+            session_name: $session
+        }
+    )) as $other_items |
+
+    {
+        stories: ($story_items | sort_by(.session) | reverse),
+        other: $other_items
+    }
+    ')
+
+    # Format and print the Shortcut stories table
+    local story_count
+    story_count=$(echo "$output" | jq '.stories | length')
+
+    if [ "$story_count" -gt 0 ]; then
+        {
+            printf "SESSION\tSTORY\tTITLE\tBRANCH\tWORKTREE\tPR\tSTATUS\n"
+            echo "$output" | jq -r '.stories[] | [.session, .story_id, (if .title == "-" then "-" elif (.title | length) > 50 then (.title[:47] + "...") else .title end), .branch, .worktree, .pr, .status] | @tsv'
+        } | column -t -s $'\t'
+    else
+        echo "No Shortcut stories found (no sc-* branches)"
+    fi
+
+    # Format and print the other branches table
+    local other_count
+    other_count=$(echo "$output" | jq '.other | length')
+
+    if [ "$other_count" -gt 0 ]; then
+        echo ""
+        echo "Other branches:"
+        {
+            printf "SESSION\tBRANCH\tWORKTREE\tPR\tSTATUS\n"
+            echo "$output" | jq -r '.other[] | [.session, .branch_name, .worktree, .pr, .status] | @tsv'
+        } | column -t -s $'\t'
+    fi
+}
+
+main "$@"
