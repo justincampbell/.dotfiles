@@ -9,7 +9,7 @@
 # - [x] Show PR CI status (currently only shows review status)
 # - [x] Show branch name instead of "yes" (for searchability)
 # - [x] Fetch titles for all stories, not just those with active sessions
-# - [ ] Combine Shortcut and non-Shortcut branches into one unified list
+# - [x] Combine Shortcut and non-Shortcut branches into one unified list
 # - [ ] Add fzf integration for interactive selection
 # - [ ] Implement selection actions (switch session, create worktree, etc.)
 
@@ -221,7 +221,9 @@ main() {
         ($sessions | map(select(. | contains($branch))) | first // null) as $session |
         ($pr_map[$branch] // null) as $pr |
         {
-            branch_name: $branch,
+            story_id: "-",
+            title: "-",
+            branch: $branch,
             worktree: (if $worktree_map[$branch] then "yes" else "no" end),
             pr: (if $pr then ($pr | pr_display) else "-" end),
             session: (if $session then "*" else " " end),
@@ -229,36 +231,21 @@ main() {
         }
     )) as $other_items |
 
-    {
-        stories: ($story_items | sort_by(.session) | reverse),
-        other: $other_items
-    }
+    # Combine and sort: active sessions first, then by story_id descending
+    ($story_items + $other_items) | sort_by([.session, .story_id]) | reverse
     ')
 
-    # Format and print the Shortcut stories table
-    local story_count
-    story_count=$(echo "$output" | jq '.stories | length')
+    # Format and print unified table
+    local item_count
+    item_count=$(echo "$output" | jq 'length')
 
-    if [ "$story_count" -gt 0 ]; then
+    if [ "$item_count" -gt 0 ]; then
         {
             printf "SESSION\tSTORY\tTITLE\tBRANCH\tWT\tPR\n"
-            echo "$output" | jq -r '.stories[] | [.session, .story_id, (if .title == "-" then "-" elif (.title | length) > 45 then (.title[:42] + "...") else .title end), .branch, .worktree, .pr] | @tsv'
+            echo "$output" | jq -r '.[] | [.session, .story_id, (if .title == "-" then "-" elif (.title | length) > 45 then (.title[:42] + "...") else .title end), .branch, .worktree, .pr] | @tsv'
         } | column -t -s $'\t'
     else
-        echo "No Shortcut stories found (no sc-* branches)"
-    fi
-
-    # Format and print the other branches table
-    local other_count
-    other_count=$(echo "$output" | jq '.other | length')
-
-    if [ "$other_count" -gt 0 ]; then
-        echo ""
-        echo "Other branches:"
-        {
-            printf "SESSION\tBRANCH\tWT\tPR\n"
-            echo "$output" | jq -r '.other[] | [.session, .branch_name, .worktree, .pr] | @tsv'
-        } | column -t -s $'\t'
+        echo "No branches found"
     fi
 }
 
