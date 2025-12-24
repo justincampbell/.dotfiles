@@ -4,6 +4,14 @@
 #
 # Lists current work items: Shortcut stories, git branches, worktrees, PRs, and tmux sessions
 # Only fetches Shortcut story details for active tmux sessions (fast)
+#
+# TODO:
+# - [ ] Show PR CI status (currently only shows review status)
+# - [ ] Show branch name instead of "yes" (for searchability)
+# - [ ] Fetch titles for all stories, not just those with active sessions
+# - [ ] Combine Shortcut and non-Shortcut branches into one unified list
+# - [ ] Add fzf integration for interactive selection
+# - [ ] Implement selection actions (switch session, create worktree, etc.)
 
 set -euo pipefail
 
