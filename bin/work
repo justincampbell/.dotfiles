@@ -6,7 +6,7 @@
 # Only fetches Shortcut story details for active tmux sessions (fast)
 #
 # TODO:
-# - [ ] Show PR CI status (currently only shows review status)
+# - [x] Show PR CI status (currently only shows review status)
 # - [ ] Show branch name instead of "yes" (for searchability)
 # - [ ] Fetch titles for all stories, not just those with active sessions
 # - [ ] Combine Shortcut and non-Shortcut branches into one unified list
@@ -149,15 +149,39 @@ main() {
             null
         end;
 
-    # Helper to derive PR status
-    def pr_status:
+    # Helper to derive CI status from statusCheckRollup
+    # Handles both CheckRun (GitHub Actions) and StatusContext (CircleCI)
+    def ci_status:
+        (.statusCheckRollup // []) as $checks |
+        if ($checks | length) == 0 then null
+        elif ($checks | any(
+            (.conclusion == "FAILURE" or .conclusion == "ERROR" or .conclusion == "TIMED_OUT") or
+            (.state == "FAILURE" or .state == "ERROR")
+        )) then "failing"
+        elif ($checks | any(
+            (.status != null and .status != "COMPLETED") or
+            (.state == "PENDING")
+        )) then "pending"
+        else "passing"
+        end;
+
+    # Helper to derive review status
+    def review_status:
         if .isDraft then "draft"
         elif .reviewDecision == "APPROVED" then "approved"
         elif .reviewDecision == "CHANGES_REQUESTED" then "changes"
-        elif (.statusCheckRollup // []) | any(.conclusion == "FAILURE" or .conclusion == "ERROR") then "failing"
-        elif (.statusCheckRollup // []) | any(.status != "COMPLETED") then "pending"
-        elif (.statusCheckRollup // []) | length > 0 then "passing"
-        else "-"
+        elif .reviewDecision == "REVIEW_REQUIRED" then "needs review"
+        else null
+        end;
+
+    # Combined PR status: #12345 (passing, needs review)
+    def pr_display:
+        .number as $num |
+        (ci_status) as $ci |
+        (review_status) as $review |
+        [($ci // empty), ($review // empty)] |
+        if length == 0 then "#\($num)"
+        else "#\($num) (\(join(", ")))"
         end;
 
     # Build lookup maps
@@ -170,14 +194,14 @@ main() {
         . as $branch |
         ($branch | extract_story_id) as $story_id |
         ($sessions | map(select(. as $s | ($s | extract_story_id) == $story_id)) | first // null) as $session |
+        ($pr_map[$branch] // null) as $pr |
         {
             story_id: $story_id,
             title: ($story_names[$story_id] // "-"),
             branch: "yes",
             branch_name: $branch,
             worktree: (if $worktree_map[$branch] then "yes" else "no" end),
-            pr: (if $pr_map[$branch] then "#\($pr_map[$branch].number)" else "-" end),
-            status: (if $pr_map[$branch] then ($pr_map[$branch] | pr_status) else "-" end),
+            pr: (if $pr then ($pr | pr_display) else "-" end),
             session: (if $session then "*" else " " end),
             session_name: $session
         }
@@ -187,11 +211,11 @@ main() {
     ($branches | map(select(extract_story_id == null)) | map(
         . as $branch |
         ($sessions | map(select(. | contains($branch))) | first // null) as $session |
+        ($pr_map[$branch] // null) as $pr |
         {
             branch_name: $branch,
             worktree: (if $worktree_map[$branch] then "yes" else "no" end),
-            pr: (if $pr_map[$branch] then "#\($pr_map[$branch].number)" else "-" end),
-            status: (if $pr_map[$branch] then ($pr_map[$branch] | pr_status) else "-" end),
+            pr: (if $pr then ($pr | pr_display) else "-" end),
             session: (if $session then "*" else " " end),
             session_name: $session
         }
@@ -209,8 +233,8 @@ main() {
 
     if [ "$story_count" -gt 0 ]; then
         {
-            printf "SESSION\tSTORY\tTITLE\tBRANCH\tWORKTREE\tPR\tSTATUS\n"
-            echo "$output" | jq -r '.stories[] | [.session, .story_id, (if .title == "-" then "-" elif (.title | length) > 50 then (.title[:47] + "...") else .title end), .branch, .worktree, .pr, .status] | @tsv'
+            printf "SESSION\tSTORY\tTITLE\tBRANCH\tWORKTREE\tPR\n"
+            echo "$output" | jq -r '.stories[] | [.session, .story_id, (if .title == "-" then "-" elif (.title | length) > 50 then (.title[:47] + "...") else .title end), .branch, .worktree, .pr] | @tsv'
         } | column -t -s $'\t'
     else
         echo "No Shortcut stories found (no sc-* branches)"
@@ -224,8 +248,8 @@ main() {
         echo ""
         echo "Other branches:"
         {
-            printf "SESSION\tBRANCH\tWORKTREE\tPR\tSTATUS\n"
-            echo "$output" | jq -r '.other[] | [.session, .branch_name, .worktree, .pr, .status] | @tsv'
+            printf "SESSION\tBRANCH\tWORKTREE\tPR\n"
+            echo "$output" | jq -r '.other[] | [.session, .branch_name, .worktree, .pr] | @tsv'
         } | column -t -s $'\t'
     fi
 }
