@@ -144,7 +144,10 @@ git_status() {
     return
   fi
 
+  # Run git status with timeout to avoid hanging on locks
   local status=$(timeout 1 git -c color.status=always status --branch --no-ahead-behind --short --untracked=normal . 2>/dev/null | sed -E 's/\.{3}[^ ]*$//g')
+
+  # If git command failed (timeout or lock), silently skip status display
   if [ $? -ne 0 ]; then
     return
   fi
@@ -209,6 +212,16 @@ timer_status() {
 
 tmux_window_title() {
   if [ -n "$TMUX" ]; then
+    local current_command=$(tmux display-message -p '#{pane_current_command}')
+
+    # Check if we're running Claude Code by looking at parent processes
+    if ps -o command= -p $PPID 2>/dev/null | grep -q 'claude'; then
+      printf '\033]2;%s\033\\' "Claude Code"
+      tmux set-window-option -t "$(tmux display-message -p '#I')" automatic-rename off >/dev/null 2>&1
+      tmux rename-window "Claude Code" >/dev/null 2>&1
+      return
+    fi
+
     if [ "$PWD" = "$HOME" ]; then
       tmux rename-window "🏠"
     else
