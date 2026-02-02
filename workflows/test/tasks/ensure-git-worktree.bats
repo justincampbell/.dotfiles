@@ -13,6 +13,10 @@ setup() {
         export REAL_HOME="$HOME"
     fi
 
+    # Configure git for test commits
+    git config --global user.name "Test User"
+    git config --global user.email "test@example.com"
+
     # Create a real git repo for worktree testing
     mkdir -p "${CODE_DIR}/justincampbell/example"
     cd "${CODE_DIR}/justincampbell/example"
