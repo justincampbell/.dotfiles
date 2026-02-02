@@ -1,0 +1,38 @@
+#!/usr/bin/env bash
+# Fix common file formatting issues (trailing whitespace, missing final newline)
+
+if [ -z "$1" ]; then
+  echo "Usage: fix-whitespace <file> [<file> ...]" >&2
+  exit 1
+fi
+
+had_errors=0
+
+for file in "$@"; do
+  if [ ! -f "$file" ]; then
+    echo "Error: File not found: $file" >&2
+    had_errors=1
+    continue
+  fi
+
+  # Create a temp file with the fixes applied
+  tmpfile=$(mktemp)
+
+  # Remove trailing whitespace and ensure final newline
+  sed -e 's/[[:space:]]*$//' "$file" > "$tmpfile"
+
+  # Ensure file ends with newline (works on both BSD and GNU sed)
+  if [ -n "$(tail -c 1 "$tmpfile")" ]; then
+    echo >> "$tmpfile"
+  fi
+
+  # Only output and update if there are differences
+  if ! cmp -s "$file" "$tmpfile"; then
+    mv "$tmpfile" "$file"
+    echo "Fixed: $file"
+  else
+    rm "$tmpfile"
+  fi
+done
+
+exit $had_errors
