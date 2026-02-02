@@ -3,13 +3,14 @@
 # Usage: work
 #
 # Lists current work items: Shortcut stories, git branches, worktrees, PRs, and tmux sessions
-# Fetches Shortcut story details for all branches (parallel, ~30-40s for many branches)
+# Fetches Shortcut story details via bulk API (~1-2s for all stories)
 #
 # TODO:
 # - [x] Show PR CI status (currently only shows review status)
 # - [x] Show branch name instead of "yes" (for searchability)
 # - [x] Fetch titles for all stories, not just those with active sessions
 # - [x] Combine Shortcut and non-Shortcut branches into one unified list
+# - [x] Optimize Shortcut API usage (bulk API with pagination, 30-45s -> 2s)
 # - [ ] Add fzf integration for interactive selection
 # - [ ] Implement selection actions (switch session, create worktree, etc.)
 
@@ -78,50 +79,47 @@ main() {
     local repo_sessions
     repo_sessions=$(echo "$sessions" | grep "^${repo_name}" || true)
 
-    # Extract unique story IDs from ALL branches
-    local all_story_ids=""
-    while IFS= read -r branch; do
-        [ -z "$branch" ] && continue
-        local sid
-        sid=$(extract_story_id "$branch")
-        if [ -n "$sid" ]; then
-            if [[ ! "$all_story_ids" =~ (^|$'\n')"$sid"($'\n'|$) ]]; then
-                all_story_ids="${all_story_ids}${all_story_ids:+$'\n'}${sid}"
-            fi
-        fi
-    done <<< "$branches"
+    # Setup temp directory
+    local tmpdir
+    tmpdir=$(mktemp -d)
+    trap 'rm -rf "${tmpdir:-}"' EXIT
 
-    # Fetch story details for all stories (parallel, batched)
-    local stories_json="[]"
-    if [ -n "$all_story_ids" ]; then
-        local tmpdir
-        tmpdir=$(mktemp -d)
-        trap "rm -rf $tmpdir" EXIT
-
-        # Fetch in parallel batches of 30
-        local count=0
-        local pids=""
-        while IFS= read -r sid; do
-            [ -z "$sid" ] && continue
-            (short story "$sid" --format "%j" 2>/dev/null > "$tmpdir/$sid.json" || echo "{}" > "$tmpdir/$sid.json") &
-            pids="$pids $!"
-            count=$((count + 1))
-            if [ $count -ge 30 ]; then
-                wait $pids 2>/dev/null
-                pids=""
-                count=0
-            fi
-        done <<< "$all_story_ids"
-
-        if [ -n "$pids" ]; then
-            wait $pids 2>/dev/null
-        fi
-
-        find "$tmpdir" -name '*.json' -exec cat {} + 2>/dev/null | jq -s '[.[] | select(. != {} and .id != null)]' > "$tmpdir/stories.json" || echo "[]" > "$tmpdir/stories.json"
-    else
-        tmpdir=$(mktemp -d)
-        trap "rm -rf $tmpdir" EXIT
+    # Fetch all stories owned by user via bulk API (much faster than individual fetches)
+    if ! command -v short >/dev/null 2>&1; then
+        echo "Warning: 'short' command not found, story titles will not be available" >&2
         echo "[]" > "$tmpdir/stories.json"
+    else
+        local mention_name
+        mention_name=$(short api /member 2>/dev/null | jq -r '.mention_name')
+
+        if [ -z "$mention_name" ] || [ "$mention_name" = "null" ]; then
+            echo "Warning: Could not get Shortcut mention_name, story titles will not be available" >&2
+            echo "[]" > "$tmpdir/stories.json"
+        else
+            # Paginate through all stories with page_size=100 for efficiency
+            local url="/search/stories?query=owner:$mention_name&page_size=100"
+            local all_stories="[]"
+            local max_pages=50
+            local page=0
+
+            while [ -n "$url" ] && [ $page -lt $max_pages ]; do
+                page=$((page + 1))
+                local response
+                response=$(short api "$url" 2>/dev/null || echo '{"data":[]}')
+
+                # Append this page's data to all_stories
+                all_stories=$(jq -s '.[0] + .[1].data' <<< "$all_stories"$'\n'"$response")
+
+                # Get next URL, or empty if done
+                url=$(echo "$response" | jq -r '.next // empty' | sed 's|^/api/v3||')
+            done
+
+            if [ $page -ge $max_pages ]; then
+                echo "Warning: Reached maximum page limit ($max_pages)" >&2
+            fi
+
+            echo "$all_stories" > "$tmpdir/stories.json"
+        fi
     fi
 
     # Write other JSON data to temp files (avoids "Argument list too long")
@@ -166,31 +164,32 @@ main() {
         elif ($checks | any(
             (.conclusion == "FAILURE" or .conclusion == "ERROR" or .conclusion == "TIMED_OUT") or
             (.state == "FAILURE" or .state == "ERROR")
-        )) then "failing"
+        )) then "❌"
         elif ($checks | any(
             (.status != null and .status != "COMPLETED") or
             (.state == "PENDING")
-        )) then "pending"
-        else "passing"
+        )) then "⏳"
+        else "✅"
         end;
 
     # Helper to derive review status
     def review_status:
-        if .isDraft then "draft"
-        elif .reviewDecision == "APPROVED" then "approved"
-        elif .reviewDecision == "CHANGES_REQUESTED" then "changes"
-        elif .reviewDecision == "REVIEW_REQUIRED" then "needs review"
+        if .isDraft then "📝"
+        elif .reviewDecision == "APPROVED" then "✓"
+        elif .reviewDecision == "CHANGES_REQUESTED" then "⚠️"
+        elif .reviewDecision == "REVIEW_REQUIRED" then "👀"
         else null
         end;
 
-    # Combined PR status: #12345 (passing, needs review)
+    # Combined PR status: #12345 ✅ 👀
     def pr_display:
         .number as $num |
         (ci_status) as $ci |
         (review_status) as $review |
         [($ci // empty), ($review // empty)] |
         if length == 0 then "#\($num)"
-        else "#\($num) (\(join(", ")))"
+        elif length == 1 then "#\($num) \(.[0])"
+        else "#\($num) \(.[0]) \(.[1])"
         end;
 
     # Build lookup maps
@@ -210,6 +209,7 @@ main() {
             branch: $branch,
             worktree: (if $worktree_map[$branch] then "yes" else "no" end),
             pr: (if $pr then ($pr | pr_display) else "-" end),
+            pr_obj: $pr,
             session: (if $session then "*" else " " end),
             session_name: $session
         }
@@ -226,13 +226,30 @@ main() {
             branch: $branch,
             worktree: (if $worktree_map[$branch] then "yes" else "no" end),
             pr: (if $pr then ($pr | pr_display) else "-" end),
+            pr_obj: $pr,
             session: (if $session then "*" else " " end),
             session_name: $session
         }
     )) as $other_items |
 
-    # Combine and sort: active sessions first, then by story_id descending
-    ($story_items + $other_items) | sort_by([.session, .story_id]) | reverse
+    # Combine and sort by priority, then story_id descending
+    # Priority: 1=active sessions, 2=PRs needing attention, 3=PRs ready to merge,
+    #           4=PRs in review, 5=other PR states, 6=worktrees, 7=everything else
+    ($story_items + $other_items) | map(
+        . as $item |
+        if $item.session == "*" then $item + {priority: 1}
+        elif ($item.pr_obj != null) then
+            ($item.pr_obj | ci_status) as $ci |
+            ($item.pr_obj | review_status) as $review |
+            if ($ci == "❌" or $review == "⚠️") then $item + {priority: 2}
+            elif ($ci == "✅" and $review == "✓") then $item + {priority: 3}
+            elif ($ci == "✅" and $review == "👀") then $item + {priority: 4}
+            else $item + {priority: 5}
+            end
+        elif $item.worktree == "yes" then $item + {priority: 6}
+        else $item + {priority: 7}
+        end
+    ) | sort_by([.priority, -(.story_id | if . == "-" then 0 else tonumber end)])
     ')
 
     # Format and print unified table
@@ -240,9 +257,61 @@ main() {
     item_count=$(echo "$output" | jq 'length')
 
     if [ "$item_count" -gt 0 ]; then
+        # Get terminal width - try multiple methods
+        local term_width
+        term_width=${COLUMNS:-}
+        [ -z "$term_width" ] && term_width=$(stty size 2>/dev/null | cut -d' ' -f2)
+        [ -z "$term_width" ] && term_width=$(tput cols 2>/dev/null)
+        [ -z "$term_width" ] && term_width=120
+
+        # Calculate natural max widths for ALL columns from actual data
+        # Note: Emoji take 2 visual cells but count as 1 char, so we calculate visual width for PR column
+        local max_session max_story max_title max_branch max_wt max_pr
+        read -r max_session max_story max_title max_branch max_wt max_pr <<< "$(echo "$output" | jq -r '
+            def visual_length:
+                . as $str |
+                ($str | length) as $len |
+                # Count emoji (rough heuristic: count common emoji we use)
+                ($str | [match("✅|❌|⏳|✓|📝|⚠️|👀"; "g")] | length) as $emoji_count |
+                $len + $emoji_count;  # Add 1 extra width per emoji (since they take 2 cells but count as 1)
+
+            [
+                (["SESSION", (.[].session)] | map(length) | max),
+                (["STORY", (.[].story_id | tostring)] | map(length) | max),
+                (["TITLE", (.[].title)] | map(length) | max),
+                (["BRANCH", (.[].branch)] | map(length) | max),
+                (["WT", (.[].worktree)] | map(length) | max),
+                (["PR", (.[].pr)] | map(visual_length) | max)
+            ] | @tsv
+        ')"
+
+        # Calculate natural width with 2-space separators between 6 columns = 10 spaces
+        local natural_width=$((max_session + max_story + max_title + max_branch + max_wt + max_pr + 10))
+
+        # Only truncate TITLE and BRANCH if natural width exceeds terminal
+        local title_width=$max_title
+        local branch_width=$max_branch
+
+        if [ $natural_width -gt $term_width ]; then
+            # Need to truncate - calculate available space for TITLE and BRANCH
+            local fixed_width=$((max_session + max_story + max_wt + max_pr + 10))
+            local available=$((term_width - fixed_width))
+
+            # Split available space 50/50 between TITLE and BRANCH
+            title_width=$((available * 50 / 100))
+            branch_width=$((available * 50 / 100))
+        fi
+
         {
             printf "SESSION\tSTORY\tTITLE\tBRANCH\tWT\tPR\n"
-            echo "$output" | jq -r '.[] | [.session, .story_id, (if .title == "-" then "-" elif (.title | length) > 45 then (.title[:42] + "...") else .title end), .branch, .worktree, .pr] | @tsv'
+            echo "$output" | jq -r --argjson tw "$title_width" --argjson bw "$branch_width" '.[] | [
+                .session,
+                .story_id,
+                (if .title == "-" then "-" elif (.title | length) > $tw then (.title[:($tw - 3)] + "...") else .title end),
+                (if (.branch | length) > $bw then (.branch[:($bw - 3)] + "...") else .branch end),
+                .worktree,
+                .pr
+            ] | @tsv'
         } | column -t -s $'\t'
     else
         echo "No branches found"

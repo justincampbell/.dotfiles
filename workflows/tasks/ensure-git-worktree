@@ -10,9 +10,17 @@ source "$(dirname "$0")/../shared.sh"
 branch_name="$1"
 
 if [ -z "$branch_name" ]; then
-    echo "Usage: create-git-worktree <branch-name>" >&2
+    echo "Usage: ensure-git-worktree <branch-name>" >&2
     exit 1
 fi
+
+# List of files to copy from base repo to worktree
+files_to_copy=(
+    ".env"
+    ".env.local"
+    ".env.development.local"
+    ".env.test.local"
+)
 
 # Get base repository from git root or current directory
 base_repo=$(git rev-parse --show-toplevel 2>/dev/null || echo "$PWD")
@@ -61,11 +69,13 @@ if [ $? -ne 0 ]; then
     exit 1
 fi
 
-# Copy .env file if it exists in base repo
-if [ -f "$base_repo/.env" ]; then
-    cp "$base_repo/.env" "$worktree_dir/.env"
-    echo "Copied .env file to worktree" >&2
-fi
+# Copy specified files if they exist in base repo
+for file in "${files_to_copy[@]}"; do
+    if [ -f "$base_repo/$file" ]; then
+        cp "$base_repo/$file" "$worktree_dir/$file"
+        echo "Copied $file to worktree" >&2
+    fi
+done
 
 # Give git a moment to settle and release locks
 sleep 0.5

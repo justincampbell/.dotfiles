@@ -1,0 +1,5 @@
+#!/bin/bash
+# Mock task that outputs a directory path
+
+# Output a test directory path
+echo "${1:-/tmp/test-output-dir}"

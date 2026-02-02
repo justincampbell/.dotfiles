@@ -19,7 +19,8 @@ export GPG_TTY=$(tty)
 export HISTCONTROL=ignoreboth
 export HISTSIZE=10000
 export PAGER=less
-export WORKFLOW_AI_CLI="claude"
+export SHORTCUT_REPO_URL="https://github.com/huntresslabs/portal"
+export WORKFLOW_AI_CLI="claude --permission-mode=bypassPermissions"
 
 export PATH=$HOME/.dotfiles/bin:$PATH # Dotfiles
 export PATH=$HOME/.dotfiles/workflows/tasks:$PATH # Workflow tasks
