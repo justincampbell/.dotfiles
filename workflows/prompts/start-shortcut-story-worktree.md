@@ -3,7 +3,9 @@ setup_tasks:
   - "./workflows/tasks/checkout-shortcut-story-worktree {{arg1}}"
 tmux_windows:
   - name: ai
-    command: "{{ai_cli}} && cleanup-git-worktree"
+    command: "{{ai_cli}}"
+  - name: git
+    command: "gitui"
   - name: vim
     command: "vim ."
   - name: shell
@@ -12,5 +14,6 @@ tmux_windows:
 
 You're going to work on a Shortcut story: {{arg1}}
 
-Review the story details using the `short` CLI and come up with a plan for implementation.
+Review the story details using the `$ short story [story ID]` CLI and come up with a plan for implementation.
 We are on that branch in a git worktree, do not switch branches.
+When you are done with the implementation, launch an Opus subagent to perform a code review.

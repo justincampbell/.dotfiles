@@ -4,6 +4,8 @@ setup_tasks:
 tmux_windows:
   - name: ai
     command: "{{ai_cli}}"
+  - name: git
+    command: "gitui"
   - name: vim
     command: "vim ."
   - name: shell
@@ -12,5 +14,6 @@ tmux_windows:
 
 You're going to work on a Shortcut story: {{arg1}}
 
-Review the story details using the `short` CLI and come up with a plan for implementation.
+Review the story details using the `$ short story [story ID]` CLI and come up with a plan for implementation.
 We are on that branch in the main repository, do not switch branches.
+When you are done with the implementation, launch an Opus subagent to perform a code review.
