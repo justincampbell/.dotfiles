@@ -77,6 +77,12 @@ for file in "${files_to_copy[@]}"; do
     fi
 done
 
+# Copy untracked files from .claude/ directory (may be gitignored)
+if [ -d "$base_repo/.claude" ]; then
+    cp -Rn "$base_repo/.claude/" "$worktree_dir/.claude/"
+    echo "Copied .claude/ to worktree" >&2
+fi
+
 # Give git a moment to settle and release locks
 sleep 0.5
 
