@@ -55,13 +55,44 @@ show_workflow_menu() {
     local menu_items=()
     local used_keys=""
 
+    # New worktree option at top, detect current repo
+    local pane_path=$(tmux display-message -p "#{pane_current_path}" 2>/dev/null)
+    # Use --git-common-dir to get the main repo name (not the worktree)
+    local git_common_dir=$(git -C "$pane_path" rev-parse --git-common-dir 2>/dev/null)
+    local repo_name=$(cd "$pane_path" && basename "$(cd "$git_common_dir/.." && pwd)" 2>/dev/null)
+    local worktree_label="New Worktree..."
+    if [ -n "$repo_name" ]; then
+        worktree_label="New $repo_name worktree..."
+    fi
+    local key=$(get_menu_key "start-worktree" "$used_keys")
+    used_keys="${used_keys}${key}"
+    menu_items+=("$worktree_label")
+    menu_items+=("$key")
+    menu_items+=("run-shell 'bash $WORKFLOWS_DIR/tmux/menu-handler.sh start-worktree'")
+
+    # Existing worktree option
+    local existing_label="Existing Worktree..."
+    if [ -n "$repo_name" ]; then
+        existing_label="Existing $repo_name worktree..."
+    fi
+    local ekey=$(get_menu_key "existing-worktree" "$used_keys")
+    used_keys="${used_keys}${ekey}"
+    menu_items+=("$existing_label")
+    menu_items+=("$ekey")
+    menu_items+=("run-shell 'bash $WORKFLOWS_DIR/tmux/menu-handler.sh open-worktree'")
+
+    # Separator before projects
+    menu_items+=("")
+    menu_items+=("")
+    menu_items+=("")
+
     # Discover sessions from sessions directory
     local sessions_dir="$WORKFLOWS_DIR/tmux/sessions"
     if [ -d "$sessions_dir" ]; then
         while IFS= read -r session_file; do
             local session_name=$(basename "$session_file" .yml)
 
-            local display_name="[S] $(workflow_display_name "$session_name")"
+            local display_name=$(workflow_display_name "$session_name")
             local key=$(get_menu_key "$session_name" "$used_keys")
             used_keys="${used_keys}${key}"
 
@@ -76,7 +107,7 @@ show_workflow_menu() {
         local project_dir=$(dirname "$workflow_file")
         local project_name=$(basename "$project_dir")
 
-        local display_name="[S] $(workflow_display_name "$project_name")"
+        local display_name=$(workflow_display_name "$project_name")
         local key=$(get_menu_key "$project_name" "$used_keys")
         used_keys="${used_keys}${key}"
 
@@ -84,55 +115,6 @@ show_workflow_menu() {
         menu_items+=("$key")
         menu_items+=("run-shell 'bash $WORKFLOWS_DIR/tmux/menu-handler.sh session:$project_name'")
     done < <(find ~/Code -name ".workflow.yml" -maxdepth 3 2>/dev/null | sort)
-
-    # Add separator after sessions
-    if [ ${#menu_items[@]} -gt 0 ]; then
-        menu_items+=("")
-        menu_items+=("")
-        menu_items+=("")
-    fi
-
-    # Discover workflows from prompts directory
-    while IFS= read -r prompt_file; do
-        local workflow_name=$(basename "$prompt_file" .md)
-
-        # Skip system prompts (starting with _)
-        [[ "$workflow_name" =~ ^_ ]] && continue
-
-        local display_name="[W] $(workflow_display_name "$workflow_name")"
-        local key=$(get_menu_key "$workflow_name" "$used_keys")
-        used_keys="${used_keys}${key}"
-
-        menu_items+=("$display_name")
-        menu_items+=("$key")
-        menu_items+=("run-shell 'bash $WORKFLOWS_DIR/tmux/menu-handler.sh workflow:$workflow_name'")
-    done < <(find "$WORKFLOWS_DIR/prompts" -maxdepth 1 -name "*.md" -type f | sort)
-
-    # Add separator between workflows and tasks
-    if [ ${#menu_items[@]} -gt 0 ]; then
-        menu_items+=("")
-        menu_items+=("")
-        menu_items+=("")
-    fi
-
-    # Discover tasks from tasks directory (macOS compatible)
-    while IFS= read -r task_file; do
-        local task_name=$(basename "$task_file")
-
-        # Skip start-workflow (it's used internally, not directly)
-        [[ "$task_name" == "start-workflow" ]] && continue
-
-        # Check if file is executable
-        [[ -x "$task_file" ]] || continue
-
-        local display_name="[T] $(workflow_display_name "$task_name")"
-        local key=$(get_menu_key "$task_name" "$used_keys")
-        used_keys="${used_keys}${key}"
-
-        menu_items+=("$display_name")
-        menu_items+=("$key")
-        menu_items+=("run-shell 'bash $WORKFLOWS_DIR/tmux/menu-handler.sh task:$task_name'")
-    done < <(find "$WORKFLOWS_DIR/tasks" -maxdepth 1 -type f | sort)
 
     # Add separator and cancel option
     menu_items+=("")
@@ -143,7 +125,7 @@ show_workflow_menu() {
     menu_items+=("")
 
     # Display the menu
-    tmux display-menu -T "Sessions, Workflows & Tasks" "${menu_items[@]}"
+    tmux display-menu "${menu_items[@]}"
 }
 
 launch_session() {
@@ -243,6 +225,26 @@ case "${1:-menu}" in
         task_name="${task_info%%:*}"
         args="${task_info#*:}"
         run_task_with_args "$task_name" $args
+        ;;
+    start-worktree)
+        tmux command-prompt -p "Branch description:" \
+            "run-shell 'printf \"%%s\" \"%%\" > /tmp/start-worktree-desc && bash $WORKFLOWS_DIR/tmux/menu-handler.sh run-start-worktree'"
+        ;;
+    open-worktree)
+        pane_path=$(tmux display-message -p "#{pane_current_path}")
+        safe_path="${pane_path//\'/\'\\\'\'}"
+        tmux display-popup -E -w 80% -h 80% \
+            "cd '$safe_path' && bash $WORKFLOWS_DIR/tasks/open-worktree"
+        ;;
+    run-start-worktree)
+        pane_path=$(tmux display-message -p "#{pane_current_path}")
+        description=$(cat /tmp/start-worktree-desc)
+        rm -f /tmp/start-worktree-desc
+        # Escape single quotes in description and path for safe shell embedding
+        safe_desc="${description//\'/\'\\\'\'}"
+        safe_path="${pane_path//\'/\'\\\'\'}"
+        tmux display-popup -E -w 80% -h 80% \
+            "cd '$safe_path' && bash $WORKFLOWS_DIR/tasks/start-worktree '$safe_desc'"
         ;;
     *)
         echo "Usage: $0 [menu|workflow:<name>|task:<name>]"

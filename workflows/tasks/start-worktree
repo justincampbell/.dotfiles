@@ -1,0 +1,50 @@
+#!/bin/bash
+# Creates a new branch worktree with tmux session from a description
+
+set -euo pipefail
+
+DOTFILES_DIR="${HOME}/.dotfiles"
+source "$DOTFILES_DIR/workflows/shared.sh"
+
+description="$*"
+
+if [ -z "$description" ]; then
+    echo "Usage: start-worktree <description>" >&2
+    echo "Example: start-worktree refactor auth flow" >&2
+    exit 1
+fi
+
+branch_name=$(slugify_branch_name "$description")
+
+if [ -z "$branch_name" ]; then
+    echo "Error: Could not create a branch name from '$description'"
+    echo ""
+    echo "Press Enter to close..."
+    read
+    exit 1
+fi
+
+# Get the current repo context
+base_repo=$(git rev-parse --show-toplevel 2>/dev/null)
+if [ -z "$base_repo" ]; then
+    echo "Error: Not in a git repository"
+    echo ""
+    echo "Press Enter to close..."
+    read
+    exit 1
+fi
+# Use --git-common-dir to get the main repo name (not the worktree)
+repo_name=$(basename "$(cd "$(git rev-parse --git-common-dir)/.." && pwd)")
+
+echo "Creating worktree..."
+echo "  Branch: $branch_name"
+echo "  Repo:   $repo_name"
+echo ""
+
+# Create the worktree (ensure-git-worktree prints progress to stderr)
+worktree_dir=$("$DOTFILES_DIR/workflows/tasks/ensure-git-worktree" "$branch_name")
+
+echo ""
+echo "Worktree: $worktree_dir"
+
+ensure_worktree_session "$worktree_dir" "$branch_name"

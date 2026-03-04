@@ -1,0 +1,49 @@
+#!/bin/bash
+# Opens an existing branch as a worktree with tmux session
+
+set -euo pipefail
+
+DOTFILES_DIR="${HOME}/.dotfiles"
+source "$DOTFILES_DIR/workflows/shared.sh"
+
+# Get the main repo directory
+git_common_dir=$(git rev-parse --git-common-dir 2>/dev/null)
+if [ -z "$git_common_dir" ]; then
+    echo "Error: Not in a git repository"
+    echo ""
+    echo "Press Enter to close..."
+    read
+    exit 1
+fi
+base_repo=$(cd "$git_common_dir/.." && pwd)
+
+# Fetch latest to include remote branches
+git -C "$base_repo" fetch --quiet origin 2>/dev/null || true
+
+# Let user pick a branch with fzf
+branch_name=$(git -C "$base_repo" branch -a --sort=-committerdate \
+    --format='%(refname:short)' \
+    | sed 's|^origin/||' \
+    | grep -v '^HEAD$' \
+    | awk '!seen[$0]++' \
+    | fzf --prompt="Branch> " --height=100%)
+
+if [ -z "$branch_name" ]; then
+    echo "No branch selected."
+    exit 1
+fi
+
+repo_name=$(basename "$base_repo")
+
+echo "Opening worktree..."
+echo "  Branch: $branch_name"
+echo "  Repo:   $repo_name"
+echo ""
+
+# Create the worktree
+worktree_dir=$("$DOTFILES_DIR/workflows/tasks/ensure-git-worktree" "$branch_name")
+
+echo ""
+echo "Worktree: $worktree_dir"
+
+ensure_worktree_session "$worktree_dir" "$branch_name"
