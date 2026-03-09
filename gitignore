@@ -3,4 +3,5 @@
 .nvmrc
 .workflow-prompt
 .workflow.yml
+planning/
 yarn_cache/
