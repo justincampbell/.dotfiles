@@ -1,5 +1,6 @@
 #!/bin/bash
 # Ensures a tmux session exists with standard layout for the given directory
+# Reads .workflow.yml if present for window configuration
 
 set -euo pipefail
 
@@ -8,33 +9,37 @@ source "$(dirname "$0")/../shared.sh"
 
 # Parse arguments
 detached=false
-if [[ "${1:-}" == "--detached" ]]; then
-    detached=true
-    shift
-fi
+session_name=""
+while [[ "${1:-}" == --* ]]; do
+    case "$1" in
+        --detached) detached=true; shift ;;
+        --name) session_name="$2"; shift 2 ;;
+        *) echo "Unknown option: $1" >&2; exit 1 ;;
+    esac
+done
 
-# Get directory path from argument
-target_dir="$1"
-windows="${2:-ai,vim,shell}"  # Default windows, can be overridden
+target_dir="${1:-}"
 
 if [ -z "$target_dir" ]; then
-    echo "Usage: ensure-tmux-session [--detached] <directory-path> [window-list]" >&2
-    echo "  --detached: Don't attach/switch to the session (for testing)" >&2
-    echo "  window-list: comma-separated list (default: ai,vim,shell)" >&2
+    echo "Usage: ensure-tmux-session [--detached] [--name NAME] <directory-path>" >&2
     exit 1
 fi
 
 # Resolve to absolute path
 target_dir=$(cd "$target_dir" && pwd)
 
-# Generate session name from directory path (basename)
-session_name=$(basename "$target_dir")
+# Default session name to directory basename
+if [ -z "$session_name" ]; then
+    session_name=$(basename "$target_dir")
+fi
 
-# Check if session already exists
-if tmux has-session -t "$session_name" 2>/dev/null; then
-    echo "Session $session_name already exists" >&2
+# Check if a session already exists for this directory
+existing_session=$(tmux list-sessions -F '#{session_name}:#{session_path}' 2>/dev/null \
+    | grep ":${target_dir}$" | head -1 | cut -d: -f1 || true)
+if [ -n "$existing_session" ]; then
+    session_name="$existing_session"
+    echo "Session $session_name already exists for $target_dir" >&2
     if [ "$detached" = false ]; then
-        echo "Switching to it" >&2
         if [ -n "${TMUX:-}" ]; then
             tmux switch-client -t "$session_name"
         else
@@ -45,56 +50,109 @@ if tmux has-session -t "$session_name" 2>/dev/null; then
     exit 0
 fi
 
-# Get configured AI CLI
-ai_cli=$(get_workflow_ai_cli)
+# Check for .workflow.yml
+workflow_yml="$target_dir/.workflow.yml"
+is_worktree=false
+[ -f "$target_dir/.git" ] && is_worktree=true
 
-# Create tmux session starting in target directory
+# Create session
 tmux new-session -d -s "$session_name" -c "$target_dir"
-
-# Give tmux a moment to fully create the session
 sleep 0.1
 
-# Get the first window index (respects base-index setting)
-first_window_index=$(tmux list-windows -t "$session_name" -F '#{window_index}' | head -1)
+# Run worktree setup commands from .workflow.yml
+if [ "$is_worktree" = true ] && [ -f "$workflow_yml" ]; then
+    setup_count=$(yq eval '.worktree.setup | length' "$workflow_yml")
+    if [ "$setup_count" != "0" ] && [ "$setup_count" != "null" ]; then
+        echo "Running worktree setup..." >&2
+        for ((i=0; i<setup_count; i++)); do
+            cmd=$(yq eval ".worktree.setup[$i]" "$workflow_yml")
+            echo "  $cmd" >&2
+            (cd "$target_dir" && eval "$cmd") || echo "  Warning: $cmd failed" >&2
+        done
+    fi
+fi
 
-# Parse and create windows
-IFS=',' read -ra WINDOW_LIST <<< "$windows"
-window_count=0
+# Determine windows: .workflow.yml > default
+if [ -f "$workflow_yml" ]; then
+    window_count=$(yq eval '.windows | length' "$workflow_yml")
+    if [ "$window_count" != "0" ] && [ "$window_count" != "null" ]; then
+        # Apply worktree window overrides
+        if [ "$is_worktree" = true ]; then
+            wt_count=$(yq eval '.worktree.windows | length' "$workflow_yml")
+            if [ "$wt_count" != "0" ] && [ "$wt_count" != "null" ]; then
+                # Build merged windows YAML
+                windows_yaml=$(yq eval '[.windows[] | to_entries[] | {"name": .key, "command": (.value // "")}]' "$workflow_yml")
+                for ((i=0; i<wt_count; i++)); do
+                    wt_name=$(yq eval ".worktree.windows[$i] | keys | .[0]" "$workflow_yml")
+                    wt_cmd=$(yq eval ".worktree.windows[$i].$wt_name" "$workflow_yml")
+                    windows_yaml=$(echo "$windows_yaml" | yq eval "(.[] | select(.name == \"$wt_name\") | .command) = \"$wt_cmd\"" -)
+                done
+            else
+                windows_yaml=$(yq eval '[.windows[] | to_entries[] | {"name": .key, "command": (.value // "")}]' "$workflow_yml")
+            fi
+        else
+            windows_yaml=$(yq eval '[.windows[] | to_entries[] | {"name": .key, "command": (.value // "")}]' "$workflow_yml")
+        fi
 
-for window_name in "${WINDOW_LIST[@]}"; do
-    window_name=$(echo "$window_name" | xargs)  # trim whitespace
+        # Create windows from YAML
+        yaml_count=$(echo "$windows_yaml" | yq -r 'length')
+        for ((i=0; i<yaml_count; i++)); do
+            name=$(echo "$windows_yaml" | yq -r ".[$i].name")
+            command=$(echo "$windows_yaml" | yq -r ".[$i].command // \"\"")
 
-    if [ $window_count -eq 0 ]; then
-        # First window already exists, just rename it
-        tmux rename-window -t "$session_name:$first_window_index" "$window_name"
-        window_target="$session_name:$first_window_index"
+            if [ $i -eq 0 ]; then
+                tmux rename-window -t "$session_name:1" "$name"
+                window_target="$session_name:1"
+            else
+                tmux new-window -t "$session_name" -n "$name" -c "$target_dir"
+                window_target="$session_name:$((i+1))"
+            fi
+
+            if [ -n "$command" ] && [ "$command" != "null" ] && [ "$command" != '""' ]; then
+                sleep 0.3
+                tmux send-keys -t "$window_target" "$command" C-m
+            fi
+        done
+
+        tmux select-window -t "$session_name:1"
+
+        if [ "$detached" = false ]; then
+            if [ -n "${TMUX:-}" ]; then
+                tmux switch-client -t "$session_name"
+            else
+                tmux attach-session -t "$session_name"
+            fi
+        fi
+
+        echo "$session_name"
+        exit 0
+    fi
+fi
+
+# Fallback: default windows (ai, vim, shell)
+default_windows=("ai" "vim" "shell")
+
+for ((i=0; i<${#default_windows[@]}; i++)); do
+    window_name="${default_windows[$i]}"
+
+    if [ $i -eq 0 ]; then
+        tmux rename-window -t "$session_name:1" "$window_name"
+        window_target="$session_name:1"
     else
-        # Create new window with explicit start directory
         tmux new-window -t "$session_name" -n "$window_name" -c "$target_dir"
-        # Get the index of the window we just created (it's the last one)
         window_index=$(tmux list-windows -t "$session_name" -F '#{window_index}' | tail -1)
         window_target="$session_name:$window_index"
     fi
 
-    # Launch appropriate application based on window name
     case "$window_name" in
-        "ai"|"copilot"|"claude")
-            sleep 0.3
-            tmux send-keys -t "$window_target" "$ai_cli" C-m
-            ;;
-        "vim"|"nvim"|"editor")
-            sleep 0.3
-            tmux send-keys -t "$window_target" "vim ." C-m
-            ;;
-        "shell"|"bash"|"zsh")
-            # No command needed for shell
-            ;;
+        "ai") sleep 0.3; tmux send-keys -t "$window_target" "claude" C-m ;;
+        "vim") sleep 0.3; tmux send-keys -t "$window_target" "vim ." C-m ;;
+        "shell") ;;
     esac
-
-    ((window_count++))
 done
 
-# Switch to the new session (unless detached mode)
+tmux select-window -t "$session_name:1"
+
 if [ "$detached" = false ]; then
     if [ -n "${TMUX:-}" ]; then
         tmux switch-client -t "$session_name"
@@ -103,5 +161,4 @@ if [ "$detached" = false ]; then
     fi
 fi
 
-# Output session name for consumption by other tasks
 echo "$session_name"

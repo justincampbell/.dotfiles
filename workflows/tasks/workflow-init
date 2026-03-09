@@ -18,7 +18,7 @@ fi
 # Create .workflow.yml with defaults
 cat > .workflow.yml <<EOF
 windows:
-  - ai: \$WORKFLOW_AI_CLI
+  - ai: claude
   - nvim: nvim
   - bash:
 EOF

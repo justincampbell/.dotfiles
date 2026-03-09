@@ -1,0 +1,9 @@
+#!/bin/bash
+# Generates a deterministic port from a string input
+# Uses the ephemeral port range (49152-65535)
+# Usage: hash-port <string>
+# Example: hash-port "DB_PORT my-feature-branch"
+
+input="${1:?Usage: hash-port <string>}"
+hash=$(printf '%s' "$input" | cksum | awk '{print $1}')
+echo $(( (hash % 16383) + 49152 ))

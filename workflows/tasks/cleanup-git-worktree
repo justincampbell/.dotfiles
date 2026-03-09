@@ -38,8 +38,17 @@ else
   exit 1
 fi
 
-# Get session name from worktree directory basename
-session_name=$(basename "$worktree_dir")
+# Find tmux session by start directory (handles renamed sessions)
+session_name=""
+while IFS=$'\t' read -r sname spath; do
+    if [ "$spath" = "$worktree_dir" ]; then
+        session_name="$sname"
+        break
+    fi
+done < <(tmux list-sessions -F '#{session_name}	#{session_path}' 2>/dev/null || true)
+if [ -z "$session_name" ]; then
+    echo "No tmux session found for directory: $worktree_dir" >&2
+fi
 
 # Verify base repo exists
 if [ ! -d "$base_repo" ]; then
@@ -72,8 +81,8 @@ fi
 # STEP 2: Wait a moment for filesystem to settle
 sleep 0.5
 
-# STEP 3: Kill tmux session
-if tmux has-session -t "$session_name" 2>/dev/null; then
+# STEP 3: Kill tmux session (only if we found one)
+if [ -n "$session_name" ] && tmux has-session -t "=$session_name" 2>/dev/null; then
   echo "Killing tmux session: $session_name" >&2
 
   # If we're currently in the session we want to kill, switch to another session first
@@ -84,18 +93,16 @@ if tmux has-session -t "$session_name" 2>/dev/null; then
       other_session=$(tmux list-sessions -F '#S' | grep -v "^$session_name$" | head -n 1)
       if [ -n "$other_session" ]; then
         echo "Switching to session: $other_session" >&2
-        tmux switch-client -t "$other_session"
+        tmux switch-client -t "=$other_session"
       else
         echo "No other sessions available, creating new session" >&2
         tmux new-session -d -s "main"
-        tmux switch-client -t "main"
+        tmux switch-client -t "=main"
       fi
     fi
   fi
 
-  tmux kill-session -t "$session_name"
-else
-  echo "No tmux session found for: $session_name" >&2
+  tmux kill-session -t "=$session_name"
 fi
 
 echo "Cleanup completed for: $worktree_dir" >&2

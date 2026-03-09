@@ -1,8 +1,7 @@
-name: dotfiles
+name: example-models
 root: ~/.dotfiles
 
 windows:
   - ai: claude
   - nvim: nvim
-  - gitui: gitui
   - bash:

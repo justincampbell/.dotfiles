@@ -1,0 +1,16 @@
+#!/usr/bin/env bash
+
+# Rename Tmux Session
+# Renames the current tmux session using humanize-git-branch
+
+set -euo pipefail
+
+if [ -z "${TMUX:-}" ]; then
+    echo "Error: Not inside a tmux session" >&2
+    exit 1
+fi
+
+session_name=$(humanize-git-branch)
+current_session=$(tmux display-message -p '#S')
+tmux rename-session -t "$current_session" "$session_name"
+echo "Renamed session to: $session_name"

@@ -15,10 +15,8 @@ if [ -z "$pr_url" ]; then
 fi
 
 # Parse GitHub PR URL
-read -r org repo pr_number < <(parse_github_url "$pr_url" true)
-if [ $? -ne 0 ]; then
-    exit 1
-fi
+pr_info=$(parse_github_url "$pr_url" true) || exit 1
+read -r org repo pr_number <<< "$pr_info"
 
 # Get base repository directory
 base_repo=$(get_github_repo_path "$org" "$repo")

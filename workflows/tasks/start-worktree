@@ -47,4 +47,4 @@ worktree_dir=$("$DOTFILES_DIR/workflows/tasks/ensure-git-worktree" "$branch_name
 echo ""
 echo "Worktree: $worktree_dir"
 
-ensure_worktree_session "$worktree_dir" "$branch_name"
+"$DOTFILES_DIR/workflows/tasks/ensure-tmux-session" --name "${repo_name}-${branch_name}" "$worktree_dir"

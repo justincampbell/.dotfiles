@@ -8,6 +8,9 @@ set -euo pipefail
 DOTFILES_DIR="${HOME}/.dotfiles"
 SESSIONS_DIR="${DOTFILES_DIR}/workflows/tmux/sessions"
 
+# Source shared utilities
+source "${DOTFILES_DIR}/workflows/shared.sh"
+
 usage() {
     echo "Usage: $0 <session-config-name|path-to-yml>"
     echo ""
@@ -51,7 +54,7 @@ if [[ "$SESSION_CONFIG" == *.yml ]] || [[ "$SESSION_CONFIG" == *.yaml ]]; then
     fi
 else
     # Search for .workflow.yml in ~/Code projects
-    workflow_file=$(find ~/Code -name ".workflow.yml" -maxdepth 3 2>/dev/null | grep "/${SESSION_CONFIG}/.workflow.yml$" | head -1)
+    workflow_file=$(find ~/Code -name ".workflow.yml" -maxdepth 3 2>/dev/null | grep "/${SESSION_CONFIG}/.workflow.yml$" | head -1 || true)
     if [ -n "$workflow_file" ]; then
         CONFIG_FILE="$workflow_file"
     else
@@ -93,6 +96,29 @@ fi
 # Create session (detached)
 tmux new-session -d -s "$SESSION_NAME" -c "$SESSION_ROOT"
 
+# Run setup commands (before env and windows)
+SETUP_COUNT=$(yq eval '.setup | length' "$CONFIG_FILE")
+if [ "$SETUP_COUNT" != "0" ] && [ "$SETUP_COUNT" != "null" ]; then
+    for ((i=0; i<SETUP_COUNT; i++)); do
+        cmd=$(yq eval ".setup[$i]" "$CONFIG_FILE")
+        (cd "$SESSION_ROOT" && eval "$cmd")
+    done
+fi
+
+# Process env vars
+SESSION_ENV_EXPORTS=""
+ENV_COUNT=$(yq eval '.env | length' "$CONFIG_FILE")
+if [ "$ENV_COUNT" != "0" ] && [ "$ENV_COUNT" != "null" ]; then
+    ENV_KEYS=$(yq eval '.env | keys | .[]' "$CONFIG_FILE")
+    while IFS= read -r key; do
+        value=$(yq eval ".env.$key" "$CONFIG_FILE")
+        # Evaluate shell substitutions
+        value=$(eval echo "$value")
+        tmux set-environment -t "$SESSION_NAME" "$key" "$value"
+        SESSION_ENV_EXPORTS+="export ${key}=${value}; "
+    done <<< "$ENV_KEYS"
+fi
+
 # Get number of windows
 WINDOW_COUNT=$(yq eval '.windows | length' "$CONFIG_FILE")
 
@@ -112,12 +138,18 @@ for ((i=0; i<WINDOW_COUNT; i++)); do
     if [ $i -eq 0 ]; then
         # First window already exists, rename it and optionally send command
         tmux rename-window -t "$SESSION_NAME:1" "$WINDOW_NAME"
+        if [ -n "$SESSION_ENV_EXPORTS" ]; then
+            tmux send-keys -t "$SESSION_NAME:1" "$SESSION_ENV_EXPORTS" C-m
+        fi
         if [ -n "$WINDOW_CMD" ]; then
             tmux send-keys -t "$SESSION_NAME:1" "$WINDOW_CMD" C-m
         fi
     else
         # Create new window
         tmux new-window -t "$SESSION_NAME" -n "$WINDOW_NAME" -c "$SESSION_ROOT"
+        if [ -n "$SESSION_ENV_EXPORTS" ]; then
+            tmux send-keys -t "$SESSION_NAME:$WINDOW_NAME" "$SESSION_ENV_EXPORTS" C-m
+        fi
         if [ -n "$WINDOW_CMD" ]; then
             tmux send-keys -t "$SESSION_NAME:$WINDOW_NAME" "$WINDOW_CMD" C-m
         fi

@@ -70,8 +70,35 @@ fi
 windows_yaml=$(parse_frontmatter "$prompt_file" "tmux_windows")
 custom_session_name=$(parse_frontmatter "$prompt_file" "tmux_session_name")
 
-# Get configured AI CLI and available tasks
-ai_cli=$(get_workflow_ai_cli)
+# Use .workflow.yml windows only if frontmatter doesn't define its own
+workflow_yml="$target_dir/.workflow.yml"
+is_worktree=false
+if [ -f "$target_dir/.git" ]; then
+    is_worktree=true
+fi
+if [ -z "$windows_yaml" ] && [ -f "$workflow_yml" ]; then
+    wf_window_count=$(yq eval '.windows | length' "$workflow_yml")
+    if [ "$wf_window_count" != "0" ] && [ "$wf_window_count" != "null" ]; then
+        windows_yaml=$(yq eval '[.windows[] | to_entries[] | {"name": .key, "command": (.value // "")}]' "$workflow_yml")
+
+        # Apply worktree window overrides if in a worktree
+        if [ "$is_worktree" = true ]; then
+            wt_window_count=$(yq eval '.worktree.windows | length' "$workflow_yml")
+            if [ "$wt_window_count" != "0" ] && [ "$wt_window_count" != "null" ]; then
+                # For each worktree window override, replace the matching window
+                for ((wi=0; wi<wt_window_count; wi++)); do
+                    wt_name=$(yq eval ".worktree.windows[$wi] | keys | .[0]" "$workflow_yml")
+                    wt_cmd=$(yq eval ".worktree.windows[$wi].$wt_name" "$workflow_yml")
+                    windows_yaml=$(echo "$windows_yaml" | yq eval "(.[] | select(.name == \"$wt_name\") | .command) = \"$wt_cmd\"" -)
+                done
+            fi
+        fi
+
+        echo "Using windows from $workflow_yml" >&2
+    fi
+fi
+
+# Get available tasks
 available_tasks=$(list_available_tasks)
 
 # Create a processed prompt file with system prompt prepended and template variables replaced
@@ -157,7 +184,7 @@ if [ -n "$windows_yaml" ]; then
             ai_window="1"
 
             # Start AI CLI
-            command="$ai_cli"
+            command="claude"
             sleep 0.3
             tmux send-keys -t "$session_name:$ai_window" "$command" C-m
 
@@ -190,6 +217,19 @@ if [ -n "$windows_yaml" ]; then
         # Give tmux a moment to fully create the session
         sleep 0.1
 
+        # Run worktree setup commands from .workflow.yml if in a worktree
+        if [ "$is_worktree" = true ] && [ -f "$workflow_yml" ]; then
+            workflow_setup_count=$(yq eval '.worktree.setup | length' "$workflow_yml")
+            if [ "$workflow_setup_count" != "0" ] && [ "$workflow_setup_count" != "null" ]; then
+                echo "Running worktree setup commands..." >&2
+                for ((si=0; si<workflow_setup_count; si++)); do
+                    setup_cmd=$(yq eval ".worktree.setup[$si]" "$workflow_yml")
+                    echo "  Executing: $setup_cmd" >&2
+                    (cd "$target_dir" && eval "$setup_cmd") || echo "  Warning: setup command failed: $setup_cmd" >&2
+                done
+            fi
+        fi
+
         # Parse windows and create them
         window_index=0
 
@@ -201,17 +241,11 @@ if [ -n "$windows_yaml" ]; then
             command=$(echo "$windows_yaml" | yq -r ".[$i].command // \"\"")
 
             # Replace template variables
-            command=$(echo "$command" | sed "s|{{ai_cli}}|$ai_cli|g")
+            command=$(echo "$command" | sed "s|{{ai_cli}}|claude|g")
 
-            # For AI window, handle prompts appropriately for each CLI
+            # For AI window, append prompt file as initial message
             if [ "$name" = "ai" ] && [ -f "$processed_prompt" ]; then
-                # For all AI CLIs: Start interactively, then send prompt
-                # The command is already replaced with {{ai_cli}} -> actual CLI + any extra commands
-                # Don't override it, just mark that we need to send a prompt after
-
-                # We'll send the prompt content via tmux send-keys after the CLI starts
-                # Mark that we need to send a prompt
-                send_prompt_after="$processed_prompt"
+                prompt_file_path="$processed_prompt"
             fi
 
             if [ $i -eq 0 ]; then
@@ -227,17 +261,17 @@ if [ -n "$windows_yaml" ]; then
             # Small delay to ensure window is fully created
             sleep 0.1
 
+
             # Execute command if specified
             if [ -n "$command" ] && [ "$command" != "null" ] && [ "$command" != '""' ]; then
+                # For AI window, copy prompt to target dir and pass as argument
+                if [ -n "${prompt_file_path:-}" ]; then
+                    cp "$prompt_file_path" "$target_dir/.workflow-prompt"
+                    command="$command \"\$(cat .workflow-prompt)\""
+                    prompt_file_path=""
+                fi
                 sleep 0.3
                 tmux send-keys -t "$window_target" "$command" C-m
-            fi
-
-            # Store prompt info for later (after session switch)
-            if [ -n "${send_prompt_after:-}" ]; then
-                pending_prompt_file="$send_prompt_after"
-                pending_prompt_target="$window_target"
-                send_prompt_after=""
             fi
         done
 
@@ -253,23 +287,6 @@ if [ -n "$windows_yaml" ]; then
             fi
         fi
 
-        # Send pending prompt after session switch (for non-Claude CLIs)
-        if [ -n "${pending_prompt_file:-}" ]; then
-            # Wait for CLI to start and session to stabilize
-            sleep 3
-
-            # Send Enter first to clear any prompts/banners
-            tmux send-keys -t "$pending_prompt_target" C-m
-            sleep 0.5
-
-            # Send the prompt content
-            prompt_content=$(cat "$pending_prompt_file")
-            tmux send-keys -t "$pending_prompt_target" "$prompt_content"
-            sleep 0.5
-
-            # Send Enter to submit the prompt
-            tmux send-keys -t "$pending_prompt_target" C-m
-        fi
     fi
 else
     # Fall back to basic session creation with just shell window

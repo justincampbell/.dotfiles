@@ -1,0 +1,73 @@
+#!/usr/bin/env bash
+# Generates mise.local.toml with unique ports for worktree isolation
+# Parses .config/wt.toml (or .config/wt.toml.example) for the port template
+# Usage: generate-mise-ports [--only VAR1,VAR2,...]
+
+set -euo pipefail
+
+# Parse --only flag
+ONLY_VARS=""
+if [[ "${1:-}" == "--only" ]]; then
+    ONLY_VARS="$2"
+    shift 2
+fi
+
+if [ -f "mise.local.toml" ]; then
+    echo "mise.local.toml already exists, skipping" >&2
+    exit 0
+fi
+
+TEMPLATE=".config/wt.toml"
+if [ ! -f "$TEMPLATE" ]; then
+    TEMPLATE=".config/wt.toml.example"
+fi
+if [ ! -f "$TEMPLATE" ]; then
+    echo "No .config/wt.toml or .config/wt.toml.example found, skipping" >&2
+    exit 0
+fi
+
+BRANCH=$(git branch --show-current 2>/dev/null || basename "$PWD")
+
+# Extract mise heredoc content (between MISE_EOF markers)
+MISE_TEMPLATE=$(sed -n "/^cat > mise.local.toml/,/^MISE_EOF$/p" "$TEMPLATE" \
+    | sed '1d;$d')
+
+if [ -z "$MISE_TEMPLATE" ]; then
+    echo "No mise.local.toml template found in $TEMPLATE, skipping" >&2
+    exit 0
+fi
+
+RESULT="$MISE_TEMPLATE"
+
+# Substitute {{ branch }} → actual branch name
+RESULT=$(echo "$RESULT" | sed "s#{{ *branch *}}#$BRANCH#g")
+
+# Substitute {{ branch | hash_port }} → actual port
+PORT=$(hash-port "$BRANCH")
+RESULT=$(echo "$RESULT" | sed "s#{{ *branch *| *hash_port *}}#$PORT#g")
+
+# Substitute {{ ("PREFIX" ~ branch) | hash_port }} → actual port for each unique prefix
+while IFS= read -r prefix; do
+    [ -z "$prefix" ] && continue
+    PPORT=$(hash-port "${prefix}${BRANCH}")
+    RESULT=$(echo "$RESULT" | sed "s#{{ *(\"${prefix}\" *~ *branch) *| *hash_port *}}#${PPORT}#g")
+done < <(echo "$RESULT" | grep -oE '"[A-Z_0-9]+"' | tr -d '"' | sort -u)
+
+# Filter to --only vars if specified
+if [ -n "$ONLY_VARS" ]; then
+    FILTERED="# Auto-generated for worktree: $BRANCH"$'\n'"[env]"
+    IFS=',' read -ra VARS <<< "$ONLY_VARS"
+    for var in "${VARS[@]}"; do
+        # Match the var assignment and any vars that reference it (e.g. EETEE_REDIS_URL references REDIS_PORT)
+        line=$(echo "$RESULT" | grep "^${var} = " || true)
+        if [ -n "$line" ]; then
+            FILTERED+=$'\n'"$line"
+        fi
+    done
+    RESULT="$FILTERED"
+fi
+
+echo "$RESULT" > mise.local.toml
+MISE=$(command -v mise 2>/dev/null || echo /opt/homebrew/bin/mise)
+"$MISE" trust mise.local.toml 2>/dev/null || true
+echo "Generated mise.local.toml for branch: $BRANCH" >&2

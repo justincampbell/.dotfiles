@@ -1,0 +1,34 @@
+#!/usr/bin/env python3
+"""Convert a branch name into a short human-readable label.
+
+Usage: humanize-git-branch [name]
+  If no argument, uses basename of $PWD
+
+Examples:
+  myapp-sc-123456-refactor-login-auth-mech-2 → "123456 Refactor Login Auth"
+  myapp-my-feature-branch-name → "Myapp My Feature"
+  sc-999999-fix-bug-thing → "999999 Fix Bug Thing"
+"""
+
+import re
+import sys
+from pathlib import Path
+
+name = sys.argv[1] if len(sys.argv) > 1 else Path.cwd().name
+
+match = re.match(r'^(?:(.+)-)?sc-(\d+)-(.*)', name)
+
+if match:
+    prefix, story_id, remainder = match.groups()
+    prefix_words = set(prefix.split('-')) if prefix else set()
+    words = [
+        w.title() for w in remainder.split('-')
+        if len(w) > 1 and not w.isdigit() and w not in prefix_words
+    ][:3]
+    print(f"{story_id} {' '.join(words)}")
+else:
+    words = [
+        w.title() for w in name.split('-')
+        if len(w) > 1 and not w.isdigit()
+    ][:3]
+    print(' '.join(words))

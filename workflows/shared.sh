@@ -1,11 +1,6 @@
 #!/bin/bash
 # Shared utilities for workflow tasks
 
-# Get the configured AI CLI command with fallback
-get_workflow_ai_cli() {
-    echo "${WORKFLOW_AI_CLI:-claude}"
-}
-
 # Convert any string to a valid git branch name
 # Lowercases, replaces non-alphanumeric chars with hyphens, truncates to 60 chars
 slugify_branch_name() {
@@ -68,36 +63,6 @@ get_github_repo_path() {
     local org="$1"
     local repo="$2"
     echo "$HOME/Code/$org/$repo"
-}
-
-# Create or switch to a tmux session for a worktree
-# Args: worktree_dir branch_name
-ensure_worktree_session() {
-    local worktree_dir="$1"
-    local branch_name="$2"
-
-    local repo_name
-    repo_name=$(basename "$(cd "$(git rev-parse --git-common-dir)/.." && pwd)")
-    local session_name="${repo_name}-${branch_name}"
-
-    # Switch to existing session if it exists
-    if tmux has-session -t "$session_name" 2>/dev/null; then
-        echo "Session already exists, switching to $session_name..."
-        tmux switch-client -t "$session_name"
-        return 0
-    fi
-
-    echo "Session: $session_name"
-    echo ""
-
-    local AI_CLI
-    AI_CLI=$(get_workflow_ai_cli "")
-    tmux new-session -d -s "$session_name" -c "$worktree_dir" -n "ai"
-    sleep 0.1
-    tmux send-keys -t "$session_name:ai" "$AI_CLI" C-m
-
-    echo "Done! Switching to session..."
-    tmux switch-client -t "$session_name"
 }
 
 # Extract YAML frontmatter from markdown files

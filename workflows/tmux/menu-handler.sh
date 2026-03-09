@@ -5,9 +5,6 @@
 
 WORKFLOWS_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 
-# AI CLI - can be overridden with environment variable
-AI_CLI="${WORKFLOW_AI_CLI:-copilot}"
-
 # Convert workflow filename to display name
 # e.g., "review-github-pr" -> "Review GitHub PR"
 workflow_display_name() {
@@ -114,7 +111,10 @@ show_workflow_menu() {
         menu_items+=("$display_name")
         menu_items+=("$key")
         menu_items+=("run-shell 'bash $WORKFLOWS_DIR/tmux/menu-handler.sh session:$project_name'")
-    done < <(find ~/Code -name ".workflow.yml" -maxdepth 3 2>/dev/null | sort)
+    done < <(find ~/Code -name ".workflow.yml" -maxdepth 3 2>/dev/null | while read -r f; do
+        dir=$(dirname "$f")
+        [ -d "$dir/.git" ] && echo "$f"
+    done | sort)
 
     # Add separator and cancel option
     menu_items+=("")

@@ -20,10 +20,11 @@ files_to_copy=(
     ".env.local"
     ".env.development.local"
     ".env.test.local"
+    ".workflow.yml"
 )
 
-# Get base repository from git root or current directory
-base_repo=$(git rev-parse --show-toplevel 2>/dev/null || echo "$PWD")
+# Get base repository (resolve to main repo, not a worktree)
+base_repo=$(cd "$(git rev-parse --git-common-dir 2>/dev/null || echo "$PWD")/.." && pwd)
 org_repo=$(basename "$(dirname "$base_repo")")/$(basename "$base_repo")
 # Sanitize branch name for directory (replace / with -)
 safe_branch_name=$(echo "$branch_name" | sed 's|/|-|g')
@@ -40,10 +41,14 @@ fi
 cd "$base_repo"
 
 # Fetch latest changes from origin
-git fetch origin
+git fetch origin >&2
 
 # Get the default branch from origin
-default_branch=$(git symbolic-ref refs/remotes/origin/HEAD | sed 's@^refs/remotes/origin/@@')
+default_branch=$(git symbolic-ref refs/remotes/origin/HEAD 2>/dev/null | sed 's@^refs/remotes/origin/@@')
+if [ -z "$default_branch" ]; then
+    echo "Error: Cannot determine default branch. Run: git remote set-head origin --auto" >&2
+    exit 1
+fi
 
 # Check if the branch already exists locally
 if git show-ref --verify --quiet "refs/heads/$branch_name"; then
@@ -53,20 +58,15 @@ if git show-ref --verify --quiet "refs/heads/$branch_name"; then
     current_branch=$(git branch --show-current)
     if [ "$current_branch" = "$branch_name" ]; then
         echo "Branch $branch_name is currently checked out, switching to $default_branch..." >&2
-        git checkout "$default_branch"
+        git checkout "$default_branch" >&2
     fi
 
     # Create worktree from existing branch
-    git worktree add "$worktree_dir" "$branch_name"
+    git worktree add "$worktree_dir" "$branch_name" >&2
 else
     echo "Creating new branch $branch_name from $default_branch" >&2
     # Create worktree with new branch based on origin's default branch (but don't track it)
-    git worktree add "$worktree_dir" --no-track -b "$branch_name" "origin/$default_branch"
-fi
-
-if [ $? -ne 0 ]; then
-    echo "Error: Failed to create worktree" >&2
-    exit 1
+    git worktree add "$worktree_dir" --no-track -b "$branch_name" "origin/$default_branch" >&2
 fi
 
 # Copy specified files if they exist in base repo
@@ -79,7 +79,7 @@ done
 
 # Copy untracked files from .claude/ directory (may be gitignored)
 if [ -d "$base_repo/.claude" ]; then
-    cp -Rn "$base_repo/.claude/" "$worktree_dir/.claude/"
+    cp -Rn "$base_repo/.claude/" "$worktree_dir/.claude/" || true
     echo "Copied .claude/ to worktree" >&2
 fi
 

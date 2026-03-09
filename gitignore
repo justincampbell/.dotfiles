@@ -1,5 +1,6 @@
 .DS_Store
 .importjs.js
 .nvmrc
+.workflow-prompt
 .workflow.yml
 yarn_cache/
