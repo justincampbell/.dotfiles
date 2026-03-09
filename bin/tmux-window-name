@@ -7,7 +7,7 @@ current_path="$3"
 # https://www.nerdfonts.com/cheat-sheet
 
 case "$command" in
-  git|gitui|lazygit)
+  git|gitui|lazygit|revise)
     echo " " # nf-dev-git
     ;;
   node)
