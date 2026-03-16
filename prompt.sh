@@ -137,7 +137,7 @@ git_status() {
 
   # Run git status with timeout to avoid hanging on locks
   local status
-  status=$(timeout 3 git -c color.status=always status --branch --no-ahead-behind --short --untracked=normal . 2>/dev/null | sed -E 's/\.{3}[^ ]*$//g')
+  status=$(gtimeout 3 git -c color.status=always status --branch --no-ahead-behind --short --untracked=normal . 2>/dev/null | sed -E 's/\.{3}[^ ]*$//g')
 
   # If git command failed (timeout or lock), silently skip status display
   if [ $? -ne 0 ]; then
