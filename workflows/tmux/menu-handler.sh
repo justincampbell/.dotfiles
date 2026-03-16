@@ -78,6 +78,13 @@ show_workflow_menu() {
     menu_items+=("$ekey")
     menu_items+=("run-shell 'bash $WORKFLOWS_DIR/tmux/menu-handler.sh open-worktree'")
 
+    # Handle URL option
+    local ukey=$(get_menu_key "url" "$used_keys")
+    used_keys="${used_keys}${ukey}"
+    menu_items+=("Handle URL...")
+    menu_items+=("$ukey")
+    menu_items+=("run-shell 'bash $WORKFLOWS_DIR/tmux/menu-handler.sh handle-url'")
+
     # Separator before projects
     menu_items+=("")
     menu_items+=("")
@@ -228,13 +235,17 @@ case "${1:-menu}" in
         ;;
     start-worktree)
         tmux command-prompt -p "Branch description:" \
-            "run-shell 'printf \"%%s\" \"%%\" > /tmp/start-worktree-desc && bash $WORKFLOWS_DIR/tmux/menu-handler.sh run-start-worktree'"
+            "run-shell 'echo \"%1\" > /tmp/start-worktree-desc && bash $WORKFLOWS_DIR/tmux/menu-handler.sh run-start-worktree'"
         ;;
     open-worktree)
         pane_path=$(tmux display-message -p "#{pane_current_path}")
         safe_path="${pane_path//\'/\'\\\'\'}"
         tmux display-popup -E -w 80% -h 80% \
             "cd '$safe_path' && bash $WORKFLOWS_DIR/tasks/open-worktree"
+        ;;
+    handle-url)
+        tmux command-prompt -p "URL:" \
+            "run-shell 'bash $WORKFLOWS_DIR/tasks/handle-workflow-url \"%1\"'"
         ;;
     run-start-worktree)
         pane_path=$(tmux display-message -p "#{pane_current_path}")

@@ -44,21 +44,21 @@ esac
 
 # Determine tmux target for displaying popup
 if [ -n "${TMUX:-}" ]; then
-    popup_target=""
+    popup_target=()
 else
     active_session=$(tmux list-sessions -F '#{session_name}' 2>/dev/null | head -n 1)
     if [ -z "$active_session" ]; then
         echo "Error: No active tmux session found" >&2
         exit 1
     fi
-    popup_target="-t $active_session"
+    popup_target=(-t "$active_session")
 fi
 
 # Workflows with a URL arg go through launch-workflow (sets up worktree, switches session)
 # Others run directly
 case "$workflow_name" in
     start-shortcut-story|review-github-pr)
-        tmux display-popup $popup_target -E -w 80% -h 80% \
+        tmux display-popup "${popup_target[@]}" -E -w 80% -h 80% \
             "bash $SCRIPT_DIR/launch-workflow '$workflow_name' '$url'"
         ;;
     *)
