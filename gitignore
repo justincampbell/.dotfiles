@@ -5,3 +5,4 @@
 .workflow.yml
 planning/
 yarn_cache/
+.claude/**/*.lock
