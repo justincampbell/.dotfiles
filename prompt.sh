@@ -123,29 +123,21 @@ ruby_status() {
 }
 
 in_git_repo() {
-  dir=${1:-.}
-  count=`expr 0$2 + 1`
-
-  if [[ $count == "4" ]]; then return 1; fi
-  if [[ -d $dir/.git ]] || [[ -f $dir/.git ]]; then return 0; fi
-
-  in_git_repo $dir/.. $count
+  git rev-parse --is-inside-work-tree &>/dev/null
 }
 
 is_git_worktree() {
-  if [[ -f .git ]]; then
-    return 0
-  fi
-  return 1
+  [[ -f .git ]]
 }
 
 git_status() {
-  if ! (in_git_repo && [[ `history 1` != *'git status'* ]]); then
+  if ! in_git_repo || [[ `history 1` == *'git status'* ]]; then
     return
   fi
 
   # Run git status with timeout to avoid hanging on locks
-  local status=$(timeout 1 git -c color.status=always status --branch --no-ahead-behind --short --untracked=normal . 2>/dev/null | sed -E 's/\.{3}[^ ]*$//g')
+  local status
+  status=$(timeout 3 git -c color.status=always status --branch --no-ahead-behind --short --untracked=normal . 2>/dev/null | sed -E 's/\.{3}[^ ]*$//g')
 
   # If git command failed (timeout or lock), silently skip status display
   if [ $? -ne 0 ]; then
