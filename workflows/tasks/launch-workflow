@@ -1,6 +1,5 @@
 #!/bin/bash
-# Internal helper for handle-workflow-url to launch workflow
-# Designed to run inside a tmux display-popup
+# Launch a workflow, stream output, and switch to the new session
 # Usage: launch-workflow <workflow-name> <url>
 
 set -o pipefail
@@ -19,8 +18,9 @@ echo "Starting $workflow_name..."
 
 # Run with --detached, streaming output and logging
 "$SCRIPT_DIR/start-workflow" --detached "$workflow_name" "$url" 2>&1 | tee "$LOG"
+exit_code=${PIPESTATUS[0]}
 
-if [ ${PIPESTATUS[0]} -eq 0 ]; then
+if [ $exit_code -eq 0 ]; then
     session_name=$(grep -o 'Started .* workflow in .*' "$LOG" | sed 's/Started .* workflow in //')
     if [ -n "$session_name" ]; then
         echo "Switching to $session_name..."
@@ -28,7 +28,6 @@ if [ ${PIPESTATUS[0]} -eq 0 ]; then
     fi
 else
     echo ""
-    echo "Failed. Log: $LOG"
-    echo "Press any key to close..."
-    read -n 1
+    echo "Failed (exit $exit_code). Log: $LOG"
+    exit $exit_code
 fi

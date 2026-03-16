@@ -18,60 +18,37 @@ fi
 
 # Determine which workflow to launch based on URL pattern
 workflow_name=""
-workflow_args=""
-show_mode_menu=false
 
 case "$url" in
     *app.shortcut.com/*/story/*)
         workflow_name="start-shortcut-story"
-        workflow_args="$url"
-        show_mode_menu=true
         ;;
 
     *github.com/notifications*)
         workflow_name="process-github-notifications"
-        workflow_args=""
         ;;
 
     *github.com/*/pull/*)
         workflow_name="review-github-pr"
-        workflow_args="$url"
-        show_mode_menu=true
         ;;
 
     *github.com/pulls*)
         workflow_name="review-github-prs"
-        workflow_args=""
         ;;
 
     *)
-        # Unknown URL type
         echo "No workflow configured for URL: $url" >&2
         exit 1
         ;;
 esac
 
-# Show mode selection menu if applicable (always required for PR/story workflows)
-if [ "$show_mode_menu" = true ]; then
-    # Determine which session to show menu in
-    if [ -n "${TMUX:-}" ]; then
-        menu_target=""
-    else
-        active_session=$(tmux list-sessions -F '#{session_name}' 2>/dev/null | head -n 1)
-        if [ -z "$active_session" ]; then
-            echo "Error: No active tmux session found" >&2
-            exit 1
-        fi
-        menu_target="-t $active_session"
-    fi
-
-    tmux display-menu $menu_target -T "Checkout Mode" \
-        "Main Repository" "r" "display-popup -E -w 80% -h 80% 'bash $SCRIPT_DIR/launch-workflow \"$workflow_name\" \"$url\"'" \
-        "Worktree (isolated)" "w" "display-popup -E -w 80% -h 80% 'bash $SCRIPT_DIR/launch-workflow \"${workflow_name}-worktree\" \"$url\"'" \
-        "" \
-        "Cancel" "q" ""
-    exit 0
-fi
-
-# Non-menu workflows
-"$SCRIPT_DIR/start-workflow" "$workflow_name" "$workflow_args"
+# Workflows with a URL arg go through launch-workflow (sets up worktree, switches session)
+# Others run directly
+case "$workflow_name" in
+    start-shortcut-story|review-github-pr)
+        "$SCRIPT_DIR/launch-workflow" "$workflow_name" "$url"
+        ;;
+    *)
+        "$SCRIPT_DIR/start-workflow" "$workflow_name"
+        ;;
+esac

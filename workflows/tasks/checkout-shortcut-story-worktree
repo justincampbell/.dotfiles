@@ -1,5 +1,0 @@
-#!/bin/bash
-# Check out a Shortcut story branch in a git worktree
-# Usage: checkout-shortcut-story-worktree <story-url-or-id>
-
-exec "$(dirname "$0")/checkout-shortcut-story" --worktree "$@"
