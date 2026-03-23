@@ -78,6 +78,13 @@ show_workflow_menu() {
     menu_items+=("$ekey")
     menu_items+=("run-shell 'bash $WORKFLOWS_DIR/tmux/menu-handler.sh open-worktree'")
 
+    # Open repo option
+    local rkey=$(get_menu_key "repo" "$used_keys")
+    used_keys="${used_keys}${rkey}"
+    menu_items+=("Open repo...")
+    menu_items+=("$rkey")
+    menu_items+=("run-shell 'bash $WORKFLOWS_DIR/tmux/menu-handler.sh open-repo'")
+
     # Handle URL option
     local ukey=$(get_menu_key "url" "$used_keys")
     used_keys="${used_keys}${ukey}"
@@ -242,6 +249,10 @@ case "${1:-menu}" in
         safe_path="${pane_path//\'/\'\\\'\'}"
         tmux display-popup -E -w 80% -h 80% \
             "cd '$safe_path' && bash $WORKFLOWS_DIR/tasks/open-worktree"
+        ;;
+    open-repo)
+        tmux display-popup -E -w 80% -h 80% \
+            "bash $WORKFLOWS_DIR/tasks/open-repo"
         ;;
     handle-url)
         tmux command-prompt -p "URL:" \

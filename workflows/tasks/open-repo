@@ -1,0 +1,28 @@
+#!/bin/bash
+# Opens a repo from ~/Code as a tmux session, named after the repo
+
+set -euo pipefail
+
+DOTFILES_DIR="${HOME}/.dotfiles"
+source "$DOTFILES_DIR/workflows/shared.sh"
+
+# Fuzzy-find git repos in ~/Code
+selected=$(find ~/Code -maxdepth 3 -name ".git" -type d 2>/dev/null \
+    | sed 's|/.git$||' \
+    | sort \
+    | sed "s|${HOME}/Code/||" \
+    | fzf --prompt="Repo> " --height=100%)
+
+if [ -z "$selected" ]; then
+    echo "No repo selected."
+    exit 1
+fi
+
+full_path="$HOME/Code/$selected"
+repo_name=$(basename "$selected")
+
+echo "Opening repo: $repo_name"
+echo "  Path: $full_path"
+echo ""
+
+"$DOTFILES_DIR/workflows/tasks/ensure-tmux-session" --name "$repo_name" "$full_path"
