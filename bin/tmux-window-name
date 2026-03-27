@@ -24,9 +24,10 @@ case "$command" in
     ;;
   *)
     if [ "$window_name" = "$command" ]; then
-      basename "$current_path"
+      name=$(basename "$current_path")
     else
-      echo "$window_name"
+      name="$window_name"
     fi
+    echo "${name:0:24}"
     ;;
 esac
