@@ -1,0 +1,50 @@
+#!/bin/bash
+# Create a worktree for a GitHub issue
+
+set -euo pipefail
+
+# Source shared utilities
+source "$(dirname "$0")/../shared.sh"
+
+# Get GitHub issue URL from argument
+issue_url="$1"
+
+if [ -z "$issue_url" ]; then
+    echo "Usage: checkout-github-issue <github-issue-url>" >&2
+    exit 1
+fi
+
+# Parse GitHub issue URL
+issue_info=$(parse_github_url "$issue_url" true) || exit 1
+read -r org repo issue_number <<< "$issue_info"
+
+# Get base repository directory
+base_repo=$(get_github_repo_path "$org" "$repo")
+
+if [ ! -d "$base_repo" ]; then
+    echo "Error: Repository not found at $base_repo" >&2
+    exit 1
+fi
+
+# Change to base repository directory
+cd "$base_repo"
+
+# Get issue title for branch name
+echo "Getting issue #$issue_number info..." >&2
+issue_title=$(gh issue view "$issue_number" --json title --jq '.title')
+
+if [ -z "$issue_title" ]; then
+    echo "Error: Failed to get title for issue #$issue_number" >&2
+    exit 1
+fi
+
+# Create branch name from issue number and title
+branch_name=$(slugify_branch_name "$issue_number-$issue_title")
+
+echo "Issue branch: $branch_name" >&2
+
+# Use ensure-git-worktree to create the worktree
+worktree_path=$("$(dirname "$0")/ensure-git-worktree" "$branch_name")
+
+# Output the worktree directory (for task chaining)
+echo "$worktree_path"

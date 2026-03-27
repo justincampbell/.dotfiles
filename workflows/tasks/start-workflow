@@ -85,11 +85,17 @@ if [ -z "$windows_yaml" ] && [ -f "$workflow_yml" ]; then
         if [ "$is_worktree" = true ]; then
             wt_window_count=$(yq eval '.worktree.windows | length' "$workflow_yml")
             if [ "$wt_window_count" != "0" ] && [ "$wt_window_count" != "null" ]; then
-                # For each worktree window override, replace the matching window
+                # For each worktree window override, replace matching window or add new one
                 for ((wi=0; wi<wt_window_count; wi++)); do
                     wt_name=$(yq eval ".worktree.windows[$wi] | keys | .[0]" "$workflow_yml")
                     wt_cmd=$(yq eval ".worktree.windows[$wi].$wt_name" "$workflow_yml")
-                    windows_yaml=$(echo "$windows_yaml" | yq eval "(.[] | select(.name == \"$wt_name\") | .command) = \"$wt_cmd\"" -)
+                    # Check if window name exists in the base list
+                    match_count=$(echo "$windows_yaml" | yq eval "[.[] | select(.name == \"$wt_name\")] | length" -)
+                    if [ "$match_count" -gt 0 ]; then
+                        windows_yaml=$(echo "$windows_yaml" | yq eval "(.[] | select(.name == \"$wt_name\") | .command) = \"$wt_cmd\"" -)
+                    else
+                        windows_yaml=$(echo "$windows_yaml" | yq eval ". + [{\"name\": \"$wt_name\", \"command\": \"$wt_cmd\"}]" -)
+                    fi
                 done
             fi
         fi

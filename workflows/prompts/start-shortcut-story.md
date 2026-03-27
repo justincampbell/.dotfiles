@@ -16,5 +16,4 @@ Rebase and push and wait for the next CI run to finish.
 # UI-facing work
 
 Use Chrome MCP to validate any user-facing changes in the UI.
-Start a web server + CSS processes with: `OVERMIND_IGNORED_PROCESSES=sidekiq,temporal overmind start -N -f Procfile.dev`
 The database/other services are running in another worktree. You may need to run migrations, that's okay to do.

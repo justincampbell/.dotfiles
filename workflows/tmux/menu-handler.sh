@@ -85,6 +85,13 @@ show_workflow_menu() {
     menu_items+=("$rkey")
     menu_items+=("run-shell 'bash $WORKFLOWS_DIR/tmux/menu-handler.sh open-repo'")
 
+    # Clone repo option
+    local ckey=$(get_menu_key "clone" "$used_keys")
+    used_keys="${used_keys}${ckey}"
+    menu_items+=("Clone repo...")
+    menu_items+=("$ckey")
+    menu_items+=("run-shell 'bash $WORKFLOWS_DIR/tmux/menu-handler.sh clone-repo'")
+
     # Handle URL option
     local ukey=$(get_menu_key "url" "$used_keys")
     used_keys="${used_keys}${ukey}"
@@ -113,7 +120,7 @@ show_workflow_menu() {
         done < <(find "$sessions_dir" -maxdepth 1 -name "*.yml" -type f 2>/dev/null | sort)
     fi
 
-    # Discover .workflow.yml files from ~/Code projects
+    # Discover .workflow.yml files from ~/Code projects (repos and org dirs)
     while IFS= read -r workflow_file; do
         local project_dir=$(dirname "$workflow_file")
         local project_name=$(basename "$project_dir")
@@ -127,7 +134,8 @@ show_workflow_menu() {
         menu_items+=("run-shell 'bash $WORKFLOWS_DIR/tmux/menu-handler.sh session:$project_name'")
     done < <(find ~/Code -name ".workflow.yml" -maxdepth 3 2>/dev/null | while read -r f; do
         dir=$(dirname "$f")
-        [ -d "$dir/.git" ] && echo "$f"
+        # Include git repos and org dirs (not worktrees)
+        [ -d "$dir/.git" ] || [ "$(dirname "$dir")" = "$HOME/Code" ] && echo "$f"
     done | sort)
 
     # Add separator and cancel option
@@ -253,6 +261,10 @@ case "${1:-menu}" in
     open-repo)
         tmux display-popup -E -w 80% -h 80% \
             "bash $WORKFLOWS_DIR/tasks/open-repo"
+        ;;
+    clone-repo)
+        tmux command-prompt -p "GitHub URL or org/repo:" \
+            "display-popup -E -w 80% -h 80% 'bash $WORKFLOWS_DIR/tasks/clone-github-repo \"%1\"'"
         ;;
     handle-url)
         tmux command-prompt -p "URL:" \

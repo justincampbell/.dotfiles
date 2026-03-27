@@ -28,6 +28,10 @@ case "$url" in
         workflow_name="process-github-notifications"
         ;;
 
+    *github.com/*/issues/*)
+        workflow_name="start-github-issue"
+        ;;
+
     *github.com/*/pull/*)
         workflow_name="review-github-pr"
         ;;
@@ -57,7 +61,7 @@ fi
 # Workflows with a URL arg go through launch-workflow (sets up worktree, switches session)
 # Others run directly
 case "$workflow_name" in
-    start-shortcut-story|review-github-pr)
+    start-shortcut-story|start-github-issue|review-github-pr)
         tmux display-popup "${popup_target[@]}" -E -w 80% -h 80% \
             "bash $SCRIPT_DIR/launch-workflow '$workflow_name' '$url'"
         ;;

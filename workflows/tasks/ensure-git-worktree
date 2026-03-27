@@ -72,15 +72,16 @@ fi
 # Copy specified files if they exist in base repo
 for file in "${files_to_copy[@]}"; do
     if [ -f "$base_repo/$file" ]; then
+        echo "Copying $file to worktree..." >&2
         cp "$base_repo/$file" "$worktree_dir/$file"
-        echo "Copied $file to worktree" >&2
     fi
 done
 
 # Copy untracked files from .claude/ directory (may be gitignored)
+# Exclude worktrees/ which can be very large
 if [ -d "$base_repo/.claude" ]; then
-    cp -Rn "$base_repo/.claude/" "$worktree_dir/.claude/" || true
-    echo "Copied .claude/ to worktree" >&2
+    echo "Copying .claude/ to worktree (excluding worktrees/)..." >&2
+    rsync -a --ignore-existing --exclude='worktrees/' "$base_repo/.claude/" "$worktree_dir/.claude/"
 fi
 
 # Give git a moment to settle and release locks

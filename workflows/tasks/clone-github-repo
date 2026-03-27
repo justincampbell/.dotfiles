@@ -1,0 +1,35 @@
+#!/bin/bash
+# Clones a GitHub repo to ~/Code/org/repo and opens it as a tmux session
+
+set -euo pipefail
+
+DOTFILES_DIR="${HOME}/.dotfiles"
+source "$DOTFILES_DIR/workflows/shared.sh"
+
+url="${1:-}"
+
+if [ -z "$url" ]; then
+    echo "Usage: clone-repo <github-url-or-org/repo>" >&2
+    exit 1
+fi
+
+# Normalize: accept "org/repo" shorthand or full GitHub URL
+if [[ "$url" =~ ^[^/]+/[^/]+$ ]] && [[ ! "$url" =~ \.com ]]; then
+    org="${url%%/*}"
+    repo="${url##*/}"
+else
+    read -r org repo <<< "$(parse_github_url "$url")"
+fi
+
+repo_path=$(get_github_repo_path "$org" "$repo")
+
+if [ -d "$repo_path" ]; then
+    echo "Repo already exists at $repo_path, opening..."
+else
+    echo "Cloning $org/$repo to $repo_path..."
+    mkdir -p "$(dirname "$repo_path")"
+    gh repo clone "$org/$repo" "$repo_path"
+    echo ""
+fi
+
+"$DOTFILES_DIR/workflows/tasks/ensure-tmux-session" --name "$repo" "$repo_path"
