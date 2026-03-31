@@ -2,7 +2,7 @@ return {
     {
         'neovim/nvim-lspconfig',
 
-        event = { "BufReadPre", "BufNewFile" },
+        lazy = false,
 
         config = function()
             vim.lsp.enable('gopls')
@@ -11,34 +11,32 @@ return {
                 settings = {
                     Lua = {
                         diagnostics = {
-                            globals = {
-                                'vim',
-                            },
+                            globals = { 'vim' },
                         },
                     },
                 },
             })
             vim.lsp.enable('lua_ls')
 
-            local ruby_lsp_init_options = {}
+            -- Start ruby_lsp eagerly if in a Ruby project, attach to Ruby buffers via autocmd
+            if vim.uv.fs_stat('Gemfile') then
+                local ruby_lsp_config = {
+                    name = 'ruby_lsp',
+                    cmd = { 'mise', 'exec', '--', 'ruby-lsp' },
+                    root_dir = vim.fn.getcwd(),
+                }
 
-            if vim.fn.executable('rubocop') == 1 then
-                ruby_lsp_init_options.formatter = 'rubocop'
-                ruby_lsp_init_options.linters = { 'rubocop' }
-            elseif vim.fn.executable('standardrb') == 1 then
-                ruby_lsp_init_options.formatter = 'standard'
-                ruby_lsp_init_options.linters = { 'standard' }
+                vim.defer_fn(function()
+                    vim.lsp.start(ruby_lsp_config)
+                end, 0)
+
+                vim.api.nvim_create_autocmd('FileType', {
+                    pattern = 'ruby',
+                    callback = function()
+                        vim.lsp.start(ruby_lsp_config)
+                    end,
+                })
             end
-
-            vim.lsp.config('ruby_lsp', {
-                init_options = ruby_lsp_init_options
-            })
-            vim.lsp.enable('ruby_lsp')
-
-            if vim.fn.executable('standardrb') == 1 then
-                vim.lsp.enable('standardrb')
-            end
-
             vim.lsp.enable('vtsls')
         end,
 
@@ -54,6 +52,9 @@ return {
                 end,
                 desc = "Go to definition"
             },
+            { "gr", function() require("fzf-lua").lsp_references() end, desc = "Find references" },
+            { "gi", vim.lsp.buf.implementation, desc = "Go to implementation" },
+            { "gy", vim.lsp.buf.type_definition, desc = "Go to type definition" },
             { "K", vim.lsp.buf.hover, desc = "Show documentation" },
         },
 
@@ -71,7 +72,6 @@ return {
                     ensure_installed = {
                         "gopls",
                         "lua_ls",
-                        "ruby_lsp",
                         "vtsls",
                     },
                 },

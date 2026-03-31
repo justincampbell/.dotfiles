@@ -96,52 +96,12 @@ vim.api.nvim_create_autocmd({ "FocusGained", "BufEnter", "CursorHold", "ModeChan
     end,
 })
 
--- TODO move keymaps to another file
-
 -- Keymaps
-vim.keymap.set("n", "gs", ":Switch<CR>", { desc = "Toggle switch" })
 vim.keymap.set("n", "<Tab>", ":tabnext<CR>", { desc = "Next tab", silent = true })
 vim.keymap.set("n", "<S-Tab>", ":tabprev<CR>", { desc = "Prev tab", silent = true })
 vim.keymap.set("n", "<Leader>td", ":tab split<CR>", { desc = "Duplicate tab", silent = true })
 vim.keymap.set("v", "<Leader>s", ":sort<CR>", { noremap = true, silent = true })
 
--- Comments
-vim.keymap.set("n", "<Leader>/", "gcc<CR>", { noremap = true, silent = true })
-vim.keymap.set("v", "<Leader>/", "gc<CR>", { noremap = true, silent = true })
-
-vim.api.nvim_create_autocmd({ "BufWritePre" }, {
-    group = vim.api.nvim_create_augroup("ts_imports", { clear = true }),
-    pattern = { "*.tsx,*.ts" },
-    callback = function()
-        -- vim.lsp.buf.code_action({ apply = true, context = { only = { "source.removeUnusedImports" }, diagnostics = {} } })
-        vim.lsp.buf.code_action({ apply = true, context = { only = { "source.addMissingImports.ts" }, diagnostics = {} } })
-        -- vim.lsp.buf.code_action({ apply = true, context = { only = { "source.sortImports" }, diagnostics = {} } })
-        -- vim.lsp.buf.code_action({ apply = true, context = { only = { "source.removeUnusedImports" }, diagnostics = {} } })
-        -- vim.lsp.buf.code_action({ apply = true, context = { only = { "source.fixAll.ts" }, diagnostics = {} } })
-        -- local actions = {
-        --     "source.removeUnusedImports",
-        --     "source.addMissingImports.ts",
-        --     "source.sortImports",
-        --     "source.fixAll.ts",
-        -- }
-        -- for i = 1, #actions do
-        --     vim.defer_fn(function()
-        --         vim.lsp.buf.code_action { apply = true, context = { only = { actions[i] } } }
-        --     end, i * 60)
-        -- end
-    end,
-})
-
 -- Show trailing whitespace as dots, tabs as subtle indicators
 vim.opt.listchars = { trail = '·', tab = '  ' }
 vim.opt.list = true
-
--- Remove trailing whitespace on save
-vim.api.nvim_create_autocmd("BufWritePre", {
-    pattern = "*",
-    callback = function()
-        local save_cursor = vim.fn.getpos(".")
-        vim.cmd([[%s/\s\+$//e]])
-        vim.fn.setpos(".", save_cursor)
-    end,
-})
