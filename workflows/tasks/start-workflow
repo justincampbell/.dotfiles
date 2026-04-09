@@ -6,12 +6,16 @@ set -euo pipefail
 # Source shared utilities
 source "$(dirname "$0")/../shared.sh"
 
-# Parse --detached flag
+# Parse flags
 detached=false
-if [[ "${1:-}" == "--detached" ]]; then
-    detached=true
+has_prompt=true
+while [[ "${1:-}" == --* ]]; do
+    case "$1" in
+        --detached)  detached=true ;;
+        --no-prompt) has_prompt=false ;;
+    esac
     shift
-fi
+done
 
 workflow_name="$1"
 shift
@@ -104,50 +108,52 @@ if [ -z "$windows_yaml" ] && [ -f "$workflow_yml" ]; then
     fi
 fi
 
-# Get available tasks
-available_tasks=$(list_available_tasks)
+processed_prompt=""
+if [ "$has_prompt" = true ]; then
+    # Get available tasks
+    available_tasks=$(list_available_tasks)
 
-# Create a processed prompt file with system prompt prepended and template variables replaced
-system_prompt="$(dirname "$0")/../prompts/_system.md"
-processed_prompt="/tmp/workflow-prompt-$$"
+    # Create a processed prompt file with system prompt prepended and template variables replaced
+    system_prompt="$(dirname "$0")/../prompts/_system.md"
+    processed_prompt="/tmp/workflow-prompt-$$"
 
-# Create temp file for available tasks to handle multiline content
-tasks_file="/tmp/workflow-tasks-$$"
-echo "$available_tasks" > "$tasks_file"
+    # Create temp file for available tasks to handle multiline content
+    tasks_file="/tmp/workflow-tasks-$$"
+    echo "$available_tasks" > "$tasks_file"
 
-# Combine system prompt with workflow prompt content (excluding frontmatter), replacing template variables
-{
-    # Replace {{available_tasks}} with file content using a different approach
-    while IFS= read -r line; do
-        if [[ "$line" == *"{{available_tasks}}"* ]]; then
-            cat "$tasks_file"
+    # Combine system prompt with workflow prompt content (excluding frontmatter), replacing template variables
+    {
+        # Replace {{available_tasks}} with file content using a different approach
+        while IFS= read -r line; do
+            if [[ "$line" == *"{{available_tasks}}"* ]]; then
+                cat "$tasks_file"
+            else
+                echo "$line"
+            fi
+        done < "$system_prompt"
+        # Extract only the content after the frontmatter (after second ---)
+        awk '/^---$/{if(++c==2) f=1; next} f' "$prompt_file"
+    } | {
+        # Replace argument template variables ({{arg1}}, {{arg2}}, etc.)
+        if [ $# -gt 0 ]; then
+            content=$(cat)
+            for i in $(seq 1 $#); do
+                arg_var="{{arg$i}}"
+                content=$(echo "$content" | sed "s|$arg_var|${!i}|g")
+            done
+            echo "$content"
         else
-            echo "$line"
+            cat
         fi
-    done < "$system_prompt"
-    echo ""
-    # Extract only the content after the frontmatter (after second ---)
-    awk '/^---$/{if(++c==2) f=1; next} f' "$prompt_file"
-} | {
-    # Replace argument template variables ({{arg1}}, {{arg2}}, etc.)
-    if [ $# -gt 0 ]; then
-        content=$(cat)
-        for i in $(seq 1 $#); do
-            arg_var="{{arg$i}}"
-            content=$(echo "$content" | sed "s|$arg_var|${!i}|g")
-        done
-        echo "$content"
-    else
-        cat
+    } > "$processed_prompt"
+
+    # For testing: allow preserving the processed prompt file
+    if [ -n "${TEST_PROMPT_OUTPUT:-}" ]; then
+        cp "$processed_prompt" "$TEST_PROMPT_OUTPUT"
     fi
-} > "$processed_prompt"
 
-# For testing: allow preserving the processed prompt file
-if [ -n "${TEST_PROMPT_OUTPUT:-}" ]; then
-    cp "$processed_prompt" "$TEST_PROMPT_OUTPUT"
+    trap "rm -f '$processed_prompt' '$tasks_file'" EXIT
 fi
-
-trap "rm -f '$processed_prompt' '$tasks_file'" EXIT
 
 # Create session with custom layout if windows are defined
 if [ -n "$windows_yaml" ]; then
@@ -172,7 +178,7 @@ if [ -n "$windows_yaml" ]; then
             sleep 1
 
             # Send the new prompt
-            if [ -f "$processed_prompt" ]; then
+            if [ -n "$processed_prompt" ] && [ -f "$processed_prompt" ]; then
                 echo "Sending new prompt to AI window..." >&2
                 prompt_content=$(cat "$processed_prompt")
                 tmux send-keys -t "$session_name:$ai_window" "$prompt_content"
@@ -195,7 +201,7 @@ if [ -n "$windows_yaml" ]; then
             tmux send-keys -t "$session_name:$ai_window" "$command" C-m
 
             # Wait for CLI to start and send prompt
-            if [ -f "$processed_prompt" ]; then
+            if [ -n "$processed_prompt" ] && [ -f "$processed_prompt" ]; then
                 sleep 3
                 echo "Sending prompt to new AI window..." >&2
                 # Send Enter first to clear any prompts/banners
@@ -250,7 +256,7 @@ if [ -n "$windows_yaml" ]; then
             command=$(echo "$command" | sed "s|{{ai_cli}}|claude|g")
 
             # For AI window, append prompt file as initial message
-            if [ "$name" = "ai" ] && [ -f "$processed_prompt" ]; then
+            if [ "$name" = "ai" ] && [ -n "$processed_prompt" ] && [ -f "$processed_prompt" ]; then
                 prompt_file_path="$processed_prompt"
             fi
 

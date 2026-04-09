@@ -33,7 +33,14 @@ case "$url" in
         ;;
 
     *github.com/*/pull/*)
-        workflow_name="review-github-pr"
+        # Show mode selection menu — each item launches display-popup directly
+        # (run-shell has no client context, so it can't open popups)
+        tmux display-menu -T "PR Review" \
+            "Review" r "display-popup -E -w 80% -h 80% \"bash $SCRIPT_DIR/launch-workflow review-github-pr '$url'\"" \
+            "Review (auto-approve)" a "display-popup -E -w 80% -h 80% \"bash $SCRIPT_DIR/launch-workflow review-github-pr-auto-approve '$url'\"" \
+            "Fix CI / address feedback" f "display-popup -E -w 80% -h 80% \"bash $SCRIPT_DIR/launch-workflow fix-github-pr '$url'\"" \
+            "Just checkout" c "display-popup -E -w 80% -h 80% \"bash $SCRIPT_DIR/launch-workflow --no-prompt review-github-pr '$url'\""
+        exit 0
         ;;
 
     *github.com/pulls*)
