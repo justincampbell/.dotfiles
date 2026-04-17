@@ -49,6 +49,14 @@ get_menu_key() {
 }
 
 show_workflow_menu() {
+    # Open a loading popup in parallel; we'll signal it to close via FIFO when the menu is ready.
+    local fifo
+    fifo=$(mktemp -u -t workflow-menu-fifo.XXXXXX)
+    mkfifo "$fifo"
+    tmux display-popup -E -w 32 -h 3 \
+        "printf '\e[?25l\n  Loading workflows...\n'; read -t 10 < '$fifo' || true; printf '\e[?25h'" &
+    local popup_pid=$!
+
     local menu_items=()
     local used_keys=""
 
@@ -146,7 +154,11 @@ show_workflow_menu() {
     menu_items+=("q")
     menu_items+=("")
 
-    # Display the menu
+    # Signal the loading popup to close, then show the real menu
+    echo done > "$fifo" 2>/dev/null || true
+    wait "$popup_pid" 2>/dev/null || true
+    rm -f "$fifo"
+
     tmux display-menu "${menu_items[@]}"
 }
 
