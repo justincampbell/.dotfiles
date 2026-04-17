@@ -196,7 +196,7 @@ if [ -n "$windows_yaml" ]; then
             ai_window="1"
 
             # Start AI CLI
-            command="claude"
+            command="${WORKFLOW_AI_CLI:-claude}"
             sleep 0.3
             tmux send-keys -t "$session_name:$ai_window" "$command" C-m
 
@@ -253,7 +253,7 @@ if [ -n "$windows_yaml" ]; then
             command=$(echo "$windows_yaml" | yq -r ".[$i].command // \"\"")
 
             # Replace template variables
-            command=$(echo "$command" | sed "s|{{ai_cli}}|claude|g")
+            command=$(echo "$command" | sed "s|{{ai_cli}}|${WORKFLOW_AI_CLI:-claude}|g")
 
             # For AI window, append prompt file as initial message
             if [ "$name" = "ai" ] && [ -n "$processed_prompt" ] && [ -f "$processed_prompt" ]; then

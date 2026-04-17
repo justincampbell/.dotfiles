@@ -20,6 +20,12 @@ fi
 workflow_name=""
 
 case "$url" in
+    *app.shortcut.com/*/epic/*|*app.shortcut.com/*/objective/*)
+        tmux display-popup -E -w 80% -h 80% \
+            "bash $SCRIPT_DIR/start-planning '$url'"
+        exit 0
+        ;;
+
     *app.shortcut.com/*/story/*)
         workflow_name="start-shortcut-story"
         ;;
@@ -30,6 +36,10 @@ case "$url" in
 
     *github.com/*/issues/*)
         workflow_name="start-github-issue"
+        ;;
+
+    *app.datadoghq.com/error-tracking/issue/*)
+        workflow_name="fix-datadog-error"
         ;;
 
     *github.com/*/pull/*)
@@ -45,6 +55,10 @@ case "$url" in
 
     *github.com/pulls*)
         workflow_name="review-github-prs"
+        ;;
+
+    *github.com/*/*)
+        workflow_name="open-github-repo"
         ;;
 
     *)
@@ -68,7 +82,7 @@ fi
 # Workflows with a URL arg go through launch-workflow (sets up worktree, switches session)
 # Others run directly
 case "$workflow_name" in
-    start-shortcut-story|start-github-issue|review-github-pr)
+    start-shortcut-story|start-github-issue|review-github-pr|fix-datadog-error|open-github-repo)
         tmux display-popup "${popup_target[@]}" -E -w 80% -h 80% \
             "bash $SCRIPT_DIR/launch-workflow '$workflow_name' '$url'"
         ;;

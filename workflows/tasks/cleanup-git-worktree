@@ -59,17 +59,51 @@ fi
 # Change to base repo for git operations
 cd "$base_repo"
 
-# STEP 1: Remove git worktree first (force removal)
+# STEP 1: Kill other panes/windows in the session so processes release file handles
+# We can't kill the whole session yet — this script may be running inside it
+if [ -n "$session_name" ] && tmux has-session -t "=$session_name" 2>/dev/null; then
+  echo "Killing other panes in session: $session_name" >&2
+
+  current_pane="${TMUX_PANE:-}"
+
+  if [ -n "$current_pane" ]; then
+    # Kill all panes in the session except the one running this script
+    for pane_id in $(tmux list-panes -s -t "=$session_name" -F '#{pane_id}' 2>/dev/null); do
+      if [ "$pane_id" != "$current_pane" ]; then
+        tmux kill-pane -t "$pane_id" 2>/dev/null || true
+      fi
+    done
+  else
+    echo "Warning: TMUX_PANE not set, skipping pane cleanup" >&2
+  fi
+
+  # Give processes a moment to exit and release file handles
+  sleep 1
+fi
+
+# STEP 2: Remove git worktree (force removal)
 if [ -d "$worktree_dir" ]; then
   echo "Removing worktree directory: $worktree_dir" >&2
 
-  # Always use force removal to avoid issues with locked files
-  if git worktree remove --force "$worktree_dir" 2>&1; then
+  if err=$(git worktree remove --force "$worktree_dir" 2>&1); then
     echo "Successfully removed worktree: $worktree_dir" >&2
   else
-    echo "Warning: Failed to remove worktree via git, removing directory manually" >&2
+    echo "Warning: git worktree remove failed: $err" >&2
+    # Clean untracked files/dirs that cause "Directory not empty"
+    git -C "$worktree_dir" clean -fd 2>/dev/null || true
+    if err=$(git worktree remove --force "$worktree_dir" 2>&1); then
+      echo "Successfully removed worktree after clean: $worktree_dir" >&2
+    else
+      echo "Warning: git worktree remove still failed: $err" >&2
+      rm -rf "$worktree_dir"
+      echo "Manually removed directory: $worktree_dir" >&2
+    fi
+  fi
+
+  # Verify the directory is actually gone
+  if [ -d "$worktree_dir" ]; then
+    echo "Error: Directory still exists after cleanup, force removing: $worktree_dir" >&2
     rm -rf "$worktree_dir"
-    echo "Manually removed directory: $worktree_dir" >&2
   fi
 
   # Clean up any dangling worktree references
@@ -78,24 +112,17 @@ else
   echo "No worktree directory found at: $worktree_dir" >&2
 fi
 
-# STEP 2: Wait a moment for filesystem to settle
-sleep 0.5
-
-# STEP 3: Kill tmux session (only if we found one)
+# STEP 3: Kill the tmux session now that cleanup is done
 if [ -n "$session_name" ] && tmux has-session -t "=$session_name" 2>/dev/null; then
   echo "Killing tmux session: $session_name" >&2
 
-  # If we're currently in the session we want to kill, switch to another session first
   if [ -n "${TMUX:-}" ]; then
     current_session=$(tmux display-message -p '#S')
     if [ "$current_session" = "$session_name" ]; then
-      # Find another session to switch to
       other_session=$(tmux list-sessions -F '#S' | grep -v "^$session_name$" | head -n 1)
       if [ -n "$other_session" ]; then
-        echo "Switching to session: $other_session" >&2
         tmux switch-client -t "=$other_session"
       else
-        echo "No other sessions available, creating new session" >&2
         tmux new-session -d -s "main"
         tmux switch-client -t "=main"
       fi
