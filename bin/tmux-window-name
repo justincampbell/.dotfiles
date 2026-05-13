@@ -7,6 +7,9 @@ current_path="$3"
 # https://www.nerdfonts.com/cheat-sheet
 
 case "$command" in
+  gh)
+    echo " " # nf-oct-mark_github
+    ;;
   git|gitui|lazygit|revise)
     echo " " # nf-dev-git
     ;;
