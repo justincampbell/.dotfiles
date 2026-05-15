@@ -9,13 +9,20 @@ source "$(dirname "$0")/../shared.sh"
 # Parse flags
 detached=false
 has_prompt=true
+print_prompt=false
 while [[ "${1:-}" == --* ]]; do
     case "$1" in
-        --detached)  detached=true ;;
-        --no-prompt) has_prompt=false ;;
+        --detached)     detached=true ;;
+        --no-prompt)    has_prompt=false ;;
+        --print-prompt) print_prompt=true ;;
     esac
     shift
 done
+
+# --print-prompt requires the prompt to be composed
+if [ "$print_prompt" = true ]; then
+    has_prompt=true
+fi
 
 workflow_name="$1"
 shift
@@ -37,75 +44,52 @@ fi
 target_dir="${PWD}"
 
 # Execute setup tasks if defined in frontmatter and capture output
-setup_tasks=$(parse_frontmatter "$prompt_file" "setup_tasks")
-if [ -n "$setup_tasks" ]; then
-    echo "Running setup tasks..." >&2
+# Skipped in --print-prompt mode (no side effects).
+if [ "$print_prompt" = false ]; then
+    setup_tasks=$(parse_frontmatter "$prompt_file" "setup_tasks")
+    if [ -n "$setup_tasks" ]; then
+        echo "Running setup tasks..." >&2
 
-    # Process each setup task and capture directory output
-    while IFS= read -r task_command; do
-        # Replace template variables with workflow arguments
-        if [ $# -gt 0 ]; then
-            for i in $(seq 1 $#); do
-                arg_var="arg$i"
-                task_command=$(echo "$task_command" | sed "s|{{$arg_var}}|${!i}|g")
-            done
-        fi
+        # Process each setup task and capture directory output
+        while IFS= read -r task_command; do
+            # Replace template variables with workflow arguments
+            if [ $# -gt 0 ]; then
+                for i in $(seq 1 $#); do
+                    arg_var="arg$i"
+                    task_command=$(echo "$task_command" | sed "s|{{$arg_var}}|${!i}|g")
+                done
+            fi
 
-        # Make relative paths absolute
-        if [[ "$task_command" == "./workflows/tasks/"* ]]; then
-            task_command="${task_command#./workflows/tasks/}"
-            task_command="$(dirname "$0")/$task_command"
-        fi
+            # Make relative paths absolute
+            if [[ "$task_command" == "./workflows/tasks/"* ]]; then
+                task_command="${task_command#./workflows/tasks/}"
+                task_command="$(dirname "$0")/$task_command"
+            fi
 
-        echo "Executing: $task_command" >&2
-        result=$(eval "$task_command")
+            echo "Executing: $task_command" >&2
+            result=$(eval "$task_command")
 
-        # If task outputs a directory path, use it as target_dir
-        # Use the last line if there are multiple lines
-        last_line=$(echo "$result" | tail -1)
-        if [ -n "$last_line" ] && [ -d "$last_line" ] 2>/dev/null; then
-            target_dir="$last_line"
-            echo "Updated target directory to: $target_dir" >&2
-        fi
-    done < <(echo "$setup_tasks" | yq -r '.[]')
+            # If task outputs a directory path, use it as target_dir
+            # Use the last line if there are multiple lines
+            last_line=$(echo "$result" | tail -1)
+            if [ -n "$last_line" ] && [ -d "$last_line" ] 2>/dev/null; then
+                target_dir="$last_line"
+                echo "Updated target directory to: $target_dir" >&2
+            fi
+        done < <(echo "$setup_tasks" | yq -r '.[]')
+    fi
 fi
 
 # Parse tmux configuration from frontmatter
+# Windows come ONLY from the prompt's frontmatter — no fallthrough to .workflow.yml
 windows_yaml=$(parse_frontmatter "$prompt_file" "tmux_windows")
 custom_session_name=$(parse_frontmatter "$prompt_file" "tmux_session_name")
 
-# Use .workflow.yml windows only if frontmatter doesn't define its own
+# Detect worktree for the kept worktree.setup execution below
 workflow_yml="$target_dir/.workflow.yml"
 is_worktree=false
 if [ -f "$target_dir/.git" ]; then
     is_worktree=true
-fi
-if [ -z "$windows_yaml" ] && [ -f "$workflow_yml" ]; then
-    wf_window_count=$(yq eval '.windows | length' "$workflow_yml")
-    if [ "$wf_window_count" != "0" ] && [ "$wf_window_count" != "null" ]; then
-        windows_yaml=$(yq eval '[.windows[] | to_entries[] | {"name": .key, "command": (.value // "")}]' "$workflow_yml")
-
-        # Apply worktree window overrides if in a worktree
-        if [ "$is_worktree" = true ]; then
-            wt_window_count=$(yq eval '.worktree.windows | length' "$workflow_yml")
-            if [ "$wt_window_count" != "0" ] && [ "$wt_window_count" != "null" ]; then
-                # For each worktree window override, replace matching window or add new one
-                for ((wi=0; wi<wt_window_count; wi++)); do
-                    wt_name=$(yq eval ".worktree.windows[$wi] | keys | .[0]" "$workflow_yml")
-                    wt_cmd=$(yq eval ".worktree.windows[$wi].$wt_name" "$workflow_yml")
-                    # Check if window name exists in the base list
-                    match_count=$(echo "$windows_yaml" | yq eval "[.[] | select(.name == \"$wt_name\")] | length" -)
-                    if [ "$match_count" -gt 0 ]; then
-                        windows_yaml=$(echo "$windows_yaml" | yq eval "(.[] | select(.name == \"$wt_name\") | .command) = \"$wt_cmd\"" -)
-                    else
-                        windows_yaml=$(echo "$windows_yaml" | yq eval ". + [{\"name\": \"$wt_name\", \"command\": \"$wt_cmd\"}]" -)
-                    fi
-                done
-            fi
-        fi
-
-        echo "Using windows from $workflow_yml" >&2
-    fi
 fi
 
 processed_prompt=""
@@ -150,6 +134,13 @@ if [ "$has_prompt" = true ]; then
     # For testing: allow preserving the processed prompt file
     if [ -n "${TEST_PROMPT_OUTPUT:-}" ]; then
         cp "$processed_prompt" "$TEST_PROMPT_OUTPUT"
+    fi
+
+    # Print-only mode: emit the composed prompt and exit before any tmux work.
+    if [ "$print_prompt" = true ]; then
+        cat "$processed_prompt"
+        rm -f "$processed_prompt" "$tasks_file"
+        exit 0
     fi
 
     trap "rm -f '$processed_prompt' '$tasks_file'" EXIT

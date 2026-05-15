@@ -2,6 +2,13 @@
 setup_tasks:
   - "./workflows/tasks/ensure-github-clone {{arg1}}"
   - "./workflows/tasks/checkout-github-issue {{arg1}}"
+tmux_windows:
+  - name: ai
+    command: "{{ai_cli}}"
+  - name: revise
+    command: "revise --dev"
+  - name: rename
+    command: "rename-tmux-session && exit"
 ---
 
 You're going to work on a GitHub issue: {{arg1}}

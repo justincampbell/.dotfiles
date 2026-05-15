@@ -4,6 +4,8 @@ setup_tasks:
 tmux_windows:
   - name: ai
     command: "{{ai_cli}}"
+  - name: revise
+    command: "revise --dev"
 ---
 
 You're exploring a GitHub repo: {{arg1}}

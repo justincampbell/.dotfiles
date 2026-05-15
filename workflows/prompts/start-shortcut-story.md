@@ -1,6 +1,13 @@
 ---
 setup_tasks:
   - "./workflows/tasks/checkout-shortcut-story {{arg1}}"
+tmux_windows:
+  - name: ai
+    command: "{{ai_cli}}"
+  - name: revise
+    command: "revise --dev"
+  - name: rename
+    command: "rename-tmux-session && exit"
 ---
 
 You're going to work on a Shortcut story: {{arg1}}

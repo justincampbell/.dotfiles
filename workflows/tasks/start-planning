@@ -1,0 +1,128 @@
+#!/bin/bash
+# Start a planning session for a Shortcut epic or objective
+# Usage: start-planning <shortcut-epic-or-objective-url>
+
+set -euo pipefail
+
+# Set up PATH for non-interactive context (display-popup)
+export PATH="$HOME/.dotfiles/bin:$HOME/.dotfiles/workflows/tasks:$HOME/.local/bin:/opt/homebrew/bin:/opt/homebrew/sbin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:$PATH"
+
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+source "$SCRIPT_DIR/../shared.sh"
+
+url="${1:-}"
+
+if [ -z "$url" ]; then
+    echo "Usage: $0 <shortcut-epic-or-objective-url>" >&2
+    exit 1
+fi
+
+# Parse URL to determine entity type and ID
+if [[ "$url" =~ /epic/([0-9]+) ]]; then
+    entity_type="epic"
+    entity_id="${BASH_REMATCH[1]}"
+elif [[ "$url" =~ /objective/([0-9]+) ]]; then
+    entity_type="objective"
+    entity_id="${BASH_REMATCH[1]}"
+else
+    echo "Error: URL must be a Shortcut epic or objective URL" >&2
+    exit 1
+fi
+
+# Fetch entity name from Shortcut for window naming
+if [ "$entity_type" = "epic" ]; then
+    entity_name=$(short api "/epics/${entity_id}" 2>/dev/null | jq -r '.name // empty')
+elif [ "$entity_type" = "objective" ]; then
+    entity_name=$(short api "/milestones/${entity_id}" 2>/dev/null | jq -r '.name // empty')
+fi
+
+# Generate short window name using humanize-git-branch logic (hyphens for tmux compatibility)
+if [ -n "${entity_name:-}" ]; then
+    window_name=$(humanize-git-branch "$(slugify_branch_name "$entity_name")" | tr ' ' '-')
+else
+    window_name="${entity_type}-${entity_id}"
+fi
+
+echo "Planning ${entity_type} ${entity_id} (${window_name})..." >&2
+
+# Ensure planning repo exists
+planning_dir="${WORKFLOW_PLANNING_DIR:-$HOME/Code/planning}"
+mkdir -p "$planning_dir"
+if [ ! -d "$planning_dir/.git" ]; then
+    echo "Initializing planning git repo..." >&2
+    git -C "$planning_dir" init
+fi
+
+# Create entity directory
+if [ "$entity_type" = "epic" ]; then
+    mkdir -p "$planning_dir/epics/${entity_id}"
+elif [ "$entity_type" = "objective" ]; then
+    mkdir -p "$planning_dir/objectives/${entity_id}"
+fi
+
+# Build the prompt
+system_prompt="$SCRIPT_DIR/../prompts/_system.md"
+workflow_prompt="$SCRIPT_DIR/../prompts/start-planning.md"
+available_tasks=$(list_available_tasks)
+tasks_file="/tmp/planning-tasks-$$"
+echo "$available_tasks" > "$tasks_file"
+
+processed_prompt="/tmp/planning-prompt-$$"
+{
+    while IFS= read -r line; do
+        if [[ "$line" == *"{{available_tasks}}"* ]]; then
+            cat "$tasks_file"
+        else
+            echo "$line"
+        fi
+    done < "$system_prompt"
+    cat "$workflow_prompt"
+} | sed "s|{{arg1}}|${url}|g" > "$processed_prompt"
+
+trap "rm -f '$tasks_file'" EXIT
+
+# Copy prompt to planning dir (avoids shell escaping issues with tmux send-keys)
+cp "$processed_prompt" "$planning_dir/.workflow-prompt"
+rm -f "$processed_prompt"
+
+# Ensure planning tmux session exists
+session_name="planning"
+if ! tmux has-session -t "=$session_name" 2>/dev/null; then
+    echo "Creating planning session..." >&2
+    tmux new-session -d -s "$session_name" -c "$planning_dir"
+    tmux rename-window -t "$session_name:1" "shell"
+fi
+
+# Check if a window for this entity already exists
+existing_window=$(tmux list-windows -t "$session_name" -F "#{window_index}:#{window_name}" \
+    | grep ":${window_name}$" | cut -d: -f1 || true)
+
+if [ -n "$existing_window" ]; then
+    echo "Window $window_name already exists, switching to it..." >&2
+    tmux select-window -t "$session_name:$existing_window"
+else
+    # Create new window for this entity
+    echo "Creating window $window_name..." >&2
+    tmux new-window -t "$session_name" -n "$window_name" -c "$planning_dir"
+    new_window_index=$(tmux list-windows -t "$session_name" -F '#{window_index}' | tail -1)
+
+    # Start AI CLI with the prompt (read from file to avoid escaping issues)
+    ai_cli="${WORKFLOW_AI_CLI:-claude}"
+    sleep 0.3
+    tmux send-keys -t "$session_name:${new_window_index}" "$ai_cli \"\$(cat .workflow-prompt)\"" C-m
+
+    # Re-apply window name after claude starts (it overrides via tmux rename-window)
+    sleep 1.5
+    tmux rename-window -t "$session_name:${new_window_index}" "$window_name"
+    tmux set -w -t "$session_name:${new_window_index}" automatic-rename off
+    tmux set -w -t "$session_name:${new_window_index}" allow-rename off
+fi
+
+# Switch to the planning session
+if [ -n "${TMUX:-}" ]; then
+    tmux switch-client -t "$session_name"
+else
+    tmux attach-session -t "$session_name"
+fi
+
+echo "Started planning session for ${entity_type} ${entity_id}" >&2
