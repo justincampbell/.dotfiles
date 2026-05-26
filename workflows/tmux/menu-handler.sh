@@ -49,12 +49,30 @@ get_menu_key() {
 }
 
 show_workflow_menu() {
-    # Open a loading popup in parallel; we'll signal it to close via FIFO when the menu is ready.
-    local fifo
-    fifo=$(mktemp -u -t workflow-menu-fifo.XXXXXX)
-    mkfifo "$fifo"
-    tmux display-popup -E -w 32 -h 3 \
-        "printf '\e[?25l\n  Loading workflows...\n'; read -t 10 < '$fifo' || true; printf '\e[?25h'" &
+    # Status file drives a small loading popup that re-renders as steps run.
+    local status_file
+    status_file=$(mktemp -t workflow-menu-status.XXXXXX)
+    echo "Detecting current repo..." > "$status_file"
+
+    # Mirror the user's menu theme on the popup, if set.
+    local border_lines border_style style
+    border_lines=$(tmux show-options -gqv menu-border-lines)
+    border_style=$(tmux show-options -gqv menu-border-style)
+    style=$(tmux show-options -gqv menu-style)
+    local popup_flags=(-E -w 36 -h 3)
+    [ -n "$border_lines" ] && popup_flags+=(-b "$border_lines")
+    [ -n "$border_style" ] && popup_flags+=(-S "$border_style")
+    [ -n "$style" ] && popup_flags+=(-s "$style")
+
+    tmux display-popup "${popup_flags[@]}" \
+        "printf '\e[?25l'
+         while :; do
+             msg=\$(cat '$status_file' 2>/dev/null)
+             [ \"\$msg\" = '__DONE__' ] && break
+             printf '\r\e[K  %s' \"\$msg\"
+             sleep 0.1
+         done
+         printf '\e[?25h'" &
     local popup_pid=$!
 
     local menu_items=()
@@ -113,12 +131,19 @@ show_workflow_menu() {
     menu_items+=("")
 
     # Discover sessions from sessions directory
+    echo "Scanning sessions..." > "$status_file"
     local sessions_dir="$WORKFLOWS_DIR/tmux/sessions"
     if [ -d "$sessions_dir" ]; then
         while IFS= read -r session_file; do
             local session_name=$(basename "$session_file" .yml)
 
-            local display_name=$(workflow_display_name "$session_name")
+            local yaml_name; yaml_name=$(yq eval '.name' "$session_file" 2>/dev/null)
+            local display_name
+            if [ -n "$yaml_name" ] && [ "$yaml_name" != "null" ]; then
+                display_name="$yaml_name"
+            else
+                display_name=$(workflow_display_name "$session_name")
+            fi
             local key=$(get_menu_key "$session_name" "$used_keys")
             used_keys="${used_keys}${key}"
 
@@ -129,11 +154,18 @@ show_workflow_menu() {
     fi
 
     # Discover .workflow.yml files from ~/Code projects (repos and org dirs)
+    echo "Discovering workflows..." > "$status_file"
     while IFS= read -r workflow_file; do
         local project_dir=$(dirname "$workflow_file")
         local project_name=$(basename "$project_dir")
 
-        local display_name=$(workflow_display_name "$project_name")
+        local yaml_name; yaml_name=$(yq eval '.name' "$workflow_file" 2>/dev/null)
+        local display_name
+        if [ -n "$yaml_name" ] && [ "$yaml_name" != "null" ]; then
+            display_name="$yaml_name"
+        else
+            display_name=$(workflow_display_name "$project_name")
+        fi
         local key=$(get_menu_key "$project_name" "$used_keys")
         used_keys="${used_keys}${key}"
 
@@ -155,9 +187,9 @@ show_workflow_menu() {
     menu_items+=("")
 
     # Signal the loading popup to close, then show the real menu
-    echo done > "$fifo" 2>/dev/null || true
+    echo "__DONE__" > "$status_file"
     wait "$popup_pid" 2>/dev/null || true
-    rm -f "$fifo"
+    rm -f "$status_file"
 
     tmux display-menu "${menu_items[@]}"
 }
