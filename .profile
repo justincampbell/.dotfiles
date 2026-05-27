@@ -111,5 +111,8 @@ if [ -x "$(command -v q-queue)" ]; then
   q-queue -s
 fi
 
+# Machine-local overrides (not checked in)
+[[ -f ~/.profile.local ]] && source ~/.profile.local
+
 # reset return code to 0
 true
