@@ -83,8 +83,16 @@ if [ "$SESSION_ROOT" = "null" ] || [ -z "$SESSION_ROOT" ]; then
     SESSION_ROOT=$(dirname "$CONFIG_FILE")
 fi
 
-# Check if session already exists
-if tmux has-session -t "$SESSION_NAME" 2>/dev/null; then
+# tmux silently rewrites `.` and `:` in session names to `_`; do it ourselves
+# so the name we use matches the name tmux stores.
+SANITIZED_NAME="${SESSION_NAME//[.:]/_}"
+if [ "$SANITIZED_NAME" != "$SESSION_NAME" ]; then
+    echo "Warning: session name '$SESSION_NAME' sanitized to '$SANITIZED_NAME' (tmux disallows . and :)" >&2
+    SESSION_NAME="$SANITIZED_NAME"
+fi
+
+# Check if session already exists (= prefix forces exact match, not prefix match)
+if tmux has-session -t "=$SESSION_NAME" 2>/dev/null; then
     if [ -n "${TMUX:-}" ]; then
         tmux switch-client -t "$SESSION_NAME"
     else
