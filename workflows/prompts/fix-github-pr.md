@@ -1,4 +1,5 @@
 ---
+model: sonnet
 setup_tasks:
   - "./workflows/tasks/ensure-github-clone {{arg1}}"
   - "./workflows/tasks/checkout-github-pr {{arg1}}"

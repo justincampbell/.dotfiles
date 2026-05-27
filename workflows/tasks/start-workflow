@@ -85,6 +85,11 @@ fi
 windows_yaml=$(parse_frontmatter "$prompt_file" "tmux_windows")
 custom_session_name=$(parse_frontmatter "$prompt_file" "tmux_session_name")
 
+# Build the AI CLI command with explicit --model (falls back to "default" so
+# we don't inherit whatever model claude last ran with)
+model=$(parse_frontmatter "$prompt_file" "model")
+ai_cli="${WORKFLOW_AI_CLI:-claude} --model '${model:-default}'"
+
 # Detect worktree for the kept worktree.setup execution below
 workflow_yml="$target_dir/.workflow.yml"
 is_worktree=false
@@ -187,7 +192,7 @@ if [ -n "$windows_yaml" ]; then
             ai_window="1"
 
             # Start AI CLI
-            command="${WORKFLOW_AI_CLI:-claude}"
+            command="$ai_cli"
             sleep 0.3
             tmux send-keys -t "$session_name:$ai_window" "$command" C-m
 
@@ -244,7 +249,7 @@ if [ -n "$windows_yaml" ]; then
             command=$(echo "$windows_yaml" | yq -r ".[$i].command // \"\"")
 
             # Replace template variables
-            command=$(echo "$command" | sed "s|{{ai_cli}}|${WORKFLOW_AI_CLI:-claude}|g")
+            command=$(echo "$command" | sed "s|{{ai_cli}}|$ai_cli|g")
 
             # For AI window, append prompt file as initial message
             if [ "$name" = "ai" ] && [ -n "$processed_prompt" ] && [ -f "$processed_prompt" ]; then

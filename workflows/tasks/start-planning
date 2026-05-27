@@ -107,7 +107,8 @@ else
     new_window_index=$(tmux list-windows -t "$session_name" -F '#{window_index}' | tail -1)
 
     # Start AI CLI with the prompt (read from file to avoid escaping issues)
-    ai_cli="${WORKFLOW_AI_CLI:-claude}"
+    model=$(parse_frontmatter "$workflow_prompt" "model")
+    ai_cli="${WORKFLOW_AI_CLI:-claude} --model '${model:-default}'"
     sleep 0.3
     tmux send-keys -t "$session_name:${new_window_index}" "$ai_cli \"\$(cat .workflow-prompt)\"" C-m
 
