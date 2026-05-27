@@ -1,7 +1,0 @@
-name: example-models
-root: ~/.dotfiles
-
-windows:
-  - ai: claude
-  - nvim: nvim
-  - bash:
