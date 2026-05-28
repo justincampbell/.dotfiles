@@ -108,7 +108,9 @@ else
 
     # Start AI CLI with the prompt (read from file to avoid escaping issues)
     model=$(parse_frontmatter "$workflow_prompt" "model")
+    effort=$(parse_frontmatter "$workflow_prompt" "effort")
     ai_cli="${WORKFLOW_AI_CLI:-claude} --model '${model:-default}'"
+    [ -n "$effort" ] && ai_cli="$ai_cli --effort '$effort'"
     sleep 0.3
     tmux send-keys -t "$session_name:${new_window_index}" "$ai_cli \"\$(cat .workflow-prompt)\"" C-m
 

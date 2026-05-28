@@ -1,5 +1,6 @@
 ---
 model: opus[1m]
+effort: max
 tmux_windows:
   - name: ai
     command: "{{ai_cli}}"
