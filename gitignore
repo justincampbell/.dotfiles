@@ -6,3 +6,5 @@
 planning/
 yarn_cache/
 .claude/**/*.lock
+
+**/.claude/settings.local.json
