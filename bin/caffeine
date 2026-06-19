@@ -1,0 +1,33 @@
+#!/bin/bash
+# Keep the Mac awake with `caffeinate -disu`, toggleable from tmux with a
+# glanceable status-bar indicator. Stateless — detection via pgrep, no PID file,
+# so it self-heals if the process dies or the machine reboots.
+#
+# Usage: caffeine {on|off|toggle|status}
+#   on / off / toggle  start, stop, or flip the keep-awake process
+#   status             print a coffee glyph when active (for the tmux status bar)
+
+set -eu
+
+match='caffeinate -disu'
+
+is_on() {
+  pgrep -fx "$match" >/dev/null 2>&1
+}
+
+start() {
+  if is_on; then return 0; fi
+  nohup caffeinate -disu >/dev/null 2>&1 &
+}
+
+stop() {
+  pkill -fx "$match" || true
+}
+
+case "${1:-status}" in
+  on)     start ;;
+  off)    stop ;;
+  toggle) if is_on; then stop; else start; fi ;;
+  status) if is_on; then printf '󰅶 '; fi ;;  # nf-md-coffee
+  *)      echo "Usage: caffeine {on|off|toggle|status}" >&2; exit 1 ;;
+esac
