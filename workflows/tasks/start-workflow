@@ -55,8 +55,8 @@ if [ "$print_prompt" = false ]; then
             # Replace template variables with workflow arguments
             if [ $# -gt 0 ]; then
                 for i in $(seq 1 $#); do
-                    arg_var="arg$i"
-                    task_command=$(echo "$task_command" | sed "s|{{$arg_var}}|${!i}|g")
+                    arg_var="{{arg$i}}"
+                    task_command="${task_command//$arg_var/${!i}}"
                 done
             fi
 
@@ -88,7 +88,9 @@ custom_session_name=$(parse_frontmatter "$prompt_file" "tmux_session_name")
 # Build the AI CLI command with explicit --model (falls back to "default" so
 # we don't inherit whatever model claude last ran with)
 model=$(parse_frontmatter "$prompt_file" "model")
+effort=$(parse_frontmatter "$prompt_file" "effort")
 ai_cli="${WORKFLOW_AI_CLI:-claude} --model '${model:-default}'"
+[ -n "$effort" ] && ai_cli="$ai_cli --effort '$effort'"
 
 # Detect worktree for the kept worktree.setup execution below
 workflow_yml="$target_dir/.workflow.yml"
