@@ -93,6 +93,13 @@ show_workflow_menu() {
     menu_items+=("$key")
     menu_items+=("run-shell 'bash $WORKFLOWS_DIR/tmux/menu-handler.sh start-worktree'")
 
+    # Idea option: free-text prompt -> worktree + AI session
+    local ikey=$(get_menu_key "idea" "$used_keys")
+    used_keys="${used_keys}${ikey}"
+    menu_items+=("Idea...")
+    menu_items+=("$ikey")
+    menu_items+=("run-shell 'bash $WORKFLOWS_DIR/tmux/menu-handler.sh idea'")
+
     # Existing worktree option
     local existing_label="Existing Worktree..."
     if [ -n "$repo_name" ]; then
@@ -178,10 +185,18 @@ show_workflow_menu() {
         [ -d "$dir/.git" ] || [ "$(dirname "$dir")" = "$HOME/Code" ] && echo "$f"
     done | sort)
 
-    # Add separator and cancel option
+    # Danger zone: clean up the current worktree (or kill the session if it's not
+    # a worktree). Guarded by a capital X key (never auto-assigned, needs Shift)
+    # plus a centered y/N confirmation modal, since it removes the worktree and
+    # kills tmux. The modal defaults to Cancel so Enter/Escape is safe.
     menu_items+=("")
     menu_items+=("")
     menu_items+=("")
+    menu_items+=("Clean up worktree / kill session")
+    menu_items+=("X")
+    menu_items+=("display-menu -T \" Clean up worktree / kill session? \" -x C -y C \"Cancel\" n \"\" \"Yes, clean up\" y \"run-shell 'bash $WORKFLOWS_DIR/tmux/menu-handler.sh cleanup'\"")
+
+    # Cancel option
     menu_items+=("Cancel")
     menu_items+=("q")
     menu_items+=("")
@@ -296,6 +311,12 @@ case "${1:-menu}" in
         tmux command-prompt -p "Branch description:" \
             "run-shell 'echo \"%1\" > /tmp/start-worktree-desc && bash $WORKFLOWS_DIR/tmux/menu-handler.sh run-start-worktree'"
         ;;
+    idea)
+        pane_path=$(tmux display-message -p "#{pane_current_path}")
+        safe_path="${pane_path//\'/\'\\\'\'}"
+        tmux display-popup -E -w 80% -h 80% \
+            "bash $WORKFLOWS_DIR/tmux/menu-handler.sh prompt-idea '$safe_path'"
+        ;;
     open-worktree)
         pane_path=$(tmux display-message -p "#{pane_current_path}")
         safe_path="${pane_path//\'/\'\\\'\'}"
@@ -323,6 +344,34 @@ case "${1:-menu}" in
         safe_path="${pane_path//\'/\'\\\'\'}"
         tmux display-popup -E -w 80% -h 80% \
             "cd '$safe_path' && bash $WORKFLOWS_DIR/tasks/start-worktree '$safe_desc'"
+        ;;
+    cleanup)
+        # Clean up the current worktree (removes worktree + kills its session).
+        # Falls back to killing the current session if it isn't a worktree.
+        # Runs in a new window so cleanup-git-worktree has a real pane/$TMUX_PANE.
+        pane_path=$(tmux display-message -p "#{pane_current_path}")
+        session_name=$(tmux display-message -p "#{session_name}")
+        safe_path="${pane_path//\'/\'\\\'\'}"
+        safe_session="${session_name//\'/\'\\\'\'}"
+        tmux new-window -n cleanup \
+            "bash $WORKFLOWS_DIR/tasks/cleanup-git-worktree '$safe_path' || tmux kill-session -t '=$safe_session'"
+        ;;
+    prompt-idea)
+        # Runs inside a display-popup: capture the idea in an editor modal,
+        # flatten it to a single line, then hand off to start-idea in the repo.
+        repo_path="$2"
+        editor="${EDITOR:-nvim}"
+        idea_file=$(mktemp)
+        "$editor" "$idea_file"
+        idea=$(tr '\n\t' '  ' < "$idea_file" | sed -e 's/  */ /g' -e 's/^ *//' -e 's/ *$//')
+        rm -f "$idea_file"
+        if [ -z "$idea" ]; then
+            echo "No idea entered — aborting."
+            sleep 1
+            exit 0
+        fi
+        cd "$repo_path"
+        exec bash "$WORKFLOWS_DIR/tasks/start-idea" "$idea"
         ;;
     *)
         echo "Usage: $0 [menu|workflow:<name>|task:<name>]"
