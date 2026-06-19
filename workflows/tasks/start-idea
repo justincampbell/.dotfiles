@@ -1,0 +1,49 @@
+#!/bin/bash
+# Creates a new branch worktree + AI session from a free-text idea prompt
+
+set -euo pipefail
+
+DOTFILES_DIR="${HOME}/.dotfiles"
+source "$DOTFILES_DIR/workflows/shared.sh"
+
+idea="$*"
+
+if [ -z "$idea" ]; then
+    echo "Usage: start-idea <prompt>" >&2
+    echo "Example: start-idea add a dark mode toggle to settings" >&2
+    exit 1
+fi
+
+# Branch name from the first few words of the idea, with optional prefix
+first_words=$(echo "$idea" | tr -s ' ' | cut -d' ' -f1-6)
+slug=$(slugify_branch_name "$first_words")
+[ -z "$slug" ] && slug="idea"
+branch_name="${WORKFLOW_BRANCH_PREFIX:-}${slug}"
+
+# Get the current repo context
+base_repo=$(git rev-parse --show-toplevel 2>/dev/null)
+if [ -z "$base_repo" ]; then
+    echo "Error: Not in a git repository"
+    echo ""
+    echo "Press Enter to close..."
+    read
+    exit 1
+fi
+# Use --git-common-dir to get the main repo name (not the worktree)
+repo_name=$(basename "$(cd "$(git rev-parse --git-common-dir)/.." && pwd)")
+
+echo "Creating idea worktree..."
+echo "  Branch: $branch_name"
+echo "  Repo:   $repo_name"
+echo ""
+
+# Create the worktree (ensure-git-worktree prints progress to stderr)
+worktree_dir=$("$DOTFILES_DIR/workflows/tasks/ensure-git-worktree" "$branch_name")
+
+echo ""
+echo "Worktree: $worktree_dir"
+
+# Hand off to start-workflow, which composes the Opus prompt (idea.md),
+# creates the ai/revise/rename windows, and switches to the new session.
+cd "$worktree_dir"
+exec "$DOTFILES_DIR/workflows/tasks/start-workflow" idea "$idea"

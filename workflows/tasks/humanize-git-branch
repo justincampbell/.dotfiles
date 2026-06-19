@@ -8,27 +8,36 @@ Examples:
   myapp-sc-123456-refactor-login-auth-mech-2 → "123456 Refactor Login Auth"
   myapp-my-feature-branch-name → "Myapp My Feature"
   sc-999999-fix-bug-thing → "999999 Fix Bug Thing"
+  myapp-sc-new-story-add-a-dark-mode-toggle → "Add Dark Mode"
 """
 
 import re
 import sys
 from pathlib import Path
 
+
+def humanize_words(text, skip=()):
+    """First 3 meaningful words from a hyphenated slug, title-cased."""
+    return [
+        w.title() for w in text.split('-')
+        if len(w) > 1 and not w.isdigit() and w not in skip
+    ][:3]
+
+
 name = sys.argv[1] if len(sys.argv) > 1 else Path.cwd().name
 
-match = re.match(r'^(?:(.+)-)?sc-(\d+)-(.*)', name)
+# Shortcut story branches: [repo-]sc-<id>-<slug>
+story_match = re.match(r'^(?:(.+)-)?sc-(\d+)-(.*)', name)
+# Idea branches: [repo-]sc-new-story-<slug> (no story id)
+idea_match = re.match(r'^(?:(.+)-)?sc-new-story-(.*)', name)
 
-if match:
-    prefix, story_id, remainder = match.groups()
+if story_match:
+    prefix, story_id, remainder = story_match.groups()
     prefix_words = set(prefix.split('-')) if prefix else set()
-    words = [
-        w.title() for w in remainder.split('-')
-        if len(w) > 1 and not w.isdigit() and w not in prefix_words
-    ][:3]
-    print(f"{story_id} {' '.join(words)}")
+    print(f"{story_id} {' '.join(humanize_words(remainder, prefix_words))}")
+elif idea_match:
+    prefix, remainder = idea_match.groups()
+    prefix_words = set(prefix.split('-')) if prefix else set()
+    print(' '.join(humanize_words(remainder, prefix_words)))
 else:
-    words = [
-        w.title() for w in name.split('-')
-        if len(w) > 1 and not w.isdigit()
-    ][:3]
-    print(' '.join(words))
+    print(' '.join(humanize_words(name)))
