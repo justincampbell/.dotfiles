@@ -21,6 +21,7 @@ Use the `/open-pull-request` skill to open a PR.
 Use the `/watch-pr` skill to monitor the PR for CI results and review feedback.
 If CI fails, investigate and fix them.
 After pushing fixes, immediately re-run `/watch-pr` to wait for the next state change — do this automatically, without asking. Keep looping until the PR is merged or closed.
+
 # UI-facing work
 
 Use Chrome MCP to validate any user-facing changes in the UI.
