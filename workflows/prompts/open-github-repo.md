@@ -1,5 +1,6 @@
 ---
-model: sonnet
+model: opus
+effort: low
 setup_tasks:
   - "./workflows/tasks/ensure-github-clone {{arg1}}"
 tmux_windows:
