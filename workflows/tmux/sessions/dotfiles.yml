@@ -2,7 +2,5 @@ name: dotfiles
 root: ~/.dotfiles
 
 windows:
-  - ai: claude
-  - nvim: nvim
-  - gitui: gitui
-  - bash:
+  - revise: revise --dev
+  - ai: $WORKFLOW_AI_CLI
