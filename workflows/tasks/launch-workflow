@@ -8,6 +8,7 @@ LOG="/tmp/workflow-launch.log"
 
 # Set up PATH and env for non-interactive context
 export PATH="$HOME/.dotfiles/bin:$HOME/.dotfiles/workflows/tasks:$HOME/.local/bin:/opt/homebrew/bin:/opt/homebrew/sbin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:$PATH"
+
 # Source machine-local env (SHORTCUT_REPO_URL, etc.) — env-only file, safe in
 # this non-interactive context where ~/.profile isn't sourced.
 [ -f "$HOME/.profile.local" ] && source "$HOME/.profile.local"
