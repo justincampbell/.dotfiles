@@ -54,14 +54,6 @@ if [ -x "$(command -v chruby)" ]; then
   [ -f .ruby-version ] && detect_chruby || chruby ruby-3.4
 fi
 
-# Node
-if [ "$NVM_DIR" != ~/.nvm ]; then
-  export NVM_DIR=~/.nvm
-  [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
-  [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"
-  [ -f .node-version ] && nvm use
-fi
-
 # Git + Prompt
 clone() {
   org=$(echo $1 | cut -f 1 -d /)
