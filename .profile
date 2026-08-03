@@ -19,7 +19,7 @@ export GPG_TTY=$(tty)
 export HISTCONTROL=ignoreboth
 export HISTSIZE=10000
 export PAGER=less
-export WORKFLOW_AI_CLI="claude --allow-dangerously-skip-permissions"
+export WORKFLOW_AI_CLI="claude --allow-dangerously-skip-permissions --remote-control"
 export WORKFLOW_BRANCH_PREFIX="sc-new-story-"
 
 export PATH=$HOME/.dotfiles/bin:$PATH # Dotfiles
