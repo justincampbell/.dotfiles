@@ -105,3 +105,21 @@ vim.keymap.set("v", "<Leader>s", ":sort<CR>", { noremap = true, silent = true })
 -- Show trailing whitespace as dots, tabs as subtle indicators
 vim.opt.listchars = { trail = '·', tab = '  ' }
 vim.opt.list = true
+
+-- Remove trailing whitespace on save
+vim.api.nvim_create_autocmd("BufWritePre", {
+    pattern = "*",
+    callback = function()
+        local save_cursor = vim.fn.getpos(".")
+        vim.cmd([[%s/\s\+$//e]])
+        vim.fn.setpos(".", save_cursor)
+    end,
+})
+
+-- Enable text wrapping for text files
+vim.api.nvim_create_autocmd("FileType", {
+    pattern = { "text", "markdown", "gitcommit" },
+    callback = function()
+        vim.opt_local.wrap = true
+    end,
+})
