@@ -15,6 +15,9 @@ tmux_windows:
 You're going to review a PR: {{arg1}}
 We are on that branch in a git worktree, do not switch branches.
 Do not make any write CLI/API requests using gh CLI or the GitHub API, unless I instruct you to do so.
+
+Review only the changes this PR introduces, not base-branch drift. First run `git fetch origin main`, then compare against the merge-base with `origin/main` using a three-dot diff: `git diff origin/main...HEAD`. Do not diff against local `main` (it may be stale) or against `origin/main` with two dots (that mixes in unrelated changes that landed on main after the branch point).
+
 If there are no concerns, approve the PR. Before approving, check if I have a pending review draft on the PR. If so, submit that pending review as the approval via the GitHub API instead of creating a new review. Otherwise, use `gh pr review --approve` with no body.
 After approving, run `cleanup-git-worktree` to remove the worktree and session.
 
