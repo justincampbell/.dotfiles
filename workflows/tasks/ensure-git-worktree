@@ -30,6 +30,20 @@ org_repo=$(basename "$(dirname "$base_repo")")/$(basename "$base_repo")
 safe_branch_name=$(echo "$branch_name" | sed 's|/|-|g')
 worktree_dir="$HOME/Code/${org_repo}-${safe_branch_name}"
 
+# If the branch is already checked out in a worktree, reuse it. Git only allows a
+# branch in one worktree, so trying to add another fails fatally. The existing
+# worktree's directory may not match our computed name (e.g. it was created with a
+# different naming scheme), so match on the branch ref rather than the path.
+existing_worktree=$(git -C "$base_repo" worktree list --porcelain | awk -v ref="refs/heads/$branch_name" '
+    /^worktree /{path=substr($0, 10)}
+    /^branch /{if ($2 == ref) print path}
+')
+if [ -n "$existing_worktree" ]; then
+    echo "Branch $branch_name is already checked out at $existing_worktree, reusing it" >&2
+    echo "$existing_worktree"
+    exit 0
+fi
+
 # Check if worktree directory already exists
 if [ -d "$worktree_dir" ]; then
     echo "Worktree directory already exists at $worktree_dir" >&2
