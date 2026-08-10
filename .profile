@@ -76,6 +76,9 @@ git_changed() {
   echo "$(git changed) $(git status --short | sed -e 's/^ //' | cut -f 2 -d " ")" | sort | uniq
 }
 
+# AI
+alias ai='$WORKFLOW_AI_CLI'
+
 # neovim
 alias vi=nvim
 alias vim=nvim
