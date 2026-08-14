@@ -17,7 +17,7 @@ You're starting a planning session for a Shortcut entity: {{arg1}}
 3. Fetch the entity data from the Shortcut API (see CLAUDE.md for commands)
 4. For epics: also fetch stories
 5. For objectives: fetch child epics
-6. Create or update the README.md using the templates in CLAUDE.md
+6. Create or update the folder note — `Epics/{id}-{slug}/{id}-{slug}.md` or `Objectives/{id}-{slug}/{id}-{slug}.md`; the directory already exists — using the templates in CLAUDE.md
 
 ## Gathering context
 

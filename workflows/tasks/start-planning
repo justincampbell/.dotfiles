@@ -50,18 +50,19 @@ fi
 echo "Planning ${entity_type} ${entity_id} (${window_name})..." >&2
 
 # Ensure planning repo exists
-planning_dir="${WORKFLOW_PLANNING_DIR:-$HOME/Code/planning}"
+planning_dir="${WORKFLOW_PLANNING_DIR:-$HOME/Code/huntresslabs/Planning}"
 mkdir -p "$planning_dir"
 if [ ! -d "$planning_dir/.git" ]; then
     echo "Initializing planning git repo..." >&2
     git -C "$planning_dir" init
 fi
 
-# Create entity directory
-if [ "$entity_type" = "epic" ]; then
-    mkdir -p "$planning_dir/epics/${entity_id}"
-elif [ "$entity_type" = "objective" ]; then
-    mkdir -p "$planning_dir/objectives/${entity_id}"
+# Create entity directory, reusing an existing {id}-{slug} dir if present
+[ "$entity_type" = "epic" ] && kind_dir="Epics" || kind_dir="Objectives"
+entity_dir=$(find "$planning_dir/$kind_dir" -maxdepth 1 -type d \( -name "${entity_id}-*" -o -name "${entity_id}" \) 2>/dev/null | head -1)
+if [ -z "$entity_dir" ]; then
+    slug=$(slugify_branch_name "${entity_name:-}")
+    mkdir -p "$planning_dir/$kind_dir/${entity_id}${slug:+-$slug}"
 fi
 
 # Build the prompt
