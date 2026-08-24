@@ -1,0 +1,202 @@
+#!/bin/bash
+# Bulk clean up worktrees / kill tmux sessions picked with fzf
+
+set -euo pipefail
+
+# Set up PATH for non-interactive context (display-popup)
+export PATH="$HOME/.dotfiles/bin:$HOME/.dotfiles/workflows/tasks:$HOME/Code/go/bin:$HOME/.local/bin:/opt/homebrew/bin:/opt/homebrew/sbin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:$PATH"
+
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+
+# Cleanup runs detached, so it needs somewhere to talk: tail this to watch.
+# Deliberately not $TMPDIR — that path is unmemorable, and this one is typeable.
+LOG="$HOME/.cache/bulk-cleanup.log"
+TAB=$'\t'
+
+# id<TAB>name<TAB>rendered-row<TAB>keywords, in recon's own order and colors.
+session_rows() {
+    local rows=""
+    # Flags before the subcommand so older recon builds honor them too. The
+    # long TTL keeps the picker sub-second; stale PR state only ever costs a
+    # missed cleanup, never a wrong one.
+    command -v recon >/dev/null 2>&1 && rows=$(recon --width 60 --cache 5m rows 2>/dev/null || true)
+    if [ -n "$rows" ]; then
+        printf '%s\n' "$rows"
+        return
+    fi
+
+    # No recon: names only, still in session-id order.
+    tmux list-sessions -F "#{session_id}${TAB}#{session_name}" 2>/dev/null \
+        | sort -t"$TAB" -k1.2,1n \
+        | while IFS="$TAB" read -r id name; do
+            printf '%s\t%s\t%-60.60s\n' "$id" "$name" "$name"
+        done
+}
+
+# Emit one fzf row per session: name<TAB>path<TAB>display
+list_sessions() {
+    local paths
+    paths=$(mktemp -t bulk-cleanup-paths.XXXXXX)
+    tmux list-sessions -F "#{session_id}${TAB}#{session_path}" 2>/dev/null > "$paths"
+
+    while IFS="$TAB" read -r id name row keywords; do
+        [ -n "$name" ] || continue
+
+        local path
+        path=$(awk -F"$TAB" -v i="$id" '$1 == i { print $2; exit }' "$paths")
+        [ -n "$path" ] || continue
+
+        local kind="worktree"
+        if [ ! -d "$path" ]; then
+            kind="gone"
+        elif [ ! -f "$path/.git" ]; then
+            kind="session"
+        fi
+
+        # recon encodes PR state as color only, and fzf can only search what it
+        # displays — so render its keyword as a word to make `merged` typeable.
+        # Same precedence recon's prColor uses.
+        local state=""
+        case " $keywords " in
+            *" merged "*)            state="merged" ;;
+            *" closed "*)            state="closed" ;;
+            *" draft "*)             state="draft" ;;
+            *" changes-requested "*) state="changes" ;;
+            *" approved "*)          state="approved" ;;
+            *" review-pending "*)    state="review" ;;
+        esac
+
+        printf '%s\t%s\t%s \033[90m%-8s %s\033[0m\n' \
+            "$name" "$path" "$row" "$state" "$kind"
+    done < <(session_rows)
+
+    rm -f "$paths"
+}
+
+pick_sessions() {
+    local origin_session="$1" rows
+    printf 'Loading sessions…\r'
+    rows=$(list_sessions) || true
+
+    if [ -z "$rows" ]; then
+        echo "No other sessions to clean up."
+        sleep 1
+        exit 0
+    fi
+
+    local picked
+    picked=$(printf '%s\n' "$rows" | fzf \
+        --ansi --multi --delimiter="$TAB" --with-nth=3 \
+        --prompt="Clean up> " --height=100% --border --info=inline \
+        --bind=ctrl-a:select-all,ctrl-d:deselect-all \
+        --header="Tab marks · C-a all · type 'merged' to filter · Enter cleans up · now in: $origin_session") || true
+
+    [ -n "$picked" ] || { echo "Nothing selected."; exit 0; }
+
+    local count
+    count=$(printf '%s\n' "$picked" | wc -l | tr -d ' ')
+    echo
+    echo "Will clean up:"
+    printf '%s\n' "$picked" | awk -F"$TAB" '{ printf "  %-34s %s\n", $1, $2 }'
+    echo
+    read -r -p "Remove worktrees and kill $count session(s)? [y/N] " answer
+    case "$answer" in
+        y|Y) ;;
+        *) echo "Aborted."; exit 0 ;;
+    esac
+
+    local queue
+    queue=$(mktemp -t bulk-cleanup.XXXXXX)
+    printf '%s\n' "$picked" | cut -d"$TAB" -f1,2 > "$queue"
+
+    # The client only has to move if its own session is on the list — otherwise
+    # it stays put and never notices the cleanup. Landing spot is the most
+    # recently active survivor, so it's predictable rather than tmux's pick.
+    if awk -F"$TAB" -v n="$origin_session" '$1 == n { found = 1 } END { exit !found }' "$queue"; then
+        local target
+        target=$(tmux list-sessions -F "#{session_activity}${TAB}#{session_name}" 2>/dev/null \
+            | sort -rn | cut -d"$TAB" -f2 \
+            | grep -Fxv -f <(cut -d"$TAB" -f1 "$queue") | head -1)
+        [ -n "$target" ] && { tmux switch-client -t "=$target" || true; }
+    fi
+
+    # nohup so the work outlives this popup instead of occupying a session.
+    mkdir -p "$(dirname "$LOG")"
+    nohup bash "$SCRIPT_DIR/cleanup-sessions" --run "$queue" >>"$LOG" 2>&1 &
+
+    echo "Cleaning up $count session(s) in the background."
+    echo "  tail -f ${LOG/#$HOME/~}"
+    sleep 2
+}
+
+# One session's teardown, logged to its own file so parallel runs don't interleave.
+cleanup_one() {
+    local name="$1" path="$2" out="$3"
+
+    # Remember the base repo before the worktree goes away, so the parent can
+    # prune bookkeeping that concurrent removals may have raced past.
+    [ -f "$path/.git" ] && sed 's/^gitdir: //;s#/\.git/worktrees/.*##' "$path/.git" > "$out.repo"
+
+    {
+        echo "=== $name ($path)"
+        if [ -f "$path/.git" ] && "$SCRIPT_DIR/cleanup-git-worktree" "$path"; then
+            echo ok > "$out.status"
+        elif tmux kill-session -t "=$name" 2>/dev/null; then
+            echo "Killed session: $name"
+            echo ok > "$out.status"
+        else
+            echo "Failed to clean up: $name"
+            echo fail > "$out.status"
+        fi
+        echo
+    } > "$out.log" 2>&1
+}
+
+run_cleanup() {
+    local queue="$1"
+    local max=4 dir i=0
+
+    dir=$(mktemp -d -t bulk-cleanup-work.XXXXXX)
+    echo "=== $(date '+%Y-%m-%d %H:%M:%S') — cleaning $(wc -l < "$queue" | tr -d ' ') session(s)"
+
+    while IFS="$TAB" read -r name path; do
+        [ -n "$name" ] || continue
+        i=$((i + 1))
+        cleanup_one "$name" "$path" "$dir/$i" &
+
+        while [ "$(jobs -pr | wc -l)" -ge "$max" ]; do
+            sleep 0.2
+        done
+    done < "$queue"
+    wait
+    rm -f "$queue"
+
+    local cleaned=0 failed=0 n
+    for n in $(seq 1 "$i"); do
+        cat "$dir/$n.log" 2>/dev/null
+        if [ "$(cat "$dir/$n.status" 2>/dev/null)" = ok ]; then
+            cleaned=$((cleaned + 1))
+        else
+            failed=$((failed + 1))
+        fi
+    done
+
+    # One serial prune per repo mops up after the parallel removals.
+    cat "$dir"/*.repo 2>/dev/null | sort -u | while read -r repo; do
+        [ -d "$repo" ] && git -C "$repo" worktree prune 2>/dev/null || true
+    done || true
+    rm -rf "$dir"
+
+    local summary="Cleaned up $cleaned session(s)"
+    [ "$failed" -gt 0 ] && summary="$summary, $failed failed"
+    echo "$summary"
+}
+
+case "${1:-}" in
+    --run)
+        run_cleanup "$2"
+        ;;
+    *)
+        pick_sessions "${1:-$(tmux display-message -p '#{session_name}')}"
+        ;;
+esac

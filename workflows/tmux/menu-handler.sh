@@ -132,6 +132,13 @@ show_workflow_menu() {
     menu_items+=("$ukey")
     menu_items+=("run-shell 'bash $WORKFLOWS_DIR/tmux/menu-handler.sh handle-url'")
 
+    # Planning option: fuzzy-pick a recent planning session or a Shortcut epic/objective
+    local pkey=$(get_menu_key "planning" "$used_keys")
+    used_keys="${used_keys}${pkey}"
+    menu_items+=("Planning...")
+    menu_items+=("$pkey")
+    menu_items+=("run-shell 'bash $WORKFLOWS_DIR/tmux/menu-handler.sh planning'")
+
     # Separator before projects
     menu_items+=("")
     menu_items+=("")
@@ -186,15 +193,19 @@ show_workflow_menu() {
     done | sort)
 
     # Danger zone: clean up the current worktree (or kill the session if it's not
-    # a worktree). Guarded by a capital X key (never auto-assigned, needs Shift)
-    # plus a centered y/N confirmation modal, since it removes the worktree and
-    # kills tmux. The modal defaults to Cancel so Enter/Escape is safe.
+    # a worktree), plus a bulk picker for several at once. Guarded by capital
+    # keys (never auto-assigned, need Shift) since they remove worktrees and kill
+    # tmux: X gets a centered y/N modal that defaults to Cancel, B confirms
+    # inside its own picker.
     menu_items+=("")
     menu_items+=("")
     menu_items+=("")
     menu_items+=("Clean up worktree / kill session")
     menu_items+=("X")
     menu_items+=("display-menu -T \" Clean up worktree / kill session? \" -x C -y C \"Cancel\" n \"\" \"Yes, clean up\" y \"run-shell 'bash $WORKFLOWS_DIR/tmux/menu-handler.sh cleanup'\"")
+    menu_items+=("Clean up sessions in bulk...")
+    menu_items+=("B")
+    menu_items+=("run-shell 'bash $WORKFLOWS_DIR/tmux/menu-handler.sh cleanup-bulk'")
 
     # Cancel option
     menu_items+=("Cancel")
@@ -327,6 +338,10 @@ case "${1:-menu}" in
         tmux display-popup -E -w 80% -h 80% \
             "bash $WORKFLOWS_DIR/tasks/open-repo"
         ;;
+    planning)
+        tmux display-popup -E -w 80% -h 80% \
+            "bash $WORKFLOWS_DIR/tasks/planning-picker"
+        ;;
     clone-repo)
         tmux command-prompt -p "GitHub URL or org/repo:" \
             "display-popup -E -w 80% -h 80% 'bash $WORKFLOWS_DIR/tasks/clone-github-repo \"%1\"'"
@@ -355,6 +370,15 @@ case "${1:-menu}" in
         safe_session="${session_name//\'/\'\\\'\'}"
         tmux new-window -n cleanup \
             "bash $WORKFLOWS_DIR/tasks/cleanup-git-worktree '$safe_path' || tmux kill-session -t '=$safe_session'"
+        ;;
+    cleanup-bulk)
+        # Multi-select several worktrees/sessions and clean them up in one pass.
+        # The picker parks the client in a holding session first, so the active
+        # session doesn't jump around as each one is killed.
+        session_name=$(tmux display-message -p "#{session_name}")
+        safe_session="${session_name//\'/\'\\\'\'}"
+        tmux display-popup -E -w 80% -h 80% \
+            "bash $WORKFLOWS_DIR/tasks/cleanup-sessions '$safe_session'"
         ;;
     prompt-idea)
         # Runs inside a display-popup: capture the idea in an editor modal,

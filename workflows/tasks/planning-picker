@@ -1,0 +1,140 @@
+#!/bin/bash
+# Fuzzy-pick a planning session (recent local dirs + active Shortcut epics/objectives) and start it
+
+set -euo pipefail
+
+# Set up PATH for non-interactive context (display-popup)
+export PATH="$HOME/.dotfiles/bin:$HOME/.dotfiles/workflows/tasks:$HOME/.local/bin:/opt/homebrew/bin:/opt/homebrew/sbin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:$PATH"
+
+# Source machine-local env (WORKFLOW_PLANNING_DIR, etc.)
+[ -f "$HOME/.profile.local" ] && source "$HOME/.profile.local"
+
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+source "$SCRIPT_DIR/../shared.sh"
+
+planning_dir="${WORKFLOW_PLANNING_DIR:-$HOME/Code/huntresslabs/Planning}"
+workspace="${WORKFLOW_SHORTCUT_WORKSPACE:-huntress}"
+
+TAB=$'\t'
+
+declare -A name_of state_of local_ids
+
+# Fetch active (not archived, not completed) epics + objectives from Shortcut as
+# TSV: type<TAB>id<TAB>name<TAB>state, sorted by recency. Best-effort and cached,
+# so repeat opens are instant and the picker still works offline (local dirs only).
+cache_dir="${TMPDIR:-/tmp}/planning-picker-cache"
+cache_file="$cache_dir/entities.tsv"
+cache_ttl=600
+
+fetch_entities() {
+    local epics objectives
+    epics=$(short api /epics 2>/dev/null) || epics=""
+    objectives=$(short api /objectives 2>/dev/null) || objectives=""
+    local jq_filter='
+        [.[] | select(.archived==false and .completed_at==null)]
+        | sort_by(.updated_at) | reverse
+        | .[] | [$type, (.id|tostring),
+                 (.name // "" | gsub("[\t\n\r]"; " ")),
+                 (.state // "")] | @tsv'
+    {
+        [ -n "$epics" ] && echo "$epics" | jq -r --arg type epic "$jq_filter"
+        [ -n "$objectives" ] && echo "$objectives" | jq -r --arg type objective "$jq_filter"
+    }
+}
+
+load_entities() {
+    if [ -f "$cache_file" ] && [ "$(( $(date +%s) - $(stat -f %m "$cache_file") ))" -lt "$cache_ttl" ]; then
+        cat "$cache_file"
+        return
+    fi
+    local fresh
+    fresh=$(fetch_entities)
+    if [ -n "$fresh" ]; then
+        mkdir -p "$cache_dir"
+        printf '%s\n' "$fresh" > "$cache_file"
+        printf '%s\n' "$fresh"
+    elif [ -f "$cache_file" ]; then
+        cat "$cache_file"  # stale fallback when Shortcut is unreachable
+    fi
+}
+
+# List local planning dirs as: mtime<TAB>type<TAB>id<TAB>dirname
+list_local() {
+    local kind type d base id
+    for kind in Epics Objectives; do
+        [ "$kind" = Epics ] && type=epic || type=objective
+        [ -d "$planning_dir/$kind" ] || continue
+        for d in "$planning_dir/$kind"/*/; do
+            [ -d "$d" ] || continue
+            base=$(basename "$d")
+            id="${base%%-*}"
+            [[ "$id" =~ ^[0-9]+$ ]] || continue
+            printf '%s\t%s\t%s\t%s\n' "$(stat -f %m "$d")" "$type" "$id" "$base"
+        done
+    done
+}
+
+# Emit an fzf row: type<TAB>id<TAB>display
+make_row() {
+    local type="$1" id="$2" started="$3" base="${4:-}"
+    local key="$type/$id" name label state marker slug
+    name="${name_of[$key]:-}"
+    if [ -z "$name" ] && [ -n "$base" ]; then
+        slug="${base#*-}"
+        [ "$slug" = "$base" ] && slug=""
+        name=$(echo "$slug" | tr '-' ' ')
+    fi
+    [ -n "$name" ] || name="(no title)"
+    [ "$type" = epic ] && label=Epic || label=Objective
+    state="${state_of[$key]:-}"
+    [ "$started" = 1 ] && marker="▸" || marker=" "
+    printf '%s\t%s\t%s %-9s %-7s %s%s\n' \
+        "$type" "$id" "$marker" "$label" "$id" "$name" "${state:+  ·  $state}"
+}
+
+printf 'Loading planning list…\r'
+entities=$(load_entities)
+
+while IFS="$TAB" read -r etype eid ename estate; do
+    [ -n "$etype" ] || continue
+    name_of["$etype/$eid"]="$ename"
+    state_of["$etype/$eid"]="$estate"
+done <<< "$entities"
+
+# Build rows: recent local sessions first (▸), then active Shortcut items not yet started.
+input=$(
+    while IFS="$TAB" read -r _mtime type id base; do
+        [ -n "$type" ] || continue
+        local_ids["$type/$id"]=1
+        make_row "$type" "$id" 1 "$base"
+    done < <(list_local | sort -t"$TAB" -k1,1nr)
+
+    while IFS="$TAB" read -r etype eid _ename _estate; do
+        [ -n "$etype" ] || continue
+        [ -n "${local_ids[$etype/$eid]:-}" ] && continue
+        make_row "$etype" "$eid" 0
+    done <<< "$entities"
+)
+
+if [ -z "$input" ]; then
+    echo "No planning sessions found (no local dirs, and Shortcut is unavailable)."
+    echo "Press Enter to close…"
+    read -r _
+    exit 0
+fi
+
+selection=$(printf '%s\n' "$input" | fzf \
+    --delimiter="$TAB" --with-nth=3 \
+    --prompt="Planning> " --height=100% --border --info=inline \
+    --header="▸ = started · recent local sessions first, then active Shortcut epics/objectives") || true
+
+if [ -z "$selection" ]; then
+    echo "No planning session selected."
+    exit 0
+fi
+
+sel_type=$(cut -d"$TAB" -f1 <<< "$selection")
+sel_id=$(cut -d"$TAB" -f2 <<< "$selection")
+url="https://app.shortcut.com/$workspace/$sel_type/$sel_id"
+
+exec bash "$SCRIPT_DIR/start-planning" "$url"
