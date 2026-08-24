@@ -42,6 +42,10 @@ case "$url" in
         workflow_name="fix-datadog-error"
         ;;
 
+    *app.datadoghq.com/incidents/*)
+        workflow_name="handle-datadog-incident"
+        ;;
+
     *github.com/*/pull/*)
         # Show mode selection menu — each item launches display-popup directly
         # (run-shell has no client context, so it can't open popups)
@@ -82,7 +86,7 @@ fi
 # Workflows with a URL arg go through launch-workflow (sets up worktree, switches session)
 # Others run directly
 case "$workflow_name" in
-    start-shortcut-story|start-github-issue|review-github-pr|fix-datadog-error|open-github-repo)
+    start-shortcut-story|start-github-issue|review-github-pr|fix-datadog-error|handle-datadog-incident|open-github-repo)
         tmux display-popup "${popup_target[@]}" -E -w 80% -h 80% \
             "bash $SCRIPT_DIR/launch-workflow '$workflow_name' '$url'"
         ;;
