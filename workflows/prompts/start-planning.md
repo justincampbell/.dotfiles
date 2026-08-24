@@ -1,6 +1,6 @@
 ---
-model: opus[1m]
-effort: xhigh
+model: fable
+effort: high
 tmux_windows:
   - name: ai
     command: "{{ai_cli}}"

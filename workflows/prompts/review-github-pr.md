@@ -1,5 +1,5 @@
 ---
-model: opus[1m]
+model: claude-opus-4-8[1m]
 setup_tasks:
   - "./workflows/tasks/ensure-github-clone {{arg1}}"
   - "./workflows/tasks/checkout-github-pr {{arg1}}"

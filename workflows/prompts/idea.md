@@ -1,5 +1,5 @@
 ---
-model: opus[1m]
+model: claude-opus-4-8[1m]
 tmux_windows:
   - name: ai
     command: "{{ai_cli}}"

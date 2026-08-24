@@ -1,5 +1,5 @@
 ---
-model: opus[1m]
+model: claude-opus-4-8[1m]
 setup_tasks:
   - "./workflows/tasks/checkout-shortcut-story {{arg1}}"
 tmux_windows:
