@@ -3,6 +3,7 @@
 .nvmrc
 .workflow-prompt
 .workflow.yml
+__pycache__/
 planning/
 yarn_cache/
 .claude/**/*.lock
