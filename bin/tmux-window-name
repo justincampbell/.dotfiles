@@ -3,10 +3,21 @@
 command="$1"
 window_name="$2"
 current_path="$3"
+pane_title="$4"
 
 # https://www.nerdfonts.com/cheat-sheet
 
 case "$command" in
+  [0-9]*.[0-9]*.[0-9]*) # Claude Code reports its version as the command
+    if [ "$window_name" != "$command" ]; then
+      name="$window_name"
+    elif [ -n "$pane_title" ] && [ "$pane_title" != "Claude Code" ]; then
+      name="$pane_title"
+    else
+      name=$(basename "$current_path")
+    fi
+    echo "${name:0:24}"
+    ;;
   gh)
     echo " " # nf-oct-mark_github
     ;;

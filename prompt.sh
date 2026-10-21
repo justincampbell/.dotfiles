@@ -204,20 +204,11 @@ timer_status() {
 
 tmux_window_title() {
   if [ -n "$TMUX" ]; then
-    local current_command=$(tmux display-message -p '#{pane_current_command}')
-
-    # Check if we're running Claude Code by looking at parent processes
-    if ps -o command= -p $PPID 2>/dev/null | grep -q 'claude'; then
-      printf '\033]2;%s\033\\' "Claude Code"
-      tmux set-window-option -t "$(tmux display-message -p '#I')" automatic-rename off >/dev/null 2>&1
-      tmux rename-window "Claude Code" >/dev/null 2>&1
-      return
-    fi
-
+    # Target this shell's own pane; untargeted commands hit the session's active window
     if [ "$PWD" = "$HOME" ]; then
-      tmux rename-window "🏠"
+      tmux rename-window -t "$TMUX_PANE" "🏠"
     else
-      tmux set-window-option -t "$(tmux display-message -p '#I')" automatic-rename on
+      tmux set-window-option -t "$TMUX_PANE" automatic-rename on
     fi
   fi
 }
