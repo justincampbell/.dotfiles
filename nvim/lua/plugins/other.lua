@@ -8,6 +8,29 @@ return {
                     "golang",
                     "rails",
                     "react",
+
+                    -- Plain Ruby projects (gems, exercises): lib/ <-> spec/ or test/
+                    {
+                        pattern = "/lib/(.*).rb",
+                        target = {
+                            { context = "test", target = "/spec/%1_spec.rb" },
+                            { context = "test", target = "/spec/lib/%1_spec.rb" },
+                            { context = "test", target = "/test/%1_test.rb" },
+                            { context = "test", target = "/test/lib/%1_test.rb" },
+                        },
+                    },
+                    {
+                        pattern = "/spec/(.*)_spec.rb",
+                        target = {
+                            { context = "source", target = "/lib/%1.rb" },
+                        },
+                    },
+                    {
+                        pattern = "/test/(.*)_test.rb",
+                        target = {
+                            { context = "source", target = "/lib/%1.rb" },
+                        },
+                    },
                 },
                 showMissingFiles = true,
             })
