@@ -6,12 +6,19 @@ set -euo pipefail
 DOTFILES_DIR="${HOME}/.dotfiles"
 source "$DOTFILES_DIR/workflows/shared.sh"
 
-# Fuzzy-find git repos in ~/Code
-selected=$(find ~/Code -maxdepth 3 -name ".git" -type d 2>/dev/null \
-    | sed 's|/.git$||' \
-    | sort \
+# Fuzzy-find projects in ~/Code: git repos (dirs with a .git directory) plus
+# any dir containing a .workflow.yml, excluding git worktrees (.git is a FILE).
+selected=$( {
+    find ~/Code -maxdepth 3 -name ".git" -type d 2>/dev/null | sed 's|/\.git$||'
+    find ~/Code -maxdepth 3 -name ".workflow.yml" 2>/dev/null | while read -r f; do
+        dir=$(dirname "$f")
+        if [ ! -f "$dir/.git" ]; then
+            echo "$dir"
+        fi
+    done
+} | sort -u \
     | sed "s|${HOME}/Code/||" \
-    | fzf --prompt="Repo> " --height=100%)
+    | fzf --prompt="Project> " --height=100%)
 
 if [ -z "$selected" ]; then
     echo "No repo selected."

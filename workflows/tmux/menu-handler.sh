@@ -13,6 +13,67 @@ workflow_display_name() {
     echo "$name" | sed 's/-/ /g' | awk '{for(i=1;i<=NF;i++) $i=toupper(substr($i,1,1)) tolower(substr($i,2))}1'
 }
 
+# Build a sortable launch entry for the grouped session/project list.
+# Emits a tab-delimited record: "<group>\t<lowercase-name>\t<display-name>\t<launch-name>"
+# where group is 0=orchestrator, 1=ongoing, 2=untyped (anything else / absent).
+build_launch_entry() {
+    local yaml_file="$1"
+    local launch_name="$2"
+
+    local yaml_name; yaml_name=$(yq eval '.name' "$yaml_file" 2>/dev/null)
+    local display_name
+    if [ -n "$yaml_name" ] && [ "$yaml_name" != "null" ]; then
+        display_name="$yaml_name"
+    else
+        display_name=$(workflow_display_name "$launch_name")
+    fi
+
+    local type; type=$(yq eval '.type' "$yaml_file" 2>/dev/null)
+    local group
+    case "$type" in
+        orchestrator) group=0 ;;
+        ongoing) group=1 ;;
+        *) group=2 ;;
+    esac
+
+    local lc_name; lc_name=$(echo "$display_name" | tr '[:upper:]' '[:lower:]')
+    printf '%s\t%s\t%s\t%s\n' "$group" "$lc_name" "$display_name" "$launch_name"
+}
+
+# Resolve the "project root" for a directory, used by the Edit project menu.
+# Order: nearest ancestor (including itself) containing a .workflow.yml; else
+# the git repo root (a linked worktree resolves to its main checkout); else the directory
+# itself when it sits directly under ~/Code/<org>/. Prints the root, else nothing.
+resolve_project_root() {
+    local dir="$1"
+
+    # 1. Nearest ancestor (including itself) containing a .workflow.yml
+    local d="$dir"
+    while [ -n "$d" ] && [ "$d" != "/" ]; do
+        if [ -f "$d/.workflow.yml" ]; then
+            echo "$d"
+            return 0
+        fi
+        d=$(dirname "$d")
+    done
+
+    # 2. Git repo root; a linked worktree resolves to its main checkout, since
+    #    worktrees are skipped by the project lists
+    local common; common=$(git -C "$dir" rev-parse --path-format=absolute --git-common-dir 2>/dev/null)
+    if [ -n "$common" ]; then
+        dirname "$common"
+        return 0
+    fi
+
+    # 3. Directory sitting directly under ~/Code/<org>/
+    if [ "$(dirname "$(dirname "$dir")")" = "$HOME/Code" ]; then
+        echo "$dir"
+        return 0
+    fi
+
+    return 1
+}
+
 # Get a unique key for a menu item (single character)
 # Uses first letter, or finds next available letter if taken
 get_menu_key() {
@@ -114,14 +175,14 @@ show_workflow_menu() {
     # Open repo option
     local rkey=$(get_menu_key "repo" "$used_keys")
     used_keys="${used_keys}${rkey}"
-    menu_items+=("Open repo...")
+    menu_items+=("Open project...")
     menu_items+=("$rkey")
     menu_items+=("run-shell 'bash $WORKFLOWS_DIR/tmux/menu-handler.sh open-repo'")
 
     # Clone repo option
     local ckey=$(get_menu_key "clone" "$used_keys")
     used_keys="${used_keys}${ckey}"
-    menu_items+=("Clone repo...")
+    menu_items+=("Clone project...")
     menu_items+=("$ckey")
     menu_items+=("run-shell 'bash $WORKFLOWS_DIR/tmux/menu-handler.sh clone-repo'")
 
@@ -139,58 +200,105 @@ show_workflow_menu() {
     menu_items+=("$pkey")
     menu_items+=("run-shell 'bash $WORKFLOWS_DIR/tmux/menu-handler.sh planning'")
 
+    # Edit project option: track / set type / untrack the current project
+    local edkey=$(get_menu_key "edit" "$used_keys")
+    used_keys="${used_keys}${edkey}"
+    menu_items+=("Edit project...")
+    menu_items+=("$edkey")
+    menu_items+=("run-shell 'bash $WORKFLOWS_DIR/tmux/menu-handler.sh edit-project'")
+
     # Separator before projects
     menu_items+=("")
     menu_items+=("")
     menu_items+=("")
 
-    # Discover sessions from sessions directory
+    # Discover launchable sessions and projects, then render them grouped by
+    # type. Sessions come from the sessions directory; projects are any dir
+    # under ~/Code with a .workflow.yml, excluding git worktrees (whose marker
+    # is a .git FILE). Entries render orchestrator -> ongoing -> untyped, each
+    # group alphabetical (case-insensitive), with a separator between groups.
     echo "Scanning sessions..." > "$status_file"
+    local launch_entries=()
+
     local sessions_dir="$WORKFLOWS_DIR/tmux/sessions"
     if [ -d "$sessions_dir" ]; then
         while IFS= read -r session_file; do
             local session_name=$(basename "$session_file" .yml)
-
-            local yaml_name; yaml_name=$(yq eval '.name' "$session_file" 2>/dev/null)
-            local display_name
-            if [ -n "$yaml_name" ] && [ "$yaml_name" != "null" ]; then
-                display_name="$yaml_name"
-            else
-                display_name=$(workflow_display_name "$session_name")
-            fi
-            local key=$(get_menu_key "$session_name" "$used_keys")
-            used_keys="${used_keys}${key}"
-
-            menu_items+=("$display_name")
-            menu_items+=("$key")
-            menu_items+=("run-shell 'bash $WORKFLOWS_DIR/tmux/menu-handler.sh session:$session_name'")
-        done < <(find "$sessions_dir" -maxdepth 1 -name "*.yml" -type f 2>/dev/null | sort)
+            launch_entries+=("$(build_launch_entry "$session_file" "$session_name")")
+        done < <(find "$sessions_dir" -maxdepth 1 -name "*.yml" -type f 2>/dev/null)
     fi
 
-    # Discover .workflow.yml files from ~/Code projects (repos and org dirs)
     echo "Discovering workflows..." > "$status_file"
     while IFS= read -r workflow_file; do
         local project_dir=$(dirname "$workflow_file")
+        # Skip git worktrees (their .git is a FILE, not a directory)
+        [ -f "$project_dir/.git" ] && continue
         local project_name=$(basename "$project_dir")
+        launch_entries+=("$(build_launch_entry "$workflow_file" "$project_name")")
+    done < <(find ~/Code -name ".workflow.yml" -maxdepth 3 2>/dev/null)
 
-        local yaml_name; yaml_name=$(yq eval '.name' "$workflow_file" 2>/dev/null)
-        local display_name
-        if [ -n "$yaml_name" ] && [ "$yaml_name" != "null" ]; then
-            display_name="$yaml_name"
-        else
-            display_name=$(workflow_display_name "$project_name")
+    # tmux silently refuses to draw a menu taller than the client, so budget
+    # the launchable rows to the space left after the fixed rows: the action
+    # items above (computed), the danger zone + Cancel below (3), the menu
+    # border (2), and the status line (1).
+    local client_height
+    client_height=$(tmux display-message -p '#{client_height}' 2>/dev/null)
+    case "$client_height" in
+        ''|*[!0-9]*) client_height=40 ;;
+    esac
+    local fixed_rows=$(( ${#menu_items[@]} / 3 ))
+    local budget=$(( client_height - fixed_rows - 6 ))
+    [ "$budget" -lt 1 ] && budget=1
+
+    local sorted_entries=()
+    while IFS= read -r entry; do
+        sorted_entries+=("$entry")
+    done < <(printf '%s\n' "${launch_entries[@]}" | sort -t$'\t' -k1,1 -k2,2)
+
+    # If the list can't fit even with both group separators, reserve the last
+    # row for "More projects..." (the scrolling fzf picker).
+    local more_needed=0 max_rows=$budget
+    if [ $(( ${#sorted_entries[@]} + 2 )) -gt "$budget" ]; then
+        more_needed=1
+        max_rows=$(( budget - 1 ))
+    fi
+
+    # Render entries grouped by type, with a separator between non-empty groups.
+    local prev_group="" rows=0
+    local entry group lc_name display_name launch_name
+    for entry in "${sorted_entries[@]}"; do
+        IFS=$'\t' read -r group lc_name display_name launch_name <<< "$entry"
+        [ -z "$group" ] && continue
+
+        local sep=0
+        [ -n "$prev_group" ] && [ "$group" != "$prev_group" ] && sep=1
+        if [ $(( rows + sep + 1 )) -gt "$max_rows" ]; then
+            break
         fi
-        local key=$(get_menu_key "$project_name" "$used_keys")
+        if [ "$sep" -eq 1 ]; then
+            menu_items+=("")
+            menu_items+=("")
+            menu_items+=("")
+            rows=$(( rows + 1 ))
+        fi
+        prev_group="$group"
+
+        local key=$(get_menu_key "$launch_name" "$used_keys")
         used_keys="${used_keys}${key}"
 
         menu_items+=("$display_name")
         menu_items+=("$key")
-        menu_items+=("run-shell 'bash $WORKFLOWS_DIR/tmux/menu-handler.sh session:$project_name'")
-    done < <(find ~/Code -name ".workflow.yml" -maxdepth 3 2>/dev/null | while read -r f; do
-        dir=$(dirname "$f")
-        # Include git repos and org dirs (not worktrees)
-        [ -d "$dir/.git" ] || [ "$(dirname "$dir")" = "$HOME/Code" ] && echo "$f"
-    done | sort)
+        menu_items+=("run-shell 'bash $WORKFLOWS_DIR/tmux/menu-handler.sh session:$launch_name'")
+        rows=$(( rows + 1 ))
+    done
+
+    if [ "$more_needed" -eq 1 ]; then
+        local mkey=$(get_menu_key "more" "$used_keys")
+        used_keys="${used_keys}${mkey}"
+        menu_items+=("More projects...")
+        menu_items+=("$mkey")
+        menu_items+=("run-shell 'bash $WORKFLOWS_DIR/tmux/menu-handler.sh open-repo'")
+    fi
 
     # Danger zone: clean up the current worktree (or kill the session if it's not
     # a worktree), plus a bulk picker for several at once. Guarded by capital
@@ -349,6 +457,146 @@ case "${1:-menu}" in
     handle-url)
         tmux command-prompt -p "URL:" \
             "run-shell 'bash $WORKFLOWS_DIR/tasks/handle-workflow-url \"%1\"'"
+        ;;
+    edit-project)
+        # Resolve the current project and show a submenu to track it, set its
+        # type, or untrack it. Action items call back into this script and
+        # re-resolve the project from the current pane (like the cleanup flow),
+        # so no paths need to be embedded in tmux command strings.
+        pane_path=$(tmux display-message -p "#{pane_current_path}")
+        root=$(resolve_project_root "$pane_path")
+        if [ -z "$root" ]; then
+            tmux display-message "Not in a project"
+            exit 0
+        fi
+        workflow_yml="$root/.workflow.yml"
+        project_basename=$(basename "$root")
+
+        # Title uses the .workflow.yml name if present, else the humanized dir.
+        if [ -f "$workflow_yml" ]; then
+            yaml_name=$(yq eval '.name' "$workflow_yml" 2>/dev/null)
+            if [ -n "$yaml_name" ] && [ "$yaml_name" != "null" ]; then
+                display_name="$yaml_name"
+            else
+                display_name=$(workflow_display_name "$project_basename")
+            fi
+        else
+            display_name=$(workflow_display_name "$project_basename")
+        fi
+
+        submenu=()
+        if [ ! -f "$workflow_yml" ]; then
+            # Untracked: offer to create a .workflow.yml
+            submenu+=("Track project")
+            submenu+=("t")
+            submenu+=("run-shell 'bash $WORKFLOWS_DIR/tmux/menu-handler.sh track-project'")
+        else
+            # Tracked: set/clear the type, or untrack. Mark the active type.
+            current_type=$(yq eval '.type' "$workflow_yml" 2>/dev/null)
+            orch_label="Type: orchestrator"
+            ong_label="Type: ongoing"
+            none_label="Type: none"
+            case "$current_type" in
+                orchestrator) orch_label="✓ $orch_label" ;;
+                ongoing) ong_label="✓ $ong_label" ;;
+                *) none_label="✓ $none_label" ;;
+            esac
+
+            submenu+=("$orch_label")
+            submenu+=("o")
+            submenu+=("run-shell 'bash $WORKFLOWS_DIR/tmux/menu-handler.sh set-project-type orchestrator'")
+
+            submenu+=("$ong_label")
+            submenu+=("g")
+            submenu+=("run-shell 'bash $WORKFLOWS_DIR/tmux/menu-handler.sh set-project-type ongoing'")
+
+            submenu+=("$none_label")
+            submenu+=("n")
+            submenu+=("run-shell 'bash $WORKFLOWS_DIR/tmux/menu-handler.sh unset-project-type'")
+
+            # Separator before the danger zone
+            submenu+=("")
+            submenu+=("")
+            submenu+=("")
+
+            # Untrack: deletes the .workflow.yml only. Guarded by a capital X key
+            # plus a centered y/N modal that defaults to Cancel (mirrors cleanup).
+            submenu+=("Untrack project (delete .workflow.yml)")
+            submenu+=("X")
+            submenu+=("display-menu -T \" Untrack $display_name? \" -x C -y C \"Cancel\" n \"\" \"Yes, untrack\" y \"run-shell 'bash $WORKFLOWS_DIR/tmux/menu-handler.sh untrack-project'\"")
+        fi
+
+        submenu+=("Cancel")
+        submenu+=("q")
+        submenu+=("")
+
+        tmux display-menu -T " Project: $display_name " "${submenu[@]}"
+        ;;
+    track-project)
+        # Create a .workflow.yml with a humanized name for the current project.
+        pane_path=$(tmux display-message -p "#{pane_current_path}")
+        root=$(resolve_project_root "$pane_path")
+        if [ -z "$root" ]; then
+            tmux display-message "Not in a project"
+            exit 0
+        fi
+        workflow_yml="$root/.workflow.yml"
+        if [ -f "$workflow_yml" ]; then
+            tmux display-message "Already tracked"
+            exit 0
+        fi
+        humanized=$(workflow_display_name "$(basename "$root")")
+        printf 'name: "%s"\n' "$humanized" > "$workflow_yml"
+        tmux display-message "Tracked project: $humanized"
+        ;;
+    set-project-type)
+        # Set .type on the current project's .workflow.yml (orchestrator|ongoing).
+        project_type="$2"
+        pane_path=$(tmux display-message -p "#{pane_current_path}")
+        root=$(resolve_project_root "$pane_path")
+        if [ -z "$root" ]; then
+            tmux display-message "Not in a project"
+            exit 0
+        fi
+        workflow_yml="$root/.workflow.yml"
+        if [ ! -f "$workflow_yml" ]; then
+            tmux display-message "Not a tracked project"
+            exit 0
+        fi
+        yq eval -i ".type = \"$project_type\"" "$workflow_yml"
+        tmux display-message "Set type: $project_type"
+        ;;
+    unset-project-type)
+        # Remove .type from the current project's .workflow.yml.
+        pane_path=$(tmux display-message -p "#{pane_current_path}")
+        root=$(resolve_project_root "$pane_path")
+        if [ -z "$root" ]; then
+            tmux display-message "Not in a project"
+            exit 0
+        fi
+        workflow_yml="$root/.workflow.yml"
+        if [ ! -f "$workflow_yml" ]; then
+            tmux display-message "Not a tracked project"
+            exit 0
+        fi
+        yq eval -i 'del(.type)' "$workflow_yml"
+        tmux display-message "Type cleared"
+        ;;
+    untrack-project)
+        # Delete the current project's .workflow.yml (untrack it).
+        pane_path=$(tmux display-message -p "#{pane_current_path}")
+        root=$(resolve_project_root "$pane_path")
+        if [ -z "$root" ]; then
+            tmux display-message "Not in a project"
+            exit 0
+        fi
+        workflow_yml="$root/.workflow.yml"
+        if [ -f "$workflow_yml" ]; then
+            rm -f "$workflow_yml"
+            tmux display-message "Untracked project (deleted .workflow.yml)"
+        else
+            tmux display-message "Not a tracked project"
+        fi
         ;;
     run-start-worktree)
         pane_path=$(tmux display-message -p "#{pane_current_path}")
