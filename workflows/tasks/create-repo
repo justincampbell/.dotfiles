@@ -1,0 +1,46 @@
+#!/bin/bash
+# Creates a new git repo at ~/Code/org/repo and opens it as a tmux session
+
+set -euo pipefail
+
+DOTFILES_DIR="${HOME}/.dotfiles"
+source "$DOTFILES_DIR/workflows/shared.sh"
+
+input="${1:-}"
+
+if [ -z "$input" ]; then
+    echo "Usage: create-repo <repo-or-org/repo>" >&2
+    exit 1
+fi
+
+# Trim surrounding whitespace
+input=$(echo "$input" | sed 's|^ *||;s| *$||')
+
+# The parent folder in ~/Code defaults to justincampbell
+if [[ "$input" == */* ]]; then
+    org="${input%%/*}"
+    repo="${input#*/}"
+else
+    org="justincampbell"
+    repo="$input"
+fi
+
+repo="${repo%/}" # tolerate a trailing slash
+
+if [ -z "$org" ] || [ -z "$repo" ] || [[ "$repo" == */* ]]; then
+    echo "Error: expected 'repo' or 'org/repo', got '$input'" >&2
+    exit 1
+fi
+
+repo_path=$(get_github_repo_path "$org" "$repo")
+
+if [ -d "$repo_path" ]; then
+    echo "Repo already exists at $repo_path, opening..."
+else
+    echo "Creating $org/$repo at $repo_path..."
+    mkdir -p "$repo_path"
+    git -C "$repo_path" init -q
+    echo ""
+fi
+
+"$DOTFILES_DIR/workflows/tasks/ensure-tmux-session" --name "$repo" "$repo_path"

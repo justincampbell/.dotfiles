@@ -186,6 +186,13 @@ show_workflow_menu() {
     menu_items+=("$ckey")
     menu_items+=("run-shell 'bash $WORKFLOWS_DIR/tmux/menu-handler.sh clone-repo'")
 
+    # New repo option
+    local nkey=$(get_menu_key "new-repo" "$used_keys")
+    used_keys="${used_keys}${nkey}"
+    menu_items+=("New project...")
+    menu_items+=("$nkey")
+    menu_items+=("run-shell 'bash $WORKFLOWS_DIR/tmux/menu-handler.sh create-repo'")
+
     # Handle URL option
     local ukey=$(get_menu_key "url" "$used_keys")
     used_keys="${used_keys}${ukey}"
@@ -453,6 +460,12 @@ case "${1:-menu}" in
     clone-repo)
         tmux command-prompt -p "GitHub URL or org/repo:" \
             "display-popup -E -w 80% -h 80% 'bash $WORKFLOWS_DIR/tasks/clone-github-repo \"%1\"'"
+        ;;
+    create-repo)
+        # Prefill the parent folder so it's one word to type, but editable
+        # if the repo belongs under a different ~/Code parent.
+        tmux command-prompt -I "justincampbell/" -p "New project (org/repo):" \
+            "display-popup -E -w 80% -h 80% 'bash $WORKFLOWS_DIR/tasks/create-repo \"%1\"'"
         ;;
     handle-url)
         tmux command-prompt -p "URL:" \
