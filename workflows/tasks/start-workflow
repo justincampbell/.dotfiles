@@ -260,12 +260,11 @@ if [ -n "$windows_yaml" ]; then
 
             if [ $i -eq 0 ]; then
                 # First window already exists, just rename it
-                tmux rename-window -t "$session_name" "$name"
-                window_target="$session_name:1"  # Use number instead of name
+                window_target=$(tmux list-windows -t "$session_name" -F '#{window_id}' | head -1)
+                tmux rename-window -t "$window_target" "$name"
             else
                 # Create new window with explicit start directory
-                tmux new-window -t "$session_name" -n "$name" -c "$target_dir"
-                window_target="$session_name:$((i+1))"  # Use window number
+                window_target=$(tmux new-window -t "$session_name" -n "$name" -c "$target_dir" -P -F '#{window_id}')
             fi
 
             # Small delay to ensure window is fully created

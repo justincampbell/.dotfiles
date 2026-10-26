@@ -656,7 +656,11 @@ case "${1:-menu}" in
             exit 0
         fi
         cd "$repo_path"
-        exec bash "$WORKFLOWS_DIR/tasks/start-idea" "$idea"
+        if ! bash "$WORKFLOWS_DIR/tasks/start-idea" "$idea"; then
+            echo ""
+            echo "start-idea failed. Idea was: $idea"
+            read -rp "Press Enter to close..."
+        fi
         ;;
     *)
         echo "Usage: $0 [menu|workflow:<name>|task:<name>]"

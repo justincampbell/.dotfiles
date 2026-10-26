@@ -21,12 +21,9 @@ slug=$(slugify_branch_name "$first_words")
 branch_name="${WORKFLOW_BRANCH_PREFIX:-}${slug}"
 
 # Get the current repo context
-base_repo=$(git rev-parse --show-toplevel 2>/dev/null)
+base_repo=$(git rev-parse --show-toplevel 2>/dev/null || true)
 if [ -z "$base_repo" ]; then
-    echo "Error: Not in a git repository"
-    echo ""
-    echo "Press Enter to close..."
-    read
+    echo "Error: Not in a git repository ($PWD)"
     exit 1
 fi
 # Use --git-common-dir to get the main repo name (not the worktree)

@@ -130,6 +130,13 @@ fi
 # Get number of windows
 WINDOW_COUNT=$(yq eval '.windows | length' "$CONFIG_FILE")
 
+if [ "$WINDOW_COUNT" = "0" ] || [ "$WINDOW_COUNT" = "null" ]; then
+    WINDOW_TARGET=$(tmux list-windows -t "$SESSION_NAME" -F '#{window_id}' | head -1)
+    tmux rename-window -t "$WINDOW_TARGET" "ai"
+    [ -n "$SESSION_ENV_EXPORTS" ] && tmux send-keys -t "$WINDOW_TARGET" "$SESSION_ENV_EXPORTS" C-m
+    tmux send-keys -t "$WINDOW_TARGET" "${WORKFLOW_AI_CLI:-claude}" C-m
+fi
+
 # Process each window
 for ((i=0; i<WINDOW_COUNT; i++)); do
     # Get window name (key)
@@ -145,22 +152,18 @@ for ((i=0; i<WINDOW_COUNT; i++)); do
 
     if [ $i -eq 0 ]; then
         # First window already exists, rename it and optionally send command
-        tmux rename-window -t "$SESSION_NAME:1" "$WINDOW_NAME"
-        if [ -n "$SESSION_ENV_EXPORTS" ]; then
-            tmux send-keys -t "$SESSION_NAME:1" "$SESSION_ENV_EXPORTS" C-m
-        fi
-        if [ -n "$WINDOW_CMD" ]; then
-            tmux send-keys -t "$SESSION_NAME:1" "$WINDOW_CMD" C-m
-        fi
+        WINDOW_TARGET=$(tmux list-windows -t "$SESSION_NAME" -F '#{window_id}' | head -1)
+        tmux rename-window -t "$WINDOW_TARGET" "$WINDOW_NAME"
     else
         # Create new window
-        tmux new-window -t "$SESSION_NAME" -n "$WINDOW_NAME" -c "$SESSION_ROOT"
-        if [ -n "$SESSION_ENV_EXPORTS" ]; then
-            tmux send-keys -t "$SESSION_NAME:$WINDOW_NAME" "$SESSION_ENV_EXPORTS" C-m
-        fi
-        if [ -n "$WINDOW_CMD" ]; then
-            tmux send-keys -t "$SESSION_NAME:$WINDOW_NAME" "$WINDOW_CMD" C-m
-        fi
+        WINDOW_TARGET=$(tmux new-window -t "$SESSION_NAME" -n "$WINDOW_NAME" -c "$SESSION_ROOT" -P -F '#{window_id}')
+    fi
+
+    if [ -n "$SESSION_ENV_EXPORTS" ]; then
+        tmux send-keys -t "$WINDOW_TARGET" "$SESSION_ENV_EXPORTS" C-m
+    fi
+    if [ -n "$WINDOW_CMD" ]; then
+        tmux send-keys -t "$WINDOW_TARGET" "$WINDOW_CMD" C-m
     fi
 done
 
