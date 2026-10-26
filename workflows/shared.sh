@@ -88,6 +88,35 @@ parse_frontmatter() {
     fi
 }
 
+# Print the tmux session for the planning vault, creating "planning" if none exists.
+# Matches on session path so it converges with sessions ensure-tmux-session names after the dir.
+ensure_planning_session() {
+    local planning_dir session_name
+    planning_dir=$(cd "$1" && pwd)
+
+    session_name=$(tmux list-sessions -F "#{session_path}	#{session_name}" 2>/dev/null \
+        | awk -F'\t' -v dir="$planning_dir" '$1 == dir { print $2; exit }')
+
+    if [ -z "$session_name" ]; then
+        session_name="planning"
+        echo "Creating planning session..." >&2
+        tmux new-session -d -s "$session_name" -c "$planning_dir"
+        tmux rename-window -t "$(tmux list-windows -t "=$session_name" -F '#{window_id}' | head -1)" "shell"
+    fi
+
+    echo "$session_name"
+}
+
+# Print the name of the tmux session whose start directory is this path, if any.
+# Sessions get humanized names after launch, so a name derived from the directory
+# no longer finds them; matching by path reuses the session instead of adding a twin.
+session_for_path() {
+    local dir
+    dir=$(cd "$1" 2>/dev/null && pwd -P) || return 0
+    tmux list-sessions -F "#{session_path}	#{session_name}" 2>/dev/null \
+        | awk -F'\t' -v d="$dir" '$1 == d { print $2; exit }'
+}
+
 # Run a network call with a time limit and a dated message when it starts, so a
 # stalled launch shows which step hung instead of sitting silent for an hour.
 # Usage: with_timeout <seconds> <command...>

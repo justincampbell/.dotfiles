@@ -166,9 +166,11 @@ if [ -n "$windows_yaml" ]; then
     else
         session_name=$(basename "$target_dir")
     fi
+    existing_for_dir=$(session_for_path "$target_dir")
+    [ -n "$existing_for_dir" ] && session_name="$existing_for_dir"
 
     # Check if session already exists
-    if tmux has-session -t "$session_name" 2>/dev/null; then
+    if tmux has-session -t "=$session_name" 2>/dev/null; then
         echo "Session $session_name already exists" >&2
 
         # Find the AI window and clear it, or create one if it doesn't exist
@@ -317,8 +319,10 @@ else
     else
         session_name=$(basename "$target_dir")
     fi
+    existing_for_dir=$(session_for_path "$target_dir")
+    [ -n "$existing_for_dir" ] && session_name="$existing_for_dir"
 
-    if tmux has-session -t "$session_name" 2>/dev/null; then
+    if tmux has-session -t "=$session_name" 2>/dev/null; then
         echo "Session $session_name already exists" >&2
         if [ "$detached" = false ]; then
             echo "Switching to it" >&2

@@ -90,26 +90,24 @@ trap "rm -f '$tasks_file'" EXIT
 cp "$processed_prompt" "$planning_dir/.workflow-prompt"
 rm -f "$processed_prompt"
 
-# Ensure planning tmux session exists
-session_name="planning"
-if ! tmux has-session -t "=$session_name" 2>/dev/null; then
-    echo "Creating planning session..." >&2
-    tmux new-session -d -s "$session_name" -c "$planning_dir"
-    tmux rename-window -t "$session_name:1" "shell"
-fi
+session_name=$(ensure_planning_session "$planning_dir")
 
-# Check if a window for this entity already exists
-existing_window=$(tmux list-windows -t "$session_name" -F "#{window_index}:#{window_name}" \
-    | grep ":${window_name}$" | cut -d: -f1 || true)
+# Check if a window for this entity already exists. Keyed on a window option rather
+# than the window name, because the planning agent renames the window to the entity's
+# full name once it has fetched the data (see Planning/CLAUDE.md).
+entity_key="${entity_type}-${entity_id}"
+existing_window=$(tmux list-windows -t "$session_name" -F '#{window_index}:#{@planning-entity}' \
+    | grep ":${entity_key}$" | cut -d: -f1 || true)
 
 if [ -n "$existing_window" ]; then
-    echo "Window $window_name already exists, switching to it..." >&2
+    echo "Window for $entity_key already exists, switching to it..." >&2
     tmux select-window -t "$session_name:$existing_window"
 else
     # Create new window for this entity
     echo "Creating window $window_name..." >&2
-    tmux new-window -t "$session_name" -n "$window_name" -c "$planning_dir"
-    new_window_index=$(tmux list-windows -t "$session_name" -F '#{window_index}' | tail -1)
+    window_target=$(tmux new-window -t "$session_name" -n "$window_name" -c "$planning_dir" -P -F '#{window_id}')
+
+    tmux set -w -t "$window_target" @planning-entity "$entity_key"
 
     # Start AI CLI with the prompt (read from file to avoid escaping issues)
     model=$(parse_frontmatter "$workflow_prompt" "model")
@@ -117,13 +115,7 @@ else
     ai_cli="${WORKFLOW_AI_CLI:-claude} --model '${model:-default}'"
     [ -n "$effort" ] && ai_cli="$ai_cli --effort '$effort'"
     sleep 0.3
-    tmux send-keys -t "$session_name:${new_window_index}" "$ai_cli \"\$(cat .workflow-prompt)\"" C-m
-
-    # Re-apply window name after claude starts (it overrides via tmux rename-window)
-    sleep 1.5
-    tmux rename-window -t "$session_name:${new_window_index}" "$window_name"
-    tmux set -w -t "$session_name:${new_window_index}" automatic-rename off
-    tmux set -w -t "$session_name:${new_window_index}" allow-rename off
+    tmux send-keys -t "$window_target" "$ai_cli \"\$(cat .workflow-prompt)\"" C-m
 fi
 
 # Switch to the planning session
