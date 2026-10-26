@@ -31,7 +31,7 @@ cd "$base_repo"
 
 # Get PR info using gh CLI to get the branch name
 echo "Getting PR #$pr_number info..." >&2
-pr_info=$(gh pr view "$pr_number" --json headRefName)
+pr_info=$(with_timeout 120 gh pr view "$pr_number" --json headRefName)
 branch_name=$(echo "$pr_info" | yq -r '.headRefName')
 
 if [ -z "$branch_name" ] || [ "$branch_name" = "null" ]; then
@@ -43,7 +43,7 @@ echo "PR branch: $branch_name" >&2
 
 # Fetch the PR branch first
 echo "Fetching PR branch..." >&2
-git fetch origin "pull/$pr_number/head:$branch_name" 2>/dev/null || true
+with_timeout 300 git fetch origin "pull/$pr_number/head:$branch_name" 2>/dev/null || true
 
 # Use ensure-git-worktree to create the worktree
 worktree_path=$("$(dirname "$0")/ensure-git-worktree" "$branch_name")

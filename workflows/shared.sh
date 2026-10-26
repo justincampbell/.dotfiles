@@ -87,3 +87,23 @@ parse_frontmatter() {
         echo "$frontmatter"
     fi
 }
+
+# Run a network call with a time limit and a dated message when it starts, so a
+# stalled launch shows which step hung instead of sitting silent for an hour.
+# Usage: with_timeout <seconds> <command...>
+with_timeout() {
+    local secs="$1"; shift
+    echo "[$(date '+%H:%M:%S')] $*" >&2
+    if command -v timeout > /dev/null 2>&1; then
+        timeout "$secs" "$@"
+    elif command -v gtimeout > /dev/null 2>&1; then
+        gtimeout "$secs" "$@"
+    else
+        "$@"
+    fi
+    local rc=$?
+    if [ "$rc" = 124 ]; then
+        echo "Timed out after ${secs}s: $*" >&2
+    fi
+    return $rc
+}

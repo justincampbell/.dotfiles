@@ -38,6 +38,13 @@ existing_worktree=$(git -C "$base_repo" worktree list --porcelain | awk -v ref="
     /^worktree /{path=substr($0, 10)}
     /^branch /{if ($2 == ref) print path}
 ')
+if [ -n "$existing_worktree" ] && [ ! -d "$existing_worktree" ]; then
+    # Deleting a worktree dir without `git worktree prune` leaves the branch
+    # registered at a dead path; prune so the branch is free to re-add below.
+    echo "Worktree for $branch_name is registered at missing path $existing_worktree, pruning" >&2
+    git -C "$base_repo" worktree prune >&2
+    existing_worktree=""
+fi
 if [ -n "$existing_worktree" ]; then
     echo "Branch $branch_name is already checked out at $existing_worktree, reusing it" >&2
     echo "$existing_worktree"
@@ -55,7 +62,7 @@ fi
 cd "$base_repo"
 
 # Fetch latest changes from origin
-git fetch origin >&2
+with_timeout 300 git fetch origin >&2 || echo "Warning: fetch failed or timed out; continuing with local refs" >&2
 
 # Get the default branch from origin
 default_branch=$(git symbolic-ref refs/remotes/origin/HEAD 2>/dev/null | sed 's@^refs/remotes/origin/@@')
