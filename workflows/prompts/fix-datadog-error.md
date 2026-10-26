@@ -1,5 +1,5 @@
 ---
-model: claude-opus-4-8[1m]
+model: opus
 setup_tasks:
   - "./workflows/tasks/ensure-github-clone $SHORTCUT_REPO_URL"
 tmux_windows:
@@ -59,7 +59,6 @@ Based on your investigation:
 
 ## Step 5: Open a PR and monitor
 
-When you are done with the implementation, launch an Opus subagent to perform a code review.
 Use the `/open-pull-request` skill to open a PR.
 Include the Datadog error URL and Shortcut story link in the PR description.
 Use the `/watch-pr` skill to monitor the PR for CI results and review feedback.

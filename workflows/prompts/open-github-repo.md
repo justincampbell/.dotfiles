@@ -1,6 +1,5 @@
 ---
-model: claude-opus-4-8[1m]
-effort: low
+model: opus
 setup_tasks:
   - "./workflows/tasks/ensure-github-clone {{arg1}}"
 tmux_windows:

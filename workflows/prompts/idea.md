@@ -1,5 +1,5 @@
 ---
-model: claude-opus-4-8[1m]
+model: opus
 tmux_windows:
   - name: ai
     command: "{{ai_cli}}"
@@ -22,6 +22,5 @@ You're on a fresh branch in a git worktree, so experiment freely — do not swit
 Unlike the other workflows, this one is **exploratory and not autopilot**: do NOT open a pull request, push, or start the CI/merge flow on your own. When you've finished the work, summarize what you found or changed and stop for my review.
 
 Only when I explicitly ask you to ship it should you:
-- Launch an Opus subagent to perform a code review.
 - Use the `/open-pull-request` skill to open a PR.
 - Use the `/watch-pr` skill to monitor the PR for CI results and review feedback; if CI fails, use the `/ci-failures` skill to get details and fix them, then immediately re-run `/watch-pr` and keep looping until the PR is merged or closed.

@@ -85,11 +85,13 @@ fi
 windows_yaml=$(parse_frontmatter "$prompt_file" "tmux_windows")
 custom_session_name=$(parse_frontmatter "$prompt_file" "tmux_session_name")
 
-# Build the AI CLI command with explicit --model (falls back to "default" so
-# we don't inherit whatever model claude last ran with)
-model=$(parse_frontmatter "$prompt_file" "model")
-effort=$(parse_frontmatter "$prompt_file" "effort")
-ai_cli="${WORKFLOW_AI_CLI:-claude} --model '${model:-default}'"
+# Build the AI CLI command with explicit --model (falls back to Opus so
+# we don't inherit whatever model claude last ran with).
+# WORKFLOW_MODEL/WORKFLOW_EFFORT let a caller override the prompt's pinned
+# values, matching the WORKFLOW_AI_CLI override below.
+model="${WORKFLOW_MODEL:-$(parse_frontmatter "$prompt_file" "model")}"
+effort="${WORKFLOW_EFFORT:-$(parse_frontmatter "$prompt_file" "effort")}"
+ai_cli="${WORKFLOW_AI_CLI:-claude} --model '${model:-opus}'"
 [ -n "$effort" ] && ai_cli="$ai_cli --effort '$effort'"
 
 # Detect worktree for the kept worktree.setup execution below

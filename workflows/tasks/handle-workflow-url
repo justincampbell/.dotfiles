@@ -16,6 +16,43 @@ if [ -z "$url" ]; then
     exit 1
 fi
 
+# Models offered when picking one interactively, weakest to strongest so the
+# arrow keys read as "bump it up / down".
+WORKFLOW_MODELS=(haiku sonnet opus fable)
+
+# Emit a nested `display-menu` command string that asks for a model, then runs
+# the workflow in a popup. The prompt's own pinned model is preselected via -C,
+# so Enter keeps today's behaviour and the arrows move off it. Picking the
+# pinned entry passes no override, preserving the frontmatter value verbatim
+# (it may carry a [1m] suffix that the bare alias would drop).
+model_menu() {
+    local workflow="$1" url="$2" pinned pinned_idx=-1 start i model name env_prefix item menu
+
+    pinned=$(parse_frontmatter "$SCRIPT_DIR/../prompts/${workflow}.md" "model" 2>/dev/null || true)
+    for i in "${!WORKFLOW_MODELS[@]}"; do
+        [[ -n "$pinned" && "$pinned" == *"${WORKFLOW_MODELS[$i]}"* ]] && pinned_idx=$i
+    done
+
+    # Unpinned (or pinned to something off this ladder): mark nothing, start on
+    # opus, and let every entry pass an explicit override.
+    start=$pinned_idx
+    [ "$start" -lt 0 ] && start=2
+
+    menu="display-menu -T \"Model\" -C $start"
+    for i in "${!WORKFLOW_MODELS[@]}"; do
+        model="${WORKFLOW_MODELS[$i]}"
+        name="$model"
+        env_prefix="WORKFLOW_MODEL=$model "
+        if [ "$i" -eq "$pinned_idx" ]; then
+            name="$model (pinned)"
+            env_prefix=""
+        fi
+        item="display-popup -E -w 80% -h 80% \\\"${env_prefix}bash $SCRIPT_DIR/launch-workflow $workflow '$url'\\\""
+        menu="$menu \"$name\" ${model:0:1} \"$item\""
+    done
+    echo "$menu"
+}
+
 # Determine which workflow to launch based on URL pattern
 workflow_name=""
 
@@ -48,11 +85,13 @@ case "$url" in
 
     *github.com/*/pull/*)
         # Show mode selection menu — each item launches display-popup directly
-        # (run-shell has no client context, so it can't open popups)
+        # (run-shell has no client context, so it can't open popups).
+        # Modes that run a prompt chain into a model menu first; "just checkout"
+        # never reaches the AI, so asking for a model there is noise.
         tmux display-menu -T "PR Review" \
-            "Review" r "display-popup -E -w 80% -h 80% \"bash $SCRIPT_DIR/launch-workflow review-github-pr '$url'\"" \
-            "Review (auto-approve)" a "display-popup -E -w 80% -h 80% \"bash $SCRIPT_DIR/launch-workflow review-github-pr-auto-approve '$url'\"" \
-            "Fix CI / address feedback" f "display-popup -E -w 80% -h 80% \"bash $SCRIPT_DIR/launch-workflow fix-github-pr '$url'\"" \
+            "Review" r "$(model_menu review-github-pr "$url")" \
+            "Review (auto-approve)" a "$(model_menu review-github-pr-auto-approve "$url")" \
+            "Fix CI / address feedback" f "$(model_menu fix-github-pr "$url")" \
             "Just checkout" c "display-popup -E -w 80% -h 80% \"bash $SCRIPT_DIR/launch-workflow --no-prompt review-github-pr '$url'\""
         exit 0
         ;;

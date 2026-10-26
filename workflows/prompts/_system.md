@@ -6,4 +6,6 @@ Prefer using the GitHub CLI (gh) instead of making API requests.
 Work autonomously — these workflows are meant to run end-to-end without check-ins.
 Don't pause to ask permission for routine, reversible steps: restarting the PR watcher (`/watch-pr`), pushing fixes, re-running tests, or resolving rebase conflicts. Just do them and report what happened. Only stop for genuinely destructive or ambiguous decisions.
 
+Before you push code changes or deliver review findings, launch an `Agent` subagent with `model: fable` to review the diff (or your findings) and address what it surfaces.
+
 ---
