@@ -204,11 +204,11 @@ timer_status() {
 
 tmux_window_title() {
   if [ -n "$TMUX" ]; then
-    # Target this shell's own pane; untargeted commands hit the session's active window
+    # Target this shell's own pane; untargeted commands hit the session's active window.
+    # No "else" re-enabling automatic-rename: it is already the global default, and
+    # turning it back on here clobbered windows named deliberately by the workflows.
     if [ "$PWD" = "$HOME" ]; then
       tmux rename-window -t "$TMUX_PANE" "🏠"
-    else
-      tmux set-window-option -t "$TMUX_PANE" automatic-rename on
     fi
   fi
 }
@@ -249,3 +249,5 @@ set_ps1() {
 set_ps1
 
 PROMPT_COMMAND='prompt_command'
+# mise's cd hook was registered in PROMPT_COMMAND before this file replaced it
+declare -F _mise_hook > /dev/null && PROMPT_COMMAND+='; _mise_hook'
