@@ -99,6 +99,10 @@ if [ -f "$target_dir/.git" ]; then
     is_worktree=true
 fi
 
+if [ "$print_prompt" = false ] && [ "$is_worktree" = true ]; then
+    pretrust_worktree "$target_dir"
+fi
+
 processed_prompt=""
 if [ "$has_prompt" = true ]; then
     # Get available tasks
@@ -281,11 +285,19 @@ if [ -n "$windows_yaml" ]; then
                 fi
                 sleep 0.3
                 tmux send-keys -t "$window_target" "$command" C-m
+                if [ "$name" = "ai" ]; then
+                    fail_on_trust_dialog "$window_target" 30 || trust_blocked=true
+                fi
             fi
         done
 
         # Switch to first window
         tmux select-window -t "$session_name:1"
+
+        if [ "${trust_blocked:-false}" = true ]; then
+            echo "Session $session_name is up but Claude has not started: answer the trust dialog in its ai window." >&2
+            exit 1
+        fi
 
         # Switch to the session (unless detached)
         if [ "$detached" = false ]; then
