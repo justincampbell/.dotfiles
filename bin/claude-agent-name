@@ -1,0 +1,16 @@
+#!/bin/bash
+# Prints "@<name>" for the Claude Code session whose status line JSON is on stdin.
+# Reads Claude Code's undocumented session registry, so it may break on upgrade.
+
+session_id=$(jq -r '.session_id // empty')
+[ -n "$session_id" ] || exit 0
+
+sessions_dir="${CLAUDE_CONFIG_DIR:-$HOME/.claude}/sessions"
+compgen -G "$sessions_dir/*.json" >/dev/null || exit 0
+
+# Stale files from dead PIDs can share a sessionId after a resume, so take the newest.
+jq -rs --arg id "$session_id" '
+  map(select(.sessionId == $id and .name))
+  | max_by(.updatedAt // 0)
+  | if . then "@" + .name else empty end
+' "$sessions_dir"/*.json 2>/dev/null
