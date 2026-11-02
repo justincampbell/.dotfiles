@@ -1,0 +1,114 @@
+#!/bin/bash
+# Prepare for a meeting from a Google Calendar event URL
+# Usage: prepare-for-meeting <google-calendar-event-url>
+
+set -euo pipefail
+
+# Set up PATH for non-interactive context (display-popup)
+export PATH="$HOME/.dotfiles/bin:$HOME/.dotfiles/workflows/tasks:$HOME/.local/bin:/opt/homebrew/bin:/opt/homebrew/sbin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:$PATH"
+
+# Source machine-local env (WORKFLOW_PLANNING_DIR, etc.) — env-only file, safe in
+# this non-interactive context where ~/.profile isn't sourced.
+[ -f "$HOME/.profile.local" ] && source "$HOME/.profile.local"
+
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+source "$SCRIPT_DIR/../shared.sh"
+
+url="${1:-}"
+
+if [ -z "$url" ]; then
+    echo "Usage: $0 <google-calendar-event-url>" >&2
+    exit 1
+fi
+
+# Extract the event id (eid) from an edit or view URL
+if [[ "$url" =~ eventedit/([^/?#]+) ]]; then
+    eid="${BASH_REMATCH[1]}"
+elif [[ "$url" =~ [?\&]eid=([^&#]+) ]]; then
+    eid="${BASH_REMATCH[1]}"
+else
+    echo "Error: URL must be a Google Calendar event URL" >&2
+    exit 1
+fi
+
+# The eid is base64 of "<event-id> <organizer-email>". Decode best-effort just to
+# derive a stable short id for the window name; the running session does the real
+# lookup. URL-safe base64 -> standard, padded to a multiple of 4.
+b64="$(printf '%s' "$eid" | tr '_-' '/+')"
+while (( ${#b64} % 4 )); do b64+='='; done
+event_id="$(printf '%s' "$b64" | base64 -d 2>/dev/null | cut -d' ' -f1 || true)"
+
+short_id="$(printf '%s' "${event_id:-$eid}" | tr -cd 'A-Za-z0-9' | tr 'A-Z' 'a-z' | cut -c1-12)"
+[ -n "$short_id" ] || short_id="event"
+window_name="meeting-$short_id"
+
+echo "Preparing for meeting ($window_name)..." >&2
+
+# Ensure planning repo exists (the vault holds meeting prep docs)
+planning_dir="${WORKFLOW_PLANNING_DIR:?Set WORKFLOW_PLANNING_DIR to the vault that holds meeting prep docs}"
+mkdir -p "$planning_dir"
+if [ ! -d "$planning_dir/.git" ]; then
+    echo "Initializing planning git repo..." >&2
+    git -C "$planning_dir" init
+fi
+
+# Build the prompt
+workflow_prompt="$SCRIPT_DIR/../prompts/prepare-for-meeting.md"
+available_tasks=$(list_available_tasks)
+tasks_file="/tmp/meeting-tasks-$$"
+echo "$available_tasks" > "$tasks_file"
+trap "rm -f '$tasks_file'" EXIT
+
+# Escape the URL for the sed replacement (calendar URLs can carry & and \)
+url_escaped="$(printf '%s' "$url" | sed 's/[&|\\]/\\&/g')"
+
+processed_prompt="/tmp/meeting-prompt-$$"
+{
+    while IFS= read -r line; do
+        if [[ "$line" == *"{{available_tasks}}"* ]]; then
+            cat "$tasks_file"
+        else
+            echo "$line"
+        fi
+    done < "$SCRIPT_DIR/../prompts/_system.md"
+    cat "$workflow_prompt"
+} | sed "s|{{arg1}}|${url_escaped}|g" > "$processed_prompt"
+
+# Copy prompt to planning dir (avoids shell escaping issues with tmux send-keys)
+cp "$processed_prompt" "$planning_dir/.workflow-prompt"
+rm -f "$processed_prompt"
+
+session_name=$(ensure_planning_session "$planning_dir")
+
+# Reuse an existing window for this event, else create one. Keyed on a window option
+# rather than the window name, because the agent renames the window to the meeting
+# title once it has fetched the event (see Planning/CLAUDE.md).
+existing_window=$(tmux list-windows -t "$session_name" -F '#{window_index}:#{@meeting-event}' \
+    | grep ":${short_id}$" | cut -d: -f1 || true)
+
+if [ -n "$existing_window" ]; then
+    echo "Window for meeting $short_id already exists, switching to it..." >&2
+    tmux select-window -t "$session_name:$existing_window"
+else
+    echo "Creating window $window_name..." >&2
+    window_target=$(tmux new-window -t "$session_name" -n "$window_name" -c "$planning_dir" -P -F '#{window_id}')
+
+    tmux set -w -t "$window_target" @meeting-event "$short_id"
+
+    # Start AI CLI with the prompt (read from file to avoid escaping issues)
+    model=$(parse_frontmatter "$workflow_prompt" "model")
+    effort=$(parse_frontmatter "$workflow_prompt" "effort")
+    ai_cli="${WORKFLOW_AI_CLI:-claude} --model '${model:-default}'"
+    [ -n "$effort" ] && ai_cli="$ai_cli --effort '$effort'"
+    sleep 0.3
+    tmux send-keys -t "$window_target" "$ai_cli \"\$(cat .workflow-prompt)\"" C-m
+fi
+
+# Switch to the planning session
+if [ -n "${TMUX:-}" ]; then
+    tmux switch-client -t "$session_name"
+else
+    tmux attach-session -t "$session_name"
+fi
+
+echo "Started meeting prep session ($window_name)" >&2
