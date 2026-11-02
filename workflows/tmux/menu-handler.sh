@@ -321,6 +321,12 @@ show_workflow_menu() {
     menu_items+=("Clean up sessions in bulk...")
     menu_items+=("B")
     menu_items+=("run-shell 'bash $WORKFLOWS_DIR/tmux/menu-handler.sh cleanup-bulk'")
+    menu_items+=("Park: stop this worktree's server")
+    menu_items+=("P")
+    menu_items+=("run-shell 'bash $WORKFLOWS_DIR/tmux/menu-handler.sh park'")
+    menu_items+=("Sweep stale worktrees (dry run, then confirm)")
+    menu_items+=("S")
+    menu_items+=("run-shell 'bash $WORKFLOWS_DIR/tmux/menu-handler.sh sweep'")
 
     # Cancel option
     menu_items+=("Cancel")
@@ -631,6 +637,19 @@ case "${1:-menu}" in
         safe_session="${session_name//\'/\'\\\'\'}"
         tmux new-window -n cleanup \
             "bash $WORKFLOWS_DIR/tasks/cleanup-git-worktree '$safe_path' || tmux kill-session -t '=$safe_session'"
+        ;;
+    park)
+        # Stop the dev server in the current worktree, keep its Claude session.
+        pane_path=$(tmux display-message -p "#{pane_current_path}")
+        safe_path="${pane_path//\'/\'\\\'\'}"
+        tmux run-shell -b "bash $WORKFLOWS_DIR/tasks/park-session '$safe_path' 2>&1 | tail -1 | xargs -I{} tmux display-message '{}'"
+        ;;
+    sweep)
+        # Dry-run report for the current pane's repo, then an explicit yes to apply.
+        pane_path=$(tmux display-message -p "#{pane_current_path}")
+        safe_path="${pane_path//\'/\'\\\'\'}"
+        tmux display-popup -E -w 90% -h 90% \
+            "cd '$safe_path' && bash $WORKFLOWS_DIR/tasks/sweep-worktrees > /tmp/sweep-report.txt 2>&1; less -R +G /tmp/sweep-report.txt; read -p 'Apply? [y/N] ' a && case \$a in y|Y) bash $WORKFLOWS_DIR/tasks/sweep-worktrees --apply 2>&1 | tee /tmp/sweep-apply.txt; echo; read -p 'Enter to close';; esac"
         ;;
     cleanup-bulk)
         # Multi-select several worktrees/sessions and clean them up in one pass.

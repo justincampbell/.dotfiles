@@ -1,0 +1,38 @@
+#!/bin/bash
+# Stops the dev server running in a worktree (overmind, or stray web/asset
+# processes) while leaving its Claude session alive. Frees the 1-2 GB a dev
+# server holds without losing the conversation.
+# Usage: park-session [dir]   (defaults to the current directory)
+
+set -euo pipefail
+
+dir="${1:-$PWD}"
+# Physical path, since lsof reports cwd with symlinks resolved
+dir=$(cd "$dir" && pwd -P)
+stopped=0
+
+if [ -S "$dir/.overmind.sock" ] && command -v overmind > /dev/null; then
+    if (cd "$dir" && overmind status > /dev/null 2>&1); then
+        echo "Stopping overmind in $(basename "$dir")" >&2
+        (cd "$dir" && overmind quit) && stopped=1 || true
+        sleep 1
+    fi
+    # A socket nobody answers on (left by a killed session) blocks the next start
+    (cd "$dir" && overmind status > /dev/null 2>&1) || rm -f "$dir/.overmind.sock"
+fi
+
+# Anything still listening from that directory (rails s, puma, webpack, tailwind
+# watchers started by hand) goes too.
+for pid in $(lsof -nP -iTCP -sTCP:LISTEN -Fp 2>/dev/null | sed -n 's/^p//p'); do
+    cwd=$(lsof -a -p "$pid" -d cwd -Fn 2>/dev/null | sed -n 's/^n//p')
+    if [ "$cwd" = "$dir" ]; then
+        echo "Killing $(ps -o comm= -p "$pid") (pid $pid)" >&2
+        kill "$pid" 2>/dev/null && stopped=1 || true
+    fi
+done
+
+if [ "$stopped" = 1 ]; then
+    echo "Parked: no server running in $(basename "$dir")" >&2
+else
+    echo "Nothing to park in $(basename "$dir")" >&2
+fi

@@ -1,0 +1,200 @@
+#!/bin/bash
+# Report (and with --apply, remove) stale worktrees, orphan checkout dirs, gone branches, and stale index locks
+#
+# Usage: sweep-worktrees [--apply] [--age DAYS] [repo-dir]
+#
+# Dry run by default. A worktree is stale when no tmux session lives in it and
+# its branch has no open PR: the remote branch is gone (merged or closed), or it
+# was never pushed / merged without a delete and nothing touched it for --age
+# days (14). Removal goes through cleanup-git-worktree so each repo's teardown
+# runs. Works on any repo; gh is optional (without it only remote-gone and age
+# are used), and repos without a .workflow.yml simply have no teardown.
+
+set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+export PATH="$SCRIPT_DIR:$HOME/.dotfiles/bin:/opt/homebrew/bin:$PATH"
+TAB=$'\t'
+
+apply=false
+age_days=14
+repo=""
+while [ $# -gt 0 ]; do
+    case "$1" in
+        --apply) apply=true ;;
+        --age) age_days="$2"; shift ;;
+        -h|--help) sed -n '2,12p' "$0" | sed 's/^# \{0,1\}//'; exit 0 ;;
+        *) repo="$1" ;;
+    esac
+    shift
+done
+
+repo=$(git -C "${repo:-$PWD}" rev-parse --path-format=absolute --git-common-dir 2>/dev/null | sed 's#/\.git$##') || {
+    echo "Not inside a git repository" >&2; exit 1
+}
+repo_name=$(basename "$repo")
+parent=$(dirname "$repo")
+now=$(date +%s)
+age_secs=$((age_days * 86400))
+
+work=$(mktemp -d -t sweep-worktrees.XXXXXX)
+trap 'rm -rf "$work"' EXIT
+
+tmux list-sessions -F "#{session_path}${TAB}#{session_name}" 2>/dev/null > "$work/sessions" || true
+session_for() { awk -F"$TAB" -v p="$1" '$1 == p { print $2; exit }' "$work/sessions"; }
+
+echo "Fetching remote branch list..." >&2
+git -C "$repo" ls-remote --heads origin 2>/dev/null | awk '{ sub("refs/heads/", "", $2); print $2 }' > "$work/remote" || true
+remote_has() { grep -Fxq "$1" "$work/remote"; }
+
+: > "$work/open-prs"
+if command -v gh > /dev/null 2>&1 && git -C "$repo" remote get-url origin 2>/dev/null | grep -q github.com; then
+    echo "Fetching open pull requests..." >&2
+    gh pr list -R "$(git -C "$repo" remote get-url origin | sed -E 's#.*github.com[:/]##; s#\.git$##')" \
+        --state open --limit 1000 --json headRefName -q '.[].headRefName' > "$work/open-prs" 2>/dev/null || true
+fi
+has_open_pr() { grep -Fxq "$1" "$work/open-prs"; }
+
+last_touch() {
+    local dir="$1" branch="$2" m c
+    m=$(stat -f %m "$dir" 2>/dev/null || echo 0)
+    c=$(git -C "$repo" log -1 --format=%ct "$branch" -- 2>/dev/null || echo 0)
+    [ "$m" -gt "$c" ] && echo "$m" || echo "$c"
+}
+
+days_ago() { echo $(( (now - $1) / 86400 )); }
+
+# --- worktrees ---------------------------------------------------------------
+: > "$work/stale"; : > "$work/kept"
+while read -r dir branch; do
+    [ "$dir" != "$repo" ] || continue
+    session=$(session_for "$dir")
+    if [ -n "$session" ]; then
+        printf '%s\t%s\tlive session "%s"\n' "$dir" "$branch" "$session" >> "$work/kept"; continue
+    fi
+    if [ "$branch" != "(detached)" ] && has_open_pr "$branch"; then
+        printf '%s\t%s\topen PR\n' "$dir" "$branch" >> "$work/kept"; continue
+    fi
+    touched=$(last_touch "$dir" "$branch")
+    old=$(( now - touched >= age_secs ))
+    if [ "$branch" = "(detached)" ]; then
+        [ "$old" = 1 ] && printf '%s\t%s\tdetached, idle %sd\n' "$dir" "$branch" "$(days_ago "$touched")" >> "$work/stale" \
+            || printf '%s\t%s\tdetached, touched %sd ago\n' "$dir" "$branch" "$(days_ago "$touched")" >> "$work/kept"
+    elif ! remote_has "$branch"; then
+        if git -C "$repo" config "branch.$branch.remote" > /dev/null 2>&1; then
+            printf '%s\t%s\tremote branch gone\n' "$dir" "$branch" >> "$work/stale"
+        elif [ "$old" = 1 ]; then
+            printf '%s\t%s\tnever pushed, idle %sd\n' "$dir" "$branch" "$(days_ago "$touched")" >> "$work/stale"
+        else
+            printf '%s\t%s\tnever pushed, touched %sd ago\n' "$dir" "$branch" "$(days_ago "$touched")" >> "$work/kept"
+        fi
+    elif [ "$old" = 1 ]; then
+        printf '%s\t%s\tno open PR, idle %sd\n' "$dir" "$branch" "$(days_ago "$touched")" >> "$work/stale"
+    else
+        printf '%s\t%s\tno open PR, touched %sd ago\n' "$dir" "$branch" "$(days_ago "$touched")" >> "$work/kept"
+    fi
+done < <(git -C "$repo" worktree list --porcelain | awk '
+    /^worktree /  { dir = $2 }
+    /^branch /    { sub("refs/heads/", "", $2); print dir, $2 }
+    /^detached/   { print dir, "(detached)" }')
+
+# --- orphan directories: <repo>-* siblings git no longer tracks ----------------
+: > "$work/orphans"
+git -C "$repo" worktree list --porcelain | awk '/^worktree /{ print $2 }' > "$work/registered"
+for dir in "$parent/$repo_name"-*/; do
+    dir="${dir%/}"
+    [ -d "$dir" ] || continue
+    grep -Fxq "$dir" "$work/registered" && continue
+    [ -d "$dir/.git" ] && continue
+    if [ -f "$dir/.git" ]; then
+        gitdir=$(sed 's/^gitdir: //' "$dir/.git")
+        [ -d "$gitdir" ] && continue
+    fi
+    [ -n "$(session_for "$dir")" ] && continue
+    printf '%s\n' "$dir" >> "$work/orphans"
+done
+
+# --- gone branches no worktree holds ------------------------------------------
+: > "$work/gone-branches"
+git -C "$repo" for-each-ref --format='%(refname:short)%09%(upstream:track)' refs/heads \
+    | awk -F"$TAB" '$2 == "[gone]" { print $1 }' > "$work/gone-all"
+git -C "$repo" worktree list --porcelain | awk '/^branch /{ sub("refs/heads/", "", $2); print $2 }' > "$work/held"
+grep -Fxv -f "$work/held" "$work/gone-all" > "$work/gone-branches" || true
+
+# --- stale index locks ----------------------------------------------------------
+: > "$work/locks"
+if ! pgrep -x git > /dev/null 2>&1; then
+    find "$repo/.git" -maxdepth 3 -name index.lock -mmin +60 2>/dev/null >> "$work/locks" || true
+fi
+
+# --- report ----------------------------------------------------------------------
+count() { grep -c . "$1" 2>/dev/null || true; }
+echo
+echo "Repository: $repo"
+echo
+echo "Stale worktrees: $(count "$work/stale")"
+awk -F"$TAB" '{ printf "  %-70s %s\n", $1, $3 }' "$work/stale" | sed "s#^  $parent/#  #"
+echo
+echo "Kept: $(count "$work/kept")"
+awk -F"$TAB" '{ printf "  %-70s %s\n", $1, $3 }' "$work/kept" | sed "s#^  $parent/#  #"
+echo
+echo "Orphan directories (not a worktree, no repo): $(count "$work/orphans")"
+sed "s#^$parent/#  #" "$work/orphans"
+echo
+echo "Local branches whose remote is gone (not held by a worktree): $(count "$work/gone-branches")"
+echo
+echo "Stale index locks (older than an hour, no git running): $(count "$work/locks")"
+sed 's/^/  /' "$work/locks"
+echo
+
+sweep_hooks=""
+if [ -f "$repo/.workflow.yml" ]; then
+    sweep_hooks=$(yq eval '.worktree.sweep[]' "$repo/.workflow.yml" 2>/dev/null || true)
+fi
+
+if [ "$apply" != true ]; then
+    [ -n "$sweep_hooks" ] && { echo "Repo sweep hooks (run on --apply):"; sed 's/^/  /' <<< "$sweep_hooks"; echo; }
+    echo "Dry run. Re-run with --apply to remove the stale worktrees, orphan directories, gone branches, and locks."
+    exit 0
+fi
+
+# --- apply -------------------------------------------------------------------------
+if [ -s "$work/locks" ]; then
+    while read -r lock; do
+        if command -v clear-git-lock > /dev/null 2>&1; then
+            clear-git-lock "$(dirname "$lock")" || rm -f "$lock"
+        else
+            rm -f "$lock"
+        fi
+        echo "Cleared $lock"
+    done < "$work/locks"
+fi
+
+if [ -s "$work/stale" ]; then
+    queue=$(mktemp -t sweep-queue.XXXXXX)
+    awk -F"$TAB" '{ n = $1; sub(".*/", "", n); print n "\t" $1 }' "$work/stale" > "$queue"
+    echo "Removing $(count "$work/stale") worktree(s)..."
+    "$SCRIPT_DIR/cleanup-sessions" --run "$queue"
+fi
+
+if [ -s "$work/orphans" ]; then
+    while read -r dir; do
+        echo "Removing orphan directory: $dir"
+        rm -rf "$dir"
+    done < "$work/orphans"
+fi
+
+git -C "$repo" worktree prune
+
+if [ -s "$work/gone-branches" ]; then
+    echo "Deleting $(count "$work/gone-branches") gone branch(es)..."
+    xargs git -C "$repo" branch -D < "$work/gone-branches" > /dev/null
+fi
+
+while IFS= read -r cmd; do
+    [ -n "$cmd" ] || continue
+    echo "Sweep hook: $cmd"
+    (cd "$repo" && eval "$cmd") || echo "Warning: sweep hook failed: $cmd" >&2
+done <<< "$sweep_hooks"
+
+echo "Sweep complete."
