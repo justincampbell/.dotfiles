@@ -130,6 +130,13 @@ if [ "$has_prompt" = true ]; then
         done < "$system_prompt"
         # Extract only the content after the frontmatter (after second ---)
         awk '/^---$/{if(++c==2) f=1; next} f' "$prompt_file"
+        # WORKFLOW_BRIEF=<file>: a launcher's brief (what to build, what is decided,
+        # where results go) rides along with the prompt, for jobs queued by another session.
+        if [ -n "${WORKFLOW_BRIEF:-}" ] && [ -f "$WORKFLOW_BRIEF" ]; then
+            printf '\n# Brief from the launcher (%s)\n\n' "$WORKFLOW_BRIEF"
+            cat "$WORKFLOW_BRIEF"
+            echo
+        fi
     } | {
         # Replace argument template variables ({{arg1}}, {{arg2}}, etc.)
         if [ $# -gt 0 ]; then

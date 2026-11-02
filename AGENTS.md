@@ -29,6 +29,7 @@
 - Modular Lua configs in `nvim/lua/plugins/`
 - Symlinks created by install script
 - Git config automation in install script
+- `WORKFLOW_BRIEF=<file>` appends a launcher's brief (what to build, what is decided, where results go) to any workflow prompt
 
 ## Notes
 - Proactively work through TODO.md items to help maintain and improve the dotfiles
