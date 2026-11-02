@@ -20,7 +20,8 @@ session_rows() {
     # long TTL keeps the picker sub-second; stale PR state only ever costs a
     # missed cleanup, never a wrong one.
     command -v recon >/dev/null 2>&1 && rows=$(recon --width 60 --cache 5m rows 2>/dev/null || true)
-    if [ -n "$rows" ]; then
+    # A recon without `rows` ignores it and prints its dashboard instead.
+    if [[ "$rows" == \$[0-9]*"$TAB"* ]]; then
         printf '%s\n' "$rows"
         return
     fi
