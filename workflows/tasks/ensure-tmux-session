@@ -4,6 +4,8 @@
 
 set -euo pipefail
 
+[ -f "$HOME/.profile.local" ] && source "$HOME/.profile.local"
+
 # Source shared utilities
 source "$(dirname "$0")/../shared.sh"
 
@@ -59,18 +61,7 @@ is_worktree=false
 tmux new-session -d -s "$session_name" -c "$target_dir"
 sleep 0.1
 
-# Run worktree setup commands from .workflow.yml
-if [ "$is_worktree" = true ] && [ -f "$workflow_yml" ]; then
-    setup_count=$(yq eval '.worktree.setup | length' "$workflow_yml")
-    if [ "$setup_count" != "0" ] && [ "$setup_count" != "null" ]; then
-        echo "Running worktree setup..." >&2
-        for ((i=0; i<setup_count; i++)); do
-            cmd=$(yq eval ".worktree.setup[$i]" "$workflow_yml")
-            echo "  $cmd" >&2
-            (cd "$target_dir" && eval "$cmd") || echo "  Warning: $cmd failed" >&2
-        done
-    fi
-fi
+run_worktree_setup "$target_dir"
 
 windows_yaml=""
 if [ -f "$workflow_yml" ]; then

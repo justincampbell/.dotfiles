@@ -176,3 +176,25 @@ fail_on_trust_dialog() {
     fi
     return 0
 }
+
+# Copy the base checkout's .workflow.yml into a worktree (it is gitignored and
+# owned by the base), then run its worktree.setup commands. Idempotent; no-op
+# for repos without one.
+run_worktree_setup() {
+    local dir="$1" base_yml yml count i cmd
+    [ -f "$dir/.git" ] || return 0
+    yml="$dir/.workflow.yml"
+    base_yml="$(cd "$(git -C "$dir" rev-parse --git-common-dir)/.." && pwd)/.workflow.yml"
+    if [ -f "$base_yml" ] && [ "$base_yml" != "$yml" ]; then
+        cp "$base_yml" "$yml"
+    fi
+    [ -f "$yml" ] || return 0
+    count=$(yq eval '.worktree.setup | length' "$yml")
+    [ "$count" != "0" ] && [ "$count" != "null" ] || return 0
+    echo "Running worktree setup commands..." >&2
+    for ((i=0; i<count; i++)); do
+        cmd=$(yq eval ".worktree.setup[$i]" "$yml")
+        echo "  Executing: $cmd" >&2
+        (cd "$dir" && eval "$cmd") || echo "  Warning: setup command failed: $cmd" >&2
+    done
+}

@@ -81,7 +81,21 @@ if [ -n "$session_name" ] && tmux has-session -t "=$session_name" 2>/dev/null; t
   sleep 1
 fi
 
-# STEP 2: Remove git worktree (force removal)
+# STEP 2: Run the repo's worktree teardown (drops per-worktree databases etc.)
+# before the directory and its mise.local.toml are gone
+if [ -f "$worktree_dir/.workflow.yml" ]; then
+  export PATH="$(cd "$(dirname "$0")" && pwd):$HOME/.dotfiles/bin:/opt/homebrew/bin:$PATH"
+  teardown_count=$(yq eval '.worktree.teardown | length' "$worktree_dir/.workflow.yml" 2>/dev/null || echo 0)
+  if [ "$teardown_count" != "0" ] && [ "$teardown_count" != "null" ]; then
+    for ((ti=0; ti<teardown_count; ti++)); do
+      teardown_cmd=$(yq eval ".worktree.teardown[$ti]" "$worktree_dir/.workflow.yml")
+      echo "Teardown: $teardown_cmd" >&2
+      (cd "$worktree_dir" && eval "$teardown_cmd") || echo "Warning: teardown command failed: $teardown_cmd" >&2
+    done
+  fi
+fi
+
+# STEP 3: Remove git worktree (force removal)
 if [ -d "$worktree_dir" ]; then
   echo "Removing worktree directory: $worktree_dir" >&2
 
@@ -112,7 +126,7 @@ else
   echo "No worktree directory found at: $worktree_dir" >&2
 fi
 
-# STEP 3: Kill the tmux session now that cleanup is done
+# STEP 4: Kill the tmux session now that cleanup is done
 if [ -n "$session_name" ] && tmux has-session -t "=$session_name" 2>/dev/null; then
   echo "Killing tmux session: $session_name" >&2
 

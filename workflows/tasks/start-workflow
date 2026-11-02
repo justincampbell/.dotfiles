@@ -3,6 +3,10 @@
 
 set -euo pipefail
 
+# Source machine-local env (SHORTCUT_REPO_URL, etc.) — env-only file, safe in
+# this non-interactive context where ~/.profile isn't sourced.
+[ -f "$HOME/.profile.local" ] && source "$HOME/.profile.local"
+
 # Source shared utilities
 source "$(dirname "$0")/../shared.sh"
 
@@ -94,15 +98,47 @@ effort="${WORKFLOW_EFFORT:-$(parse_frontmatter "$prompt_file" "effort")}"
 ai_cli="${WORKFLOW_AI_CLI:-claude} --model '${model:-opus}'"
 [ -n "$effort" ] && ai_cli="$ai_cli --effort '$effort'"
 
-# Detect worktree for the kept worktree.setup execution below
 workflow_yml="$target_dir/.workflow.yml"
 is_worktree=false
 if [ -f "$target_dir/.git" ]; then
     is_worktree=true
 fi
 
+# Worktree setup runs before the prompt is composed so the environment block
+# below can read what it generated (mise.local.toml).
 if [ "$print_prompt" = false ] && [ "$is_worktree" = true ]; then
+    run_worktree_setup "$target_dir"
     pretrust_worktree "$target_dir"
+fi
+
+# The repo's .workflow.yml can describe the worktree's environment for the
+# session; {{env}} expands to the KEY=VALUE lines of mise.local.toml.
+worktree_prompt_text() {
+    local text env_lines
+    [ "$is_worktree" = true ] && [ -f "$workflow_yml" ] || return 0
+    text=$(yq eval '.worktree.prompt // ""' "$workflow_yml")
+    [ -n "$text" ] || return 0
+    env_lines=""
+    if [ -f "$target_dir/mise.local.toml" ]; then
+        env_lines=$(grep -E '^[A-Z_0-9]+ = ' "$target_dir/mise.local.toml" | sed -E 's/ = "?([^"]*)"?$/=\1/')
+    fi
+    printf '\n'
+    while IFS= read -r line; do
+        if [[ "$line" == *"{{env}}"* ]]; then
+            printf '%s\n' "$env_lines"
+        else
+            printf '%s\n' "$line"
+        fi
+    done <<< "$text"
+}
+
+# The repo's worktree.windows (per-worktree chores like DB setup) follow the
+# prompt's own windows; the base windows: list is never used for worktrees.
+if [ -n "$windows_yaml" ] && [ "$is_worktree" = true ] && [ -f "$workflow_yml" ]; then
+    worktree_windows=$(yq eval '.worktree.windows // [] | map({"name": (keys | .[0]), "command": (to_entries | .[0].value)})' "$workflow_yml")
+    if [ -n "$worktree_windows" ] && [ "$worktree_windows" != "[]" ]; then
+        windows_yaml=$(printf '%s\n%s\n' "$windows_yaml" "$worktree_windows")
+    fi
 fi
 
 processed_prompt=""
@@ -130,6 +166,7 @@ if [ "$has_prompt" = true ]; then
         done < "$system_prompt"
         # Extract only the content after the frontmatter (after second ---)
         awk '/^---$/{if(++c==2) f=1; next} f' "$prompt_file"
+        worktree_prompt_text
         # WORKFLOW_BRIEF=<file>: a launcher's brief (what to build, what is decided,
         # where results go) rides along with the prompt, for jobs queued by another session.
         if [ -n "${WORKFLOW_BRIEF:-}" ] && [ -f "$WORKFLOW_BRIEF" ]; then
@@ -241,19 +278,6 @@ if [ -n "$windows_yaml" ]; then
 
         # Give tmux a moment to fully create the session
         sleep 0.1
-
-        # Run worktree setup commands from .workflow.yml if in a worktree
-        if [ "$is_worktree" = true ] && [ -f "$workflow_yml" ]; then
-            workflow_setup_count=$(yq eval '.worktree.setup | length' "$workflow_yml")
-            if [ "$workflow_setup_count" != "0" ] && [ "$workflow_setup_count" != "null" ]; then
-                echo "Running worktree setup commands..." >&2
-                for ((si=0; si<workflow_setup_count; si++)); do
-                    setup_cmd=$(yq eval ".worktree.setup[$si]" "$workflow_yml")
-                    echo "  Executing: $setup_cmd" >&2
-                    (cd "$target_dir" && eval "$setup_cmd") || echo "  Warning: setup command failed: $setup_cmd" >&2
-                done
-            fi
-        fi
 
         # Parse windows and create them
         window_index=0
