@@ -92,6 +92,22 @@ rm -f "$processed_prompt"
 
 session_name=$(ensure_planning_session "$planning_dir")
 
+# Claude's --name for this entity: asked once (the popup has a tty), then remembered.
+planning_names_file="${XDG_STATE_HOME:-$HOME/.local/state}/workflows/planning-session-names"
+planning_session_name() {
+    local key="$1" suggestion="$2" name
+    name=$(awk -F'\t' -v k="$key" '$1 == k { print $2 }' "$planning_names_file" 2>/dev/null | tail -1)
+    if [ -z "$name" ]; then
+        if [ -t 0 ]; then
+            read -r -p "Claude session name for ${entity_name:-$key} [$suggestion]: " name
+        fi
+        name="${name:-$suggestion}"
+        mkdir -p "$(dirname "$planning_names_file")"
+        printf '%s\t%s\n' "$key" "$name" >> "$planning_names_file"
+    fi
+    echo "$name"
+}
+
 # Check if a window for this entity already exists. Keyed on a window option rather
 # than the window name, because the planning agent renames the window to the entity's
 # full name once it has fetched the data (see Planning/CLAUDE.md).
@@ -104,8 +120,9 @@ if [ -n "$existing_window" ]; then
     tmux select-window -t "$session_name:$existing_window"
 else
     # Create new window for this entity
-    echo "Creating window $window_name..." >&2
-    window_target=$(tmux new-window -t "$session_name" -n "$window_name" -c "$planning_dir" -P -F '#{window_id}')
+    claude_name=$(planning_session_name "$entity_key" "$window_name")
+    echo "Creating window $claude_name..." >&2
+    window_target=$(tmux new-window -t "$session_name" -n "$claude_name" -c "$planning_dir" -P -F '#{window_id}')
 
     tmux set -w -t "$window_target" @planning-entity "$entity_key"
 
@@ -114,6 +131,7 @@ else
     effort=$(parse_frontmatter "$workflow_prompt" "effort")
     ai_cli="${WORKFLOW_AI_CLI:-claude} --model '${model:-default}'"
     [ -n "$effort" ] && ai_cli="$ai_cli --effort '$effort'"
+    ai_cli="$ai_cli --name $(printf '%q' "$claude_name")"
     sleep 0.3
     tmux send-keys -t "$window_target" "$ai_cli \"\$(cat .workflow-prompt)\"" C-m
 fi
